@@ -1,0 +1,65 @@
+version: '3'
+services: 
+    btcd:
+        image: btcd
+        build: 
+            context: 'btcd/'
+        volumes:
+            - shared:/rpc
+            - bitcoin:/data
+        environment:
+            - RPCUSER
+            - RPCPASS
+            - NETWORK
+            - DEBUG
+            - MINING_ADDRESS
+    
+    lnd:
+        image: lnd
+        build:
+            context: 'lnd/'
+        volumes: 
+            - shared:/rpc
+            - lnd:/root/.lnd
+            - ./lnd/lnd.conf:/root/.lnd/lnd.conf
+        environment: 
+            - RPCUSER
+            - RPCPASS
+            - NETWORK
+            - CHAIN
+            - DEBUG
+        depends_on: 
+            - btcd
+
+    ariadne:
+        image: graphlnd
+        build: 
+            context: 'ariadne/'
+        volumes: 
+            - ./ariadne/code/:/app/code
+            - lnd:/root/.lnd
+        ports:
+            - '127.0.0.1:5000:5000'
+        depends_on: 
+            - lnd
+            - redis
+
+    redis:
+        image: redis:alpine
+        volumes: 
+            - redis:/data
+            - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+
+
+volumes:
+    shared:
+        driver: local
+
+    lnd:
+        driver: local
+
+    bitcoin:
+        driver: local
+
+    redis:
+        driver: local

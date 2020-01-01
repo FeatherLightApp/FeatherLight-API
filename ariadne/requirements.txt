@@ -1,0 +1,10 @@
+ariadne
+pylint
+uvicorn
+base58
+bitstring
+redis
+rpyc
+grpcio
+grpcio-tools
+googleapis-common-protos

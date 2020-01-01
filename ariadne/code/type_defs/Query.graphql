@@ -1,0 +1,5 @@
+type Query {
+    echo(string: String): String
+    walletBalance: WalletBalance!
+    genSeed(pw: String!): String!
+}
