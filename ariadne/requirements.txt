@@ -3,7 +3,8 @@ pylint
 uvicorn
 base58
 bitstring
-redis
+aioredis
+aioify
 rpyc
 grpcio
 grpcio-tools

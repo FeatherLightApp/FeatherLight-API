@@ -23,3 +23,4 @@ combined_creds = grpc.composite_channel_credentials(cert_creds, auth_creds)
 # TODO add wallet unlocking stub for wallet unlock
 
 channel = grpc.secure_channel('lnd:10009', combined_creds, 'grpc.max_receive_message_length'=1024 * 1024 * 1024)
+stub = lnrpc.LightningStub(channel)
