@@ -8,7 +8,7 @@ class Lock:
         self._lock_key = lock_key
 
     async def obtain_lock(self):
-    """obtain lock based on current time"""
+        """obtain lock based on current time"""
         utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
         set_result = await self._redis.setnx(self._lock_key, utc_seconds)
         # fail if value already exists
@@ -20,5 +20,5 @@ class Lock:
         return True
 
     async def release_lock(self):
-    """release obtained lock"""
+        """release obtained lock"""
         await self._redis.delete(self._lock_key)

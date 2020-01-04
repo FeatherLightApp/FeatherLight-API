@@ -1,27 +1,32 @@
+"""module for defining the user class"""
+import json
 from math import floor
 from secrets import token_bytes
 from hashlib import sha256
 from datetime import datetime
-from helpers.async_future import fwrap
-import Lock
-
+from code.helpers.async_future import fwrap
+from code.classes.Lock import Lock
+from code.helpers.bolt11.address import Address as lightningPayReq
+from code.helpers.mixins import LoggerMixin
 import rpc_pb2 as ln
-import aioify
 
-_invoice_ispaid_cache = {}
-_listtransactions_cache = False
-_listtransactions_cache_expiry_ts = 0
 
-class User:
 
-    def __init__(self, redis, bitcoindrpc, lightning):
+
+class User(LoggerMixin):
+    """defines an instance of a user"""
+    def __init__(self, redis, btcd, lnd, cache=None):
+        super().__init__()
         self._redis = redis
-        self._bitcoindrpc = bitcoindrpc
-        self._lightning = lightning
+        self._bitcoindrpc = btcd
+        self._lightning = lnd
         self._userid = None
         self._login = None
         self._pw = None
+        self._access_token = None
+        self._refresh_token = None
         self._balance = 0
+        self.cache = cache
 
     def get_user_id(self):
         return self._userid
@@ -38,28 +43,47 @@ class User:
     def get_refresh_token(self):
         return self._refresh_token
 
-    async def load_by_auth(self, auth):
+    @classmethod
+    async def from_auth(cls, redis, btcd, lnd, auth, cache=None):
+        """Factory method for creating instance from auth token"""
         if not auth:
             return False
-        access_token = authoriztion.replace('Bearer ', '')
-        userid = await self._redis.get('userid_for_' + access_token)
+        access_token = auth.replace('Bearer ', '')
+        userid = await redis.get('userid_for_' + access_token)
 
         if userid:
-            self._userid = userid
-            return True
-        else:
-            return False
+            this = cls(redis, btcd, lnd)
+            this._userid = userid
+            return this
+        return None
 
-    async def load_by_refresh(self, refresh_token):
-        user_id = await self._redis.get('userid_for_' + refresh_token)
+    @classmethod
+    async def from_refresh(cls, redis, btcd, lnd, refresh_token, cache=None):
+        """Factory method for creating instance from refresh token"""
+        user_id = await redis.get('userid_for_' + refresh_token)
+        if user_id:
+            this = cls(redis, btcd, lnd)
+            this._userid = user_id
+            await this._generate_tokens()
+            return this
+        return None
+
+    @classmethod
+    async def from_credentials(cls, redis, btcd, lnd, login, pw, cache=None):
+        """factory method for instantiating from credentials"""
+        userid = await redis.get('user_' + login + '_' + cls.hash(pw))
+
         if userid:
-            self._userid = user_id
-            await self._generate_tokens()
-            return True
-        else:
-            return False
+            this = cls(redis, btcd, lnd)
+            this._userid = userid
+            this._login = login
+            this._pw = pw
+            await this._generate_tokens()
+            return this
+        return None
 
     async def create(self):
+        """create a new user and save to db"""
         login = token_bytes(10).hex()
 
         pw = token_bytes(10).hex()
@@ -72,41 +96,33 @@ class User:
         await self._save_to_db()
 
     async def save_metadata(self, metadata):
+        """save metadata for user to redis"""
         return await self._redis.set('metadata_for_' + self._userid, json.dumps(metadata))
 
-    async def load_by_credentials(self, login, pw):
-        userid = await self._redis.get('user_' + login + '_' + this._hash(pw))
-
-        if userid:
-            this._userid = userid
-            this._login = login
-            this._pw = pw
-            await self._generate_tokens()
-            return True
-        else:
-            return False
-
     async def get_address(self):
+        """return bitcoin address of user"""
         return await self._redis.get('bitcoin_address_for_' + self._userid)
 
-    """
-    asynchronously generate a new lightning address
-    and return a gRPC Response: NewAddressResponse
-    see https://api.lightning.community/#newaddress
-    for more info
-    """
     async def generate_address(self):
+        """
+        asynchronously generate a new lightning address
+        and return a gRPC Response: NewAddressResponse
+        see https://api.lightning.community/#newaddress
+        for more info
+        """
         request = ln.NewAddressRequest(type=0)
         return await fwrap(self._lightning.NewAddress.future(request, timeout=5000))
 
     async def get_balance(self):
-        balance = await self._redis.get('balance_for_' + this._userid) * 1
+        """get the balance for the user"""
+        balance = await self._redis.get('balance_for_' + self._userid) * 1
         if not balance:
             balance = await self.get_calculated_balance()
-            await this.save_balance(balance)
+            await self.save_balance(balance)
         return balance
 
     async def get_calculated_balance(self):
+        """get the calculated balance for the user"""
         calculated_balance = 0
 
         userinvoices = await self.get_user_invoices()
@@ -129,15 +145,18 @@ class User:
         return calculated_balance
     
     async def save_balance(self, balance):
+        """save balance to redis"""
         key = 'balance_for_' + self._userid
         await this._redis.set(key, balance)
         await this._redis.expire(key, 1800)
 
     async def clear_balance_cache(self):
+        """clear balance from redis"""
         key = 'balance_for_' + self._userid
-        return self._redis.del(key)
+        return self._redis.delete(key)
 
     async def save_user_invoice(self, doc):
+        """save invoice to redis"""
         decoded = lightningPayReq.from_string(doc.payment_request)
         await this._redis.set('payment_hash_' + decoded.paymenthash, self._userid)
         return await self._redis.rpush('userinvoices_for_' + self._userid, json.dumps(doc))
@@ -150,13 +169,14 @@ class User:
     async def set_payment_hash_paid(self, payment_hash):
         return await self._redis.set('ispaid_' + payment_hash, 1)
 
-    """
-    asynchronously lookup invoice by its payment hash
-    and return a gRPC Response: Invoice
-    see https://api.lightning.community/
-    for more info
-    """
+
     async def lookup_invoice(self, payment_hash):
+        """
+        asynchronously lookup invoice by its payment hash
+        and return a gRPC Response: Invoice
+        see https://api.lightning.community/
+        for more info
+        """
         # TODO validate type of payment hash. Must be bytes
         request = ln.PaymentHash(
             r_hash=payment_hash,
@@ -197,8 +217,6 @@ class User:
         return result
 
             
-
-
     async def add_address(self, address):
         await self._redis.set('bitcoin_address_for_' + self._userid, address)
 
@@ -232,8 +250,8 @@ class User:
                 invoice['timestamp'] = invoice['decoded']['timestamp']
                 invoice['memo'] = invoice['decoded']['description']
 
-            if invoice['payment_preimage']:
-                # invoice.payment_preimage = Buffer.from(invoice.payment_preimage, 'hex').toString('hex')
+            # if invoice['payment_preimage']:
+            #     invoice['payment_preimage'] = Buffer.from(invoice.payment_preimage, 'hex').toString('hex')
 
             del invoice['payment_error']
             del invoice['payment_route']
@@ -244,22 +262,23 @@ class User:
         return result
 
     async def _list_transactions(self):
-        response = _listtransactions_cache
+        response = self.cache['list_transactions']
         utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
         if response:
-            if (utc_seconds > _listtransactions_cache_expiry_ts):
+            if (utc_seconds > self.cache['list_transactions_cache_expiry']):
                 # invalidate cache
-                response = False
-                _listtransactions_cache = False
+                self.cache['list_transactions'] = None
+                self.logger.info('Invalidating context transaction cache')
+        else:
             try:
                 return json.loads(response)
             except json.decoder.JSONDecodeError as e:
-                logging.critical(e)
+                self.logger.critical('Could not read json from global transaction cache ' + e)
         
         txs = await self._bitcoindrpc.request('listtransacions', ['*', 100500, 0, True])
         ret = { 'result': [] }
         for tx in txs.result:
-            ret.result.append({
+            ret['result'].append({
                 'category': tx.category,
                 'amount': tx.amount,
                 confirmations: tx.confirmations,
@@ -267,8 +286,8 @@ class User:
                 'time': tx.time
             })
 
-        _listtransactions_cache = json.dumps(ret)
-        _listtransactions_cache_expiry_ts = utc_seconds + 5 * 60
+        self.cache['list_transactions'] = json.dumps(ret)
+        self.cache['list_transactions_cache_expiry'] = utc_seconds + 5 * 60
         return ret
 
     async def getPendingTxs(self):
@@ -297,10 +316,10 @@ class User:
         await self._redis.set('userid_for_' + self._access_token, self._userid)
         await self._redis.set('userid_for_' + self._refresh_token, self._userid)
         await self._redis.set('access_token_for_' + self._userid, self._access_token)
-        await self._redis.set('refresh_token_for_' _ self._userid, self._refresh_token)
+        await self._redis.set('refresh_token_for_' + self._userid, self._refresh_token)
 
     async def _save_to_db(self):
-        await self._redis.set('user_{}_{}'.format(self._login, self._hash(self._pw)), self._userid)
+        await self._redis.set('user_{}_{}'.format(self._login, self.hash(self._pw)), self._userid)
 
     async def account_for_possible_txids(self):
         onchain_txs = await self.get_txs()
@@ -324,12 +343,13 @@ class User:
                 await self._redis.rpush('imported_txids_for_' + self._userid, tx.txid)
                 await lock.release_lock()
 
-    """
-    Adds invoice to a list of user's locked payments.
-    Used to calculate balance till the lock is lifted
-    (payment is in determined state - success or fail)
-    """
+
     async def lock_funds(self, pay_req, decoded_invoice):
+        """
+        Adds invoice to a list of user's locked payments.
+        Used to calculate balance till the lock is lifted
+        (payment is in determined state - success or fail)
+        """
         utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
         doc = {
             'pay_req': pay_req,
@@ -338,17 +358,18 @@ class User:
         }
         return self._redis.rpush('locked_payments_for_' + self._userid, json.dumps(doc))
 
-    """
-    Strips specific payreq from the list of locked payments
-    """
+
     async def unlock_funds(self, pay_req):
+        """
+        Strips specific payreq from the list of locked payments
+        """
         payments = await self.get_locked_payments()
         save_back = []
         for paym in payments:
             if paym.pay_req != pay_req:
                 save_back.append(paym)
 
-        await self._redis.del('locked_payments_for_' + self._userid)
+        await self._redis.delete('locked_payments_for_' + self._userid)
         for doc in save_back:
             await self._redis.rpush('locked_payments_for_' + self._userid, json.dumps(doc))
 
@@ -365,7 +386,9 @@ class User:
 
         return result
 
-    def _hash(self, string):
+    @staticmethod
+    def hash(string):
+        """returns hex digest of string"""
         h = sha256()
         h.update(string.encode('utf-8'))
         return h.digest().hex()

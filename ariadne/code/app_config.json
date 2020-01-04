@@ -1,0 +1,13 @@
+{
+    "btcd": {
+        "host": "btcd",
+        "port": 18556
+    },
+    "redis": {
+        "host": "redis://redis"
+    },
+    "lnd": {
+        "grpc": "lnd:10009",
+        "password": ""
+    }
+}

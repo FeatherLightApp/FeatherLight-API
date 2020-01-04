@@ -1,0 +1,16 @@
+type WalletBalance {
+    totalBalance: Int!
+    confirmedBalance: Int!
+}
+
+type CreatePayload {
+    login: String!
+    password: String!
+}
+
+type LoginPayload {
+    access: String
+    refresh: String
+    ok: Boolean!
+    error: String
+}

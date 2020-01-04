@@ -1,11 +1,14 @@
 """define app entry point"""
 import os
-import logging
+from json import loads
+import aioredis
+import rpyc
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
-from code.schema import schema
-from lightning import channel
-from bitcoin import client as btc_client
+from code.init_schema import schema
+from code.lightning import init_lightning
+from code.helpers.mixins import LoggerMixin
+
 
 # TODO import and run environment tests
 
@@ -13,20 +16,40 @@ from bitcoin import client as btc_client
 
 
 
-
-app = Starlette(debug=True)
-
-class Context:
+class Context(LoggerMixin):
     """class for passing context values"""
 
-    def __init__(self):
-
-
+    def __init__(self, config):
+        super().__init__()
+        self._config = config
         self.req = None
+        self.redis = None
+        self.lightning = init_lightning(self._config['lnd']['grpc'])
+        self.bitcoind = rpyc.connect(
+            self._config['btcd']['host'],
+            self._config['btcd']['port']
+        )
+        self.logger.warning('initialized context')
+        # DEFINE cached variables in global context
+        self.cache = {
+            'invoce_ispaid': {},
+            'list_transactions': None,
+            'list_transactions_cache_expiry': 0
+        }
     
     def __call__(self, req):
         self.req = req
         return self
 
+    async def init_redis(self):
+        """async init redis db. call before app startup"""
+        self.logger.warning('instantiating redis')
+        self.redis = await aioredis.create_redis_pool(self._config['redis']['host'])
 
-app.mount('/graphql', GraphQL(schema, debug=True, context_value=Context()))
+
+conf = loads(open('code/app_config.json').read())
+
+ctx = Context(conf)
+
+app = Starlette(debug=True, on_startup=[ctx.init_redis])
+app.mount('/graphql', GraphQL(schema, debug=True, context_value=ctx))

@@ -20,14 +20,6 @@ def r_walllet_balance(obj, info):
         'confirmedBalance': response.confirmed_balance
     }
 
-@query.field('genSeed')
-def r_gen_seed(obj, info, pw):
-    logging.critical(info)
-    stub = lnrpc.WalletUnlockerStub(info.context.channel)
-    req = ln.GenSeedRequest(
-        aezeed_passphrase=pw.encode('utf-8')
-    )
-    future = stub.GenSeed.future(req)
-    logging.critical(type(future))
-    res = future.result()
-    return res.cipher_seed_mnemonic
+@query.field('auth')
+async def r_auth(obj, info, user=None, pw=None):
+    if not (user and pw) or info.context.req.headers
