@@ -1,5 +1,6 @@
 ariadne
 pylint
+pyjwt
 uvicorn
 base58
 bitstring

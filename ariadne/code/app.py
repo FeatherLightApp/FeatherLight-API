@@ -5,9 +5,10 @@ import aioredis
 import rpyc
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
-from code.init_schema import schema
+from code.resolvers.schema import schema
 from code.lightning import init_lightning
 from code.helpers.mixins import LoggerMixin
+from code.classes.JWT import JWT
 
 
 # TODO import and run environment tests
@@ -36,6 +37,8 @@ class Context(LoggerMixin):
             'list_transactions': None,
             'list_transactions_cache_expiry': 0
         }
+        self.jwt = JWT(config['refresh_secret'], config['access_secret'])
+        self.cookie_name = config['cookie_name']
     
     def __call__(self, req):
         self.req = req
@@ -48,6 +51,9 @@ class Context(LoggerMixin):
 
 
 conf = loads(open('code/app_config.json').read())
+keys = loads(open('/code/keys.json').read())
+
+conf.update(keys)
 
 ctx = Context(conf)
 
