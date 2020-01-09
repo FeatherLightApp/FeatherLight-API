@@ -1,11 +1,15 @@
 # TODO add type annotations
+from datetime import (
+    datetime,
+    timedelta
+)
 from secrets import token_bytes
 from math import floor
 from base64 import b64encode
 import rpc_pb2 as ln
-from helpers.async_future import fwrap
-from helpers.bolt11.address import Address
-from helpers.mixins import DotDict
+from code.helpers.async_future import fwrap
+# from code.helpers.bolt11.address import Address
+from code.helpers.mixins import DotDict
 
 
 
@@ -68,7 +72,7 @@ class Paym:
 
         return await fwrap(self._lightning.SendToRouteSync.future(request, timeout=5000))
 
-    async def process_send_payment_response(self, payment):
+    def process_send_payment_response(self, payment):
         """process the sent payment"""
         if payment and payment.payment_route and payment.payment_route.total_amt_msat:
             # paid just now
@@ -122,19 +126,22 @@ class Paym:
 
     async def is_expired(self):
         """determine if the invoice is expired"""
-        if not self._bolt11: raise RuntimeError('bolt11 is not provided')
+        if not self._bolt11:
+            raise RuntimeError('bolt11 is not provided')
         decoded = await self.decode_payreq_rpc(self._bolt11)
         utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
         return decoded.timestamp + decoded.expiry < utc_seconds
 
-    def decode_payreq_local(self, payreq):
-        """locally decode pay req"""
+    # def decode_payreq_local(self, payreq):
+    #     """locally decode pay req"""
         # TODO make sure Address class align with attribute names of ln.DecodePayReq
-        self._decoded_locally = Address.from_string(payreq)
+        # self._decoded_locally = Address.from_string(payreq)
 
     async def get_payment_hash(self):
         """return the payment hash for the payment"""
-        if not self._bolt11: raise RuntimeError('bolt11 is not provided')
-        if not self._decoded: await self.decode_payreq_rpc(self._bolt11)
+        if not self._bolt11:
+            raise RuntimeError('bolt11 is not provided')
+        if not self._decoded:
+            await self.decode_payreq_rpc(self._bolt11)
 
         return self._decoded.payment_hash

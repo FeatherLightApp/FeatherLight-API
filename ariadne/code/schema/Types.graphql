@@ -1,16 +1,38 @@
-type WalletBalance {
+kkktype WalletBalance {
     totalBalance: Int!
     confirmedBalance: Int!
 }
 
 type CreatePayload {
-    login: String!
-    password: String!
+    login: String
+    password: String
+    ok: Boolean!
+    error: String
 }
 
-type LoginPayload {
+type TokenPayload {
     access: String
     refresh: String
     ok: Boolean!
     error: String
+}
+
+type AddInvoicePayload {
+    ok: Boolean!
+    error: String
+    hash: String
+    paymentReq: String
+    addIndex: Int
+}
+
+union Invoice = LocalInvoice | RemoteInvoice
+
+type LocalInvoice {
+
+}
+
+type PayInvoicePayload {
+    ok: Boolean!
+    error: String
+    payment: Invoice
 }

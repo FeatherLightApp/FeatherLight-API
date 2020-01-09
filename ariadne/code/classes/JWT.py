@@ -41,4 +41,3 @@ class JWT:
                     self._access_secret,
                     algorithms=['HS256'])
             )
-

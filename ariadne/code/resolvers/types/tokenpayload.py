@@ -1,3 +1,7 @@
+from datetime import (
+    datetime,
+    timedelta
+)
 from ariadne import ObjectType
 
 token_payload = ObjectType('TokenPayload')
@@ -17,7 +21,7 @@ def r_access_token(obj, info):
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(minutes=15)
         }
-       return context.jwt.encode(access_json, kind='access')
+        return context.jwt.encode(access_json, kind='access')
     return None
 
 

@@ -5,10 +5,4 @@ from .types import types
 
 type_defs = load_schema_from_path('code/schema/')
 
-schema = make_executable_schema(
-    type_defs,
-    [
-        query,
-        mutation
-    ]
-)
+schema = make_executable_schema(type_defs, types)

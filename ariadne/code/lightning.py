@@ -26,3 +26,7 @@ def init_lightning(host):
     # TODO max receive message length? = 1024^3
     channel = grpc.secure_channel(host, combined_creds)
     return lnrpc.LightningStub(channel)
+
+# TODO
+async def lnd_tests():
+    pass

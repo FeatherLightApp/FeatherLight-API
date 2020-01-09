@@ -1,6 +1,7 @@
 ariadne
 pylint
 pyjwt
+protobuf3-to-dict
 uvicorn
 base58
 bitstring

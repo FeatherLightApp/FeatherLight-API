@@ -13,6 +13,6 @@ class LoggerMixin(object):
 
 class DotDict(dict):
     """access dictionary with dot notaion"""
-    __getattr__ = super().get
-    __setattr__ = super().__setitem__
-    __delattr__ = super().__delitem__
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__

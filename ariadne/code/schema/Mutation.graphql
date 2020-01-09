@@ -1,3 +1,5 @@
 type Mutation {
-    create: CreatePayload
+    create: CreatePayload!
+    addInvoice(memo: String! amt: Int!): AddInvoicePayload!
+    payInvoice(invoice: String! amt: Int): PayInvoicePayload!
 }

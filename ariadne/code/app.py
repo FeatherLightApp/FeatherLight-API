@@ -6,15 +6,10 @@ import rpyc
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
 from code.resolvers.schema import schema
-from code.lightning import init_lightning
+from code.lightning import init_lightning, lnd_tests
 from code.helpers.mixins import LoggerMixin
 from code.classes.JWT import JWT
-
-
-# TODO import and run environment tests
-
-# end tests
-
+from code.classes.User import User
 
 
 class Context(LoggerMixin):
@@ -25,8 +20,9 @@ class Context(LoggerMixin):
         self._config = config
         self.req = None
         self.redis = None
-        self.lightning = init_lightning(self._config['lnd']['grpc'])
-        self.bitcoind = rpyc.connect(
+        self.lnd = init_lightning(self._config['lnd']['grpc'])
+        self.id_pubkey = None
+        self.btcd = rpyc.connect(
             self._config['btcd']['host'],
             self._config['btcd']['port']
         )
@@ -50,6 +46,24 @@ class Context(LoggerMixin):
         self.redis = await aioredis.create_redis_pool(self._config['redis']['host'])
 
 
+    async def user_from_header(self):
+        header = self.req.headers['Authorization']
+        if not header:
+            return None
+        trimmed = header.encode('utf-8').replace('Bearer ')
+        jsn = self.jwt.decode(trimmed, kind='access')
+        if not jsn:
+            return None
+        return await User.from_auth(
+            ctx=self,
+            auth=jsn['token']
+        )
+
+    # TODO smoke tests for connected containers
+    async def smoke_tests(self):
+        self.id_pubkey = await lnd_tests()
+
+
 conf = loads(open('code/app_config.json').read())
 keys = loads(open('/code/keys.json').read())
 
@@ -57,5 +71,5 @@ conf.update(keys)
 
 ctx = Context(conf)
 
-app = Starlette(debug=True, on_startup=[ctx.init_redis])
+app = Starlette(debug=True, on_startup=[ctx.init_redis, ctx.smoke_tests])
 app.mount('/graphql', GraphQL(schema, debug=True, context_value=ctx))

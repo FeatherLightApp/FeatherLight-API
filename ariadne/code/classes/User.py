@@ -6,7 +6,7 @@ from hashlib import sha256
 from datetime import datetime
 from code.helpers.async_future import fwrap
 from code.classes.Lock import Lock
-from code.helpers.bolt11.address import Address as lightningPayReq
+# from code.helpers.bolt11.address import Address as lightningPayReq
 from code.helpers.mixins import LoggerMixin
 import rpc_pb2 as ln
 
@@ -14,51 +14,48 @@ import rpc_pb2 as ln
 class User(LoggerMixin):
     """defines an instance of a user cache variable is only necessary in 
     queries or mutations that call functions requiring the global cache values"""
-    def __init__(self, redis, btcd, lnd, cache=None):
+    def __init__(self, ctx):
         super().__init__()
-        self._redis = redis
-        self._bitcoindrpc = btcd
-        self._lightning = lnd
+        self._redis = ctx.redis
+        self._bitcoindrpc = ctx.btcd
+        self._lightning = ctx.lnd
         self.userid = None
         self.login = None
         self.pw = None
         self.access_token = None
         self.refresh_token = None
         self._balance = 0
-        self.cache = cache
+        self.cache = ctx.cache
 
     @classmethod
-    async def from_auth(cls, redis, btcd, lnd, auth, cache=None):
+    async def from_auth(cls, ctx, auth):
         """Factory method for creating instance from auth token"""
-        if not auth:
-            return False
-        access_token = auth.replace('Bearer ', '')
-        userid = await redis.get('userid_for_' + access_token)
+        userid = await redis.get('userid_for_' + auth)
 
         if userid:
-            this = cls(redis, btcd, lnd, cache=cache)
+            this = cls(ctx.redis, ctx.btcd, ctx.lnd, ctx.cache)
             this.userid = userid
             return this
         return None
 
     @classmethod
-    async def from_refresh(cls, redis, btcd, lnd, refresh_token, cache=None):
+    async def from_refresh(cls, ctx, refresh_token):
         """Factory method for creating instance from refresh token"""
         user_id = await redis.get('userid_for_' + refresh_token)
         if user_id:
-            this = cls(redis, btcd, lnd, cache=cache)
+            this = cls(ctx.redis, ctx.btcd, ctx.lnd, ctx.cache)
             this.userid = user_id
             await this._generate_tokens()
             return this
         return None
 
     @classmethod
-    async def from_credentials(cls, redis, btcd, lnd, login, pw, cache=None):
+    async def from_credentials(cls, ctx, login, pw):
         """factory method for instantiating from credentials"""
         userid = await redis.get('user_' + login + '_' + cls.hash(pw))
 
         if userid:
-            this = cls(redis, btcd, lnd, cache=cache)
+            this = cls(ctx.redis, ctx.btcd, ctx.lnd, ctx.cache)
             this.userid = userid
             this.login = login
             await this._generate_tokens()
@@ -138,11 +135,22 @@ class User(LoggerMixin):
         key = 'balance_for_' + self.userid
         return self._redis.delete(key)
 
-    async def save_user_invoice(self, doc):
-        """save invoice to redis"""
-        decoded = lightningPayReq.from_string(doc.payment_request)
-        await this._redis.set('payment_hash_' + decoded.paymenthash, self.userid)
-        return await self._redis.rpush('userinvoices_for_' + self.userid, json.dumps(doc))
+    async def save_paid_invoice(self, doc):
+        return await self._redis.rpush('txs_for_' + self.userid, dumps(doc))
+
+    async def add_invoice(self, memo, amt):
+        """add invoice and save invoice to redis"""
+        # TODO add suport for more custom invoices
+        request = ln.Invoice(
+            memo=memo,
+            value=amt,
+            expiry=3600*24
+        )
+        response = await fwrap(self._lightning.AddInvoice.future(request, timeout=5000))
+        decoded = await fwrap (self._lightning.DecodePayReq.future(ln.PayReqString(pay_req=response.payment_request)))
+        await self._redis.set('payment_hash_' + decoded.paymenthash, self.userid)
+        await self._redis.rpush('userinvoices_for_' + self.userid, json.dumps(response))
+        return response
 
     # Doesnt belong here FIXME
     async def get_user_by_payment_hash(self, payment_hash):
@@ -296,8 +304,7 @@ class User(LoggerMixin):
         # delete old refresh and expire keys before making new ones
         old_refresh = await self._redis.get('refresh_token_for_' + self.userid)
         old_access = await self._redis.get('access_token_for_' + self.userid)
-        await self._redis.del(['userid_for_' + old_refresh, 'userid_for_' + old_access ])
-        
+        await self._redis.delete(['userid_for_' + old_refresh, 'userid_for_' + old_access ])
         buffer = token_bytes(20)
         self.access_token = buffer.hex()
 
