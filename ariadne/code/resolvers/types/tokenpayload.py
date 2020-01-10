@@ -17,11 +17,11 @@ def r_ok(obj, info):
 def r_access_token(obj, info):
     if obj:
         access_json = {
-            'token': u.access_token,
+            'token': obj.access_token,
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(minutes=15)
         }
-        return context.jwt.encode(access_json, kind='access')
+        return info.context.jwt.encode(access_json, kind='access')
     return None
 
 
@@ -29,11 +29,11 @@ def r_access_token(obj, info):
 def r_refresh_token(obj, info):
     if obj:
         refresh_json = {
-            'token': u.refresh_token,
+            'token': obj.refresh_token,
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(days=7)
         }
-        return context.jwt.encode(refresh_json, kind='refresh')
+        return info.context.jwt.encode(refresh_json, kind='refresh')
     return None
 
 

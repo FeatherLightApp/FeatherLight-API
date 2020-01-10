@@ -22,22 +22,20 @@ class JWT:
                 self._access_secret,
                 algorithm='HS256'
             ).decode('utf-8')
-        else:
-            raise ValueError('token kind must be either refresh or access')
+        raise ValueError('token kind must be either refresh or access')
 
     def decode(self, token, kind):
         """decodes jwt into json(python dict)"""
         if kind == 'refresh':
             return decode_jwt(
-                decode_jwt(
-                    token,
-                    self._refresh_secret,
-                    algorithms=['HS256'])
+                token,
+                self._refresh_secret,
+                algorithms=['HS256']
             )
-        if kind == 'access':
+        elif kind == 'access':
             return decode_jwt(
-                decode_jwt(
-                    token,
-                    self._access_secret,
-                    algorithms=['HS256'])
+                token,
+                self._access_secret,
+                algorithms=['HS256']
             )
+        raise ValueError('token kind must be either refresh or access')

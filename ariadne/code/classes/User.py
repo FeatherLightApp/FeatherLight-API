@@ -30,21 +30,21 @@ class User(LoggerMixin):
     @classmethod
     async def from_auth(cls, ctx, auth):
         """Factory method for creating instance from auth token"""
-        userid = await redis.get('userid_for_' + auth)
+        userid = await ctx.redis.get('userid_for_' + auth)
 
         if userid:
-            this = cls(ctx.redis, ctx.btcd, ctx.lnd, ctx.cache)
-            this.userid = userid
+            this = cls(ctx)
+            this.userid = userid.decode('utf-8')
             return this
         return None
 
     @classmethod
     async def from_refresh(cls, ctx, refresh_token):
         """Factory method for creating instance from refresh token"""
-        user_id = await redis.get('userid_for_' + refresh_token)
+        user_id = await ctx.redis.get('userid_for_' + refresh_token)
         if user_id:
-            this = cls(ctx.redis, ctx.btcd, ctx.lnd, ctx.cache)
-            this.userid = user_id
+            this = cls(ctx)
+            this.userid = user_id.decode('utf-8')
             await this._generate_tokens()
             return this
         return None
@@ -52,11 +52,10 @@ class User(LoggerMixin):
     @classmethod
     async def from_credentials(cls, ctx, login, pw):
         """factory method for instantiating from credentials"""
-        userid = await redis.get('user_' + login + '_' + cls.hash(pw))
-
+        userid = await ctx.redis.get('user_' + login + '_' + cls.hash(pw))
         if userid:
-            this = cls(ctx.redis, ctx.btcd, ctx.lnd, ctx.cache)
-            this.userid = userid
+            this = cls(ctx)
+            this.userid = userid.decode('utf-8')
             this.login = login
             await this._generate_tokens()
             return this
@@ -302,23 +301,20 @@ class User(LoggerMixin):
 
     async def _generate_tokens(self):
         # delete old refresh and expire keys before making new ones
-        old_refresh = await self._redis.get('refresh_token_for_' + self.userid)
-        old_access = await self._redis.get('access_token_for_' + self.userid)
-        await self._redis.delete(['userid_for_' + old_refresh, 'userid_for_' + old_access ])
+
         buffer = token_bytes(20)
         self.access_token = buffer.hex()
 
         buffer = token_bytes(20)
         self.refresh_token = buffer.hex()
 
-        await self._redis.set('userid_for_' + self.access_token, self.userid)
-        await self._redis.set('userid_for_' + self.refresh_token, self.userid)
-        await self._redis.set('access_token_for_' + self.userid, self.access_token)
-        await self._redis.set('refresh_token_for_' + self.userid, self.refresh_token)
+        await self._redis.set('userid_for_' + self.access_token, self.userid, expire=900)
+        await self._redis.set('userid_for_' + self.refresh_token, self.userid, expire=604800)
+        await self._redis.set('access_token_for_' + self.userid, self.access_token, expire=900)
+        await self._redis.set('refresh_token_for_' + self.userid, self.refresh_token, expire=604800)
 
     async def _save_to_db(self):
         await self._redis.set('user_{}_{}'.format(self.login, self.hash(self.pw)), self.userid)
-        self.pw = None
 
     async def account_for_possible_txids(self):
         onchain_txs = await self.get_txs()

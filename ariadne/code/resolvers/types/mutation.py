@@ -42,10 +42,7 @@ async def r_pay_invoice(_, info, invoice, amt):
     )
     if not await lock.obtain_lock():
         info.context.logger.warning('Failed to acquire lock for user {}'.format(u.userid))
-        return {
-            'ok': False,
-            'error': 'Locked DB try again later'
-        }
+        return 'DB is locked try again later'
     user_balance = await u.get_calculated_balance()
     request = ln.PayReqString(pay_req=invoice)
     response = await fwrap(info.context.lnd.DecodePayReq.future(request, timeout=5000))
@@ -58,16 +55,10 @@ async def r_pay_invoice(_, info, invoice, amt):
         info.context.logger.warning(
             'Invalid amount when paying invoice for user {}'.format(u.userid)
         )
-        return {
-            'ok': False,
-            'error': 'Invalid invoice amount'
-        }
+        return 'Invalid invoice amount'
     # check if user has enough balance including possible fees
     if not user_balance >= real_amount + floor(real_amount * 0.01):
-        return {
-            'ok': False,
-            'error': 'Not enough balance to pay invoice'
-        }
+        return 'Not enough balance to pay invoice'
 
     # determine destination of funds
     if info.context.id_pubkey == response.destination:
@@ -76,18 +67,12 @@ async def r_pay_invoice(_, info, invoice, amt):
         if not userid_payee:
             await lock.release_lock()
             info.context.logger.critical('Could not get user by payment hash')
-            return {
-                'ok': False,
-                'error': 'Could not get user by payment hash'
-            }
+            return 'Could not get user py payment hash'
         if await u.get_payment_hash_paid(response.payment_hash):
             # invoice has already been paid
             await lock.release_lock()
             info.context.logger.warning('Attempted to pay invoice that was already paid')
-            return {
-                'ok': False,
-                'error': 'Invoice has already been paid'
-            }
+            return 'Invoice has already been paid'
 
         # initialize internal user payee
         payee = User(ctx=info.context)
@@ -106,6 +91,7 @@ async def r_pay_invoice(_, info, invoice, amt):
         })
         await payee.set_payment_hash_paid(response.payment_hash)
         await lock.release_lock()
+        response.num_satoshis = real_amount
         return response
 
     else:
@@ -128,17 +114,14 @@ async def r_pay_invoice(_, info, invoice, amt):
                 # payment success
                 shallow_paym = Paym(False, False, False) # weird FIXME
                 payment = shallow_paym.process_send_payment_response(pay_res)
+                payment.pay_req = invoice
+                payment.decoded = response
                 pay_dict = protobuf_to_dict(payment)
-                pay_dict['pay_req'] = invoice
-                pay_dict['decoded'] = response
-                await u.save_paid_invoice()
+                await u.save_paid_invoice(pay_dict)
                 await u.clear_balance_cache()
                 await lock.release_lock()
-                return pay_dict
+                return payment
             else:
                 # payment failed
                 await lock.release_lock()
-                return {
-                    'ok': False,
-                    'error': 'Payment failed'
-                }
+                return 'Payment Failed'

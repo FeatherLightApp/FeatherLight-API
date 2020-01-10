@@ -1,6 +1,6 @@
 type Query {
     echo(string: String): String
     walletBalance: WalletBalance!
-    login(user: String pw: String): TokenPayload!
+    login(user: String! pw: String!): TokenPayload!
     getToken: TokenPayload!
 }

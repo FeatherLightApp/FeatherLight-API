@@ -13,7 +13,7 @@ def init_lightning(host):
 
     def metadata_callback(context, callback):
         # for more info see grpc docs
-        callback([('macaroon', self.macaroon)], None)
+        callback([('macaroon', macaroon)], None)
 
     with open('/root/.lnd/tls.cert', 'rb') as c:
         cert = c.read()

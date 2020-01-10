@@ -2,6 +2,7 @@ from ariadne import ObjectType
 
 pay_invoice_payload = ObjectType('PayInvoicePayload')
 
+
 @pay_invoice_payload.field('ok')
 def r_ok(obj, info):
     if obj and not isinstance(obj, str):
@@ -15,4 +16,9 @@ def r_error(obj, info):
     return None
 
 
-@pay_invoice_payload.field('')
+@pay_invoice_payload.field('payment')
+def r_payment(obj, info):
+    if obj and not isinstance(obj, str):
+        return obj
+    return None
+

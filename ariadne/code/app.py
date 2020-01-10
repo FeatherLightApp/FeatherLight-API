@@ -17,10 +17,11 @@ class Context(LoggerMixin):
 
     def __init__(self, config):
         super().__init__()
+        self.logger.info(config)
         self._config = config
         self.req = None
         self.redis = None
-        self.lnd = init_lightning(self._config['lnd']['grpc'])
+        self.lnd = init_lightning(config['lnd']['grpc'])
         self.id_pubkey = None
         self.btcd = rpyc.connect(
             self._config['btcd']['host'],
@@ -65,7 +66,7 @@ class Context(LoggerMixin):
 
 
 conf = loads(open('code/app_config.json').read())
-keys = loads(open('/code/keys.json').read())
+keys = loads(open('code/keys.json').read())
 
 conf.update(keys)
 

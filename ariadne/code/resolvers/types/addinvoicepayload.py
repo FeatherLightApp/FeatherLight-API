@@ -25,7 +25,7 @@ def r_hash(obj, info):
     return None
 
 
-@add_invoice_payload.field('payment_request')
+@add_invoice_payload.field('paymentReq')
 def r_paymentreq(obj, info):
     if obj and obj.payment_request:
         return obj.payment_request

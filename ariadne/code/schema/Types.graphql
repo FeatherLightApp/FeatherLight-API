@@ -1,4 +1,4 @@
-kkktype WalletBalance {
+type WalletBalance {
     totalBalance: Int!
     confirmedBalance: Int!
 }
@@ -28,11 +28,60 @@ type AddInvoicePayload {
 union Invoice = LocalInvoice | RemoteInvoice
 
 type LocalInvoice {
+    destination: String
+    paymentHash: String
+    numSatoshis: Int
+    timestamp: Int
+    expiry: Int
+    description: String
+    fallbackAddress: String
+    cltvExpiry: Int
+    routeHints: [RouteHint]
+    paymentAddress: String
+    features: [FeaturesEntry]
+}
 
+type RouteHint {
+    hopHints: [HopHint]
+}
+
+type HopHint {
+    nodeID: String
+    chanID: Int
+    feeBaseMsat: Int
+    feePropMilionth: Int
+    cltvExpiryDelta: Int
+}
+
+type FeaturesEntry {
+    key: Int
+    value: Feature
+}
+
+type Feature {
+    name: String
+    isRequired: Boolean
+    isKnown: Boolean
+}
+
+type RemoteInvoice {
+    error: String
+    preimage: String
+    route: Route
+    hash: String
+    decoded: LocalInvoice
+    payReq: String!
 }
 
 type PayInvoicePayload {
     ok: Boolean!
     error: String
     payment: Invoice
+}
+
+type Route {
+    totalTimeLock: Int!
+    totalFees: Int!
+    totalAmt: Int!
+    #hops: [Hop]!
 }
