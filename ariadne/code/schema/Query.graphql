@@ -2,5 +2,14 @@ type Query {
     echo(string: String): String
     walletBalance: WalletBalance!
     login(user: String! pw: String!): TokenPayload!
-    getToken: TokenPayload!
+    token: TokenPayload!
+    BTCAddress: AddressPayload!
+    balance: BalancePayload!
+    #info: GetInfoPayload!
+    txs: TxsPayload!
+    invoices: InvoicesPayload!
+    pending: PendingPayload!
+    decodeInvoice: DecodeInvoicePayload!
+    checkRouteInvoice: CheckRouteInvoicePayload!
+    info: InfoPayload!
 }

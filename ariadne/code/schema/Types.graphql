@@ -3,27 +3,7 @@ type WalletBalance {
     confirmedBalance: Int!
 }
 
-type CreatePayload {
-    login: String
-    password: String
-    ok: Boolean!
-    error: String
-}
 
-type TokenPayload {
-    access: String
-    refresh: String
-    ok: Boolean!
-    error: String
-}
-
-type AddInvoicePayload {
-    ok: Boolean!
-    error: String
-    hash: String
-    paymentReq: String
-    addIndex: Int
-}
 
 union Invoice = LocalInvoice | RemoteInvoice
 
@@ -73,15 +53,10 @@ type RemoteInvoice {
     payReq: String!
 }
 
-type PayInvoicePayload {
-    ok: Boolean!
-    error: String
-    payment: Invoice
-}
-
 type Route {
     totalTimeLock: Int!
     totalFees: Int!
     totalAmt: Int!
-    #hops: [Hop]!
+    #hops: [Hop]! TODO
 }
+

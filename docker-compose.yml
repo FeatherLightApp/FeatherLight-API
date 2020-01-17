@@ -7,6 +7,7 @@ services:
         volumes:
             - shared:/rpc
             - bitcoin:/data
+            - ./btcd/btcd.conf:/root/.btcd/btcd.conf
         environment:
             - RPCUSER
             - RPCPASS
@@ -38,6 +39,7 @@ services:
         volumes: 
             - ./ariadne/code/:/app/code
             - lnd:/root/.lnd
+            - shared:/rpc
         ports:
             - '127.0.0.1:5000:5000'
         depends_on: 

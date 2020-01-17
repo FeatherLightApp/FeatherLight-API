@@ -29,7 +29,8 @@ async def r_create(_, info):
 @mutation.field('addInvoice')
 async def r_add_invoice(_, info, memo, amt):
     u = await info.context.user_from_header()
-    return await u.add_invoice(memo, amt)
+    response = await u.add_invoice(memo, amt)
+    return protobuf_to_dict(response)
 
 @mutation.field('payInvoice')
 async def r_pay_invoice(_, info, invoice, amt):

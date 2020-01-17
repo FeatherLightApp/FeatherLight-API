@@ -1,0 +1,86 @@
+type CreatePayload {
+    login: String
+    password: String
+    ok: Boolean!
+    error: String
+}
+
+type TokenPayload {
+    access: String
+    refresh: String
+    ok: Boolean!
+    error: String
+}
+
+type AddInvoicePayload {
+    ok: Boolean!
+    error: String
+    hash: String
+    paymentReq: String
+    addIndex: Int
+}
+
+type PayInvoicePayload {
+    ok: Boolean!
+    error: String
+    payment: Invoice
+}
+
+type AddressPayload {
+    ok: Boolean!
+    error: String
+    address: String
+}
+
+type BalancePayload {
+    ok: Boolean!
+    error: String
+    availableBalance: Int
+}
+
+type InvoicesPayload {
+    ok: Boolean!
+    error: String
+}
+
+type DecodeInvoicePayload {
+    ok: Boolean!
+    error: String
+}
+
+type CheckRouteInvoicePayload {
+    ok: Boolean!
+    error: String
+}
+
+type PendingPayload {
+    ok: Boolean!
+    error: String
+}
+
+type InfoPayload {
+    ok: Boolean!
+    version: String
+    identityPubkey: String
+    alias: String
+    color: String
+    numPendingChannels: Int
+    numActiveChannel: Int
+    numInactiveChannels: Int
+    numPeers: Int
+    blockHeight: Int
+    blockHash: String
+    bestHeaderTimestamp: Int
+    syncedToChain: Boolean
+    syncedToGraph: Boolean
+    testnet: Boolean
+    #"chains": <array Chain>, 
+    #"uris": <array string>,
+    #"features": <array FeaturesEntry>,
+}
+
+type TxsPayload {
+    ok: Boolean!
+    error: String
+    
+}

@@ -2,11 +2,11 @@
 import os
 from json import loads
 import aioredis
-import rpyc
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
 from code.resolvers.schema import schema
 from code.lightning import init_lightning, lnd_tests
+from code.bitcoin import Bitcoin
 from code.helpers.mixins import LoggerMixin
 from code.classes.JWT import JWT
 from code.classes.User import User
@@ -23,10 +23,7 @@ class Context(LoggerMixin):
         self.redis = None
         self.lnd = init_lightning(config['lnd']['grpc'])
         self.id_pubkey = None
-        self.btcd = rpyc.connect(
-            self._config['btcd']['host'],
-            self._config['btcd']['port']
-        )
+        self.btcd = Bitcoin(config['btcd'])
         self.logger.warning('initialized context')
         # DEFINE cached variables in global context
         self.cache = {
@@ -47,11 +44,19 @@ class Context(LoggerMixin):
         self.redis = await aioredis.create_redis_pool(self._config['redis']['host'])
 
 
+    async def destroy(self):
+        """Destroy close necessary connections gracefully"""
+        self.logger.info('Destroying redis instance')
+        self.redis.close()
+        await self.redis.wait_closed()
+        await self.btcd.aclose()
+
+
     async def user_from_header(self):
         header = self.req.headers['Authorization']
         if not header:
             return None
-        trimmed = header.encode('utf-8').replace('Bearer ')
+        trimmed = header.replace('Bearer ', '').encode('utf-8')
         jsn = self.jwt.decode(trimmed, kind='access')
         if not jsn:
             return None
@@ -72,5 +77,9 @@ conf.update(keys)
 
 ctx = Context(conf)
 
-app = Starlette(debug=True, on_startup=[ctx.init_redis, ctx.smoke_tests])
+app = Starlette(
+    debug=True,
+    on_startup=[ctx.init_redis, ctx.smoke_tests],
+    on_shutdown=[ctx.destroy]
+)
 app.mount('/graphql', GraphQL(schema, debug=True, context_value=ctx))

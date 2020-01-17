@@ -82,15 +82,22 @@ class User(LoggerMixin):
         """return bitcoin address of user"""
         return await self._redis.get('bitcoin_address_for_' + self.userid)
 
+    async def add_address(self, address):
+        await self._redis.set('bitcoin_address_for_' + self.userid, address)
+
     async def generate_address(self):
         """
         asynchronously generate a new lightning address
-        and return a gRPC Response: NewAddressResponse
+        gRPC Response: NewAddressResponse
         see https://api.lightning.community/#newaddress
         for more info
+        Imports the address to bitcoind
         """
         request = ln.NewAddressRequest(type=0)
-        return await fwrap(self._lightning.NewAddress.future(request, timeout=5000))
+        response = await fwrap(self._lightning.NewAddress.future(request, timeout=5000))
+        await self.add_address(response.address)
+        self._bitcoindrpc.req('importaddress', [response.address, response.address, False])
+
 
     async def get_balance(self):
         """get the balance for the user"""
@@ -182,7 +189,8 @@ class User(LoggerMixin):
         result = []
         for invoice in ranges:
             invoice_dict = json.loads(invoice)
-            decoded = lightningPayReq.from_string(invoice_dict.payment_request)
+            req = ln.PayReqString(pay_req=invoice_dict['payment_request'])
+            decoded = await fwrap(self._lightning.DecodePayReq.future(req, timeout=5000))
             invoice_ispaid = False
             if self.cache and decoded.paymenthash in self.cache['invoice_ispaid']:
                 invoice_ispaid = True
@@ -208,10 +216,6 @@ class User(LoggerMixin):
             result.append(invoice_dict)
         
         return result
-
-            
-    async def add_address(self, address):
-        await self._redis.set('bitcoin_address_for_' + self.userid, address)
 
     async def get_txs(self):
         addr = await self.get_address()
@@ -266,15 +270,15 @@ class User(LoggerMixin):
             try:
                 return json.loads(response)
             except json.decoder.JSONDecodeError as e:
-                self.logger.critical('Could not read json from global transaction cache ' + e)
+                self.logger.critical('Could not read json from global transaction cache ', e)
         
         txs = await self._bitcoindrpc.request('listtransacions', ['*', 100500, 0, True])
-        ret = { 'result': [] }
+        ret = {'result': []}
         for tx in txs.result:
             ret['result'].append({
                 'category': tx.category,
                 'amount': tx.amount,
-                confirmations: tx.confirmations,
+                'confirmations': tx.confirmations,
                 'address': tx.address,
                 'time': tx.time
             })
