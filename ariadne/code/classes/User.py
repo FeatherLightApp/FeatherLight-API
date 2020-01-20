@@ -30,13 +30,10 @@ class User(LoggerMixin):
     @classmethod
     async def from_auth(cls, ctx, auth):
         """Factory method for creating instance from auth token"""
-        userid = await ctx.redis.get('userid_for_' + auth)
-
-        if userid:
-            this = cls(ctx)
-            this.userid = userid.decode('utf-8')
-            return this
-        return None
+        this = cls(ctx)
+        this.userid = auth
+        ctx.logger.critical(ctx.btcd)
+        return this
 
     @classmethod
     async def from_refresh(cls, ctx, refresh_token):
@@ -260,27 +257,27 @@ class User(LoggerMixin):
 
     async def _list_transactions(self):
         response = self.cache['list_transactions']
-        utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
+        utc_seconds = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
         if response:
             if (utc_seconds > self.cache['list_transactions_cache_expiry']):
                 # invalidate cache
                 self.cache['list_transactions'] = None
                 self.logger.info('Invalidating context transaction cache')
-        else:
             try:
                 return json.loads(response)
             except json.decoder.JSONDecodeError as e:
                 self.logger.critical('Could not read json from global transaction cache ', e)
         
-        txs = await self._bitcoindrpc.request('listtransacions', ['*', 100500, 0, True])
+        txs = await self._bitcoindrpc.req('listtransactions', ['*', 100500, 0, True])
+        self.logger.critical(txs)
         ret = {'result': []}
-        for tx in txs.result:
+        for tx in txs['result']:
             ret['result'].append({
-                'category': tx.category,
-                'amount': tx.amount,
-                'confirmations': tx.confirmations,
-                'address': tx.address,
-                'time': tx.time
+                'category': tx['category'],
+                'amount': tx['amount'],
+                'confirmations': tx['confirmations'],
+                'address': tx['address'],
+                'time': tx['time']
             })
 
         self.cache['list_transactions'] = json.dumps(ret)

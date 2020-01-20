@@ -1,6 +1,7 @@
 """class for encoding and decoding jwt"""
 from jwt import encode as encode_jwt
 from jwt import decode as decode_jwt
+from jwt.exceptions import InvalidSignatureError
 
 class JWT:
     """class that represents jwt encode/decoder"""
@@ -26,16 +27,20 @@ class JWT:
 
     def decode(self, token, kind):
         """decodes jwt into json(python dict)"""
-        if kind == 'refresh':
-            return decode_jwt(
-                token,
-                self._refresh_secret,
-                algorithms=['HS256']
-            )
-        elif kind == 'access':
-            return decode_jwt(
-                token,
-                self._access_secret,
-                algorithms=['HS256']
-            )
+        try:
+            if kind == 'refresh':
+                return decode_jwt(
+                    token,
+                    self._refresh_secret,
+                    algorithms=['HS256']
+                )
+            elif kind == 'access':
+                return decode_jwt(
+                    token,
+                    self._access_secret,
+                    algorithms=['HS256']
+                )
+        except InvalidSignatureError:
+            return None
+
         raise ValueError('token kind must be either refresh or access')

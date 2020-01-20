@@ -60,6 +60,7 @@ class Context(LoggerMixin):
         jsn = self.jwt.decode(trimmed, kind='access')
         if not jsn:
             return None
+        self.logger.critical(self.btcd)
         return await User.from_auth(
             ctx=self,
             auth=jsn['token']

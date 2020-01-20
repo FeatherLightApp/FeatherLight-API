@@ -28,14 +28,22 @@ async def r_create(_, info):
 
 @mutation.field('addInvoice')
 async def r_add_invoice(_, info, memo, amt):
-    u = await info.context.user_from_header()
+    if not (u := await info.context.user_from_header()):
+        return {
+            'ok': False,
+            'error': 'Invalid auth token'
+        }
     response = await u.add_invoice(memo, amt)
     return protobuf_to_dict(response)
 
 @mutation.field('payInvoice')
 async def r_pay_invoice(_, info, invoice, amt):
     assert not amt or amt >= 0
-    u = await info.context.user_from_header()
+    if not (u := await info.context.user_from_header()):
+        return {
+            'ok': False,
+            'error': 'Invalid auth token'
+        }
     # obtain a db lock
     lock = Lock(
         info.context.redis,
