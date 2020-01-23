@@ -39,10 +39,8 @@ set_default() {
 }
 
 # Set default variables if needed.
-RPCUSER=$(set_default "$RPCUSER" "devuser")
-RPCPASS=$(set_default "$RPCPASS" "devpass")
-DEBUG=$(set_default "$DEBUG" "info")
-NETWORK=$(set_default "$NETWORK" "simnet")
+DEBUG=$(set_default "$DEBUG" "rpc")
+NETWORK=$(set_default "$NETWORK" "regtest")
 
 PARAMS=""
 if [ "$NETWORK" != "mainnet" ]; then
@@ -50,15 +48,11 @@ if [ "$NETWORK" != "mainnet" ]; then
 fi
 
 PARAMS=$(echo $PARAMS \
-    "--debuglevel=$DEBUG" \
-    "--rpcuser=$RPCUSER" \
-    "--rpcpass=$RPCPASS" \
+    "--debug=$DEBUG" \
     "--datadir=/data" \
-    "--logdir=/data" \
-    "--rpccert=/rpc/rpc.cert" \
-    "--rpckey=/rpc/rpc.key" \
-    "--rpclisten=0.0.0.0" \
-    "--txindex"
+    "--debuglogfile=/data/debug.log" \
+    "--txindex" \
+    "--conf=/root/.btcd/btcd.conf"
 )
 
 # Set the mining flag only if address is non empty.
@@ -70,5 +64,5 @@ fi
 PARAMS="$PARAMS $@"
 
 # Print command and start bitcoin node.
-echo "Command: btcd $PARAMS"
-exec btcd $PARAMS
+echo "Command: bitcoind $PARAMS"
+exec bitcoind $PARAMS

@@ -6,8 +6,7 @@ from code.helpers.mixins import LoggerMixin
 class Bitcoin(AsyncClient, LoggerMixin):
     """Subclass for making btcd rpc requests"""
     def __init__(self, config):
-        LoggerMixin().__init__()
-        self._certpath = config['certpath']
+        LoggerMixin()
         self._host = config['host']
         self._port = config['port']
         self._user = config['user']
@@ -15,14 +14,13 @@ class Bitcoin(AsyncClient, LoggerMixin):
 
     async def req(self, method, params=None, reqid=None):
         """make a request to bitcoin rpc and return response json sync"""
-        url = f'https://{self._host}:{self._port}'
+        url = f'http://{self._host}:{self._port}'
         self.logger.critical(url)
-        self.logger.critical(self._certpath)
         js = {'method': method}
         if params:
             js['params'] = params
         js['id'] = reqid if reqid else token_hex(4)
-        async with AsyncClient(verify=self._certpath) as client:
+        async with AsyncClient() as client:
             res = await client.post(
                 url,
                 json=js,

@@ -27,20 +27,17 @@ class JWT:
 
     def decode(self, token, kind):
         """decodes jwt into json(python dict)"""
-        try:
-            if kind == 'refresh':
-                return decode_jwt(
-                    token,
-                    self._refresh_secret,
-                    algorithms=['HS256']
-                )
-            elif kind == 'access':
-                return decode_jwt(
-                    token,
-                    self._access_secret,
-                    algorithms=['HS256']
-                )
-        except InvalidSignatureError:
-            return None
+        if kind == 'refresh':
+            return decode_jwt(
+                token,
+                self._refresh_secret,
+                algorithms=['HS256']
+            )
+        if kind == 'access':
+            return decode_jwt(
+                token,
+                self._access_secret,
+                algorithms=['HS256']
+            )
 
         raise ValueError('token kind must be either refresh or access')

@@ -1,10 +1,9 @@
 {
     "btcd": {
         "host": "btcd",
-        "port": 18556,
+        "port": 18443,
         "user": "devuser",
-        "pass": "devpass",
-        "certpath": "/rpc/rpc.cert"
+        "pass": "devpass"
     },
     "redis": {
         "host": "redis://redis"

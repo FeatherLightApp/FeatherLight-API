@@ -42,9 +42,9 @@ set_default() {
 RPCUSER=$(set_default "$RPCUSER" "devuser")
 RPCPASS=$(set_default "$RPCPASS" "devpass")
 DEBUG=$(set_default "$DEBUG" "debug")
-NETWORK=$(set_default "$NETWORK" "simnet")
+NETWORK=$(set_default "$NETWORK" "regtest")
 CHAIN=$(set_default "$CHAIN" "bitcoin")
-BACKEND="btcd"
+BACKEND="bitcoind"
 if [[ "$CHAIN" == "litecoin" ]]; then
     BACKEND="ltcd"
 fi
@@ -53,8 +53,7 @@ exec lnd \
     --noseedbackup \
     "--$CHAIN.active" \
     "--$CHAIN.$NETWORK" \
-    "--$CHAIN.node"="btcd" \
-    "--$BACKEND.rpccert"="/rpc/rpc.cert" \
+    "--$CHAIN.node"="bitcoind" \
     "--$BACKEND.rpchost"="btcd" \
     "--$BACKEND.rpcuser"="$RPCUSER" \
     "--$BACKEND.rpcpass"="$RPCPASS" \

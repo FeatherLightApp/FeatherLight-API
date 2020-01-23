@@ -37,6 +37,7 @@ class User(LoggerMixin):
 
     @classmethod
     async def from_refresh(cls, ctx, refresh_token):
+        # TODO remove this method in favor of jwt toekn only no DB tokens
         """Factory method for creating instance from refresh token"""
         user_id = await ctx.redis.get('userid_for_' + refresh_token)
         if user_id:
@@ -98,11 +99,11 @@ class User(LoggerMixin):
 
     async def get_balance(self):
         """get the balance for the user"""
-        balance = await self._redis.get('balance_for_' + self.userid) * 1
+        balance = await self._redis.get('balance_for_' + self.userid)
         if not balance:
             balance = await self.get_calculated_balance()
             await self.save_balance(balance)
-        return balance
+        return int(balance)
 
     async def get_calculated_balance(self):
         """get the calculated balance for the user"""
@@ -130,8 +131,8 @@ class User(LoggerMixin):
     async def save_balance(self, balance):
         """save balance to redis"""
         key = 'balance_for_' + self.userid
-        await this._redis.set(key, balance)
-        await this._redis.expire(key, 1800)
+        await self._redis.set(key, balance)
+        await self._redis.expire(key, 1800)
 
     async def clear_balance_cache(self):
         """clear balance from redis"""
@@ -222,10 +223,13 @@ class User(LoggerMixin):
         if not addr:
             raise Exception('cannot get transactions" no onchain address assigned to user')
         txs = await self._list_transactions()
-        txs = txs.result
+        txs = txs['result']
         result = []
         for tx in txs:
-            if tx.confirmations >= 3 and tx.address == addr and tx.category == 'receive':
+            if (
+                'confirmations' in tx and 'address' in tx and 'category' in tx
+                and tx['confirmations'] >= 3 and tx['address'] == addr and tx['category'] == 'receive'
+            ):
                 tx.type = 'bitcoind_tx'
                 result.append(tx)
             
@@ -284,7 +288,7 @@ class User(LoggerMixin):
         self.cache['list_transactions_cache_expiry'] = utc_seconds + 5 * 60
         return ret
 
-    async def getPendingTxs(self):
+    async def get_pending_txs(self):
         addr = await self.get_address()
         if not addr:
             await self.generate_address()

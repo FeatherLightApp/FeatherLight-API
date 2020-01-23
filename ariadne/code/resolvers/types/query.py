@@ -1,9 +1,12 @@
 """resolvers for query types"""
+from math import floor
 from datetime import (
     datetime,
     timedelta
 )
+from secrets import token_hex
 from ariadne import QueryType
+from jwt.exceptions import ExpiredSignatureError
 from protobuf_to_dict import protobuf_to_dict
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
@@ -29,36 +32,24 @@ async def r_walllet_balance(_, info):
 
 @query.field('login')
 async def r_auth(obj, info, user, pw):
-    if not (u := await User.from_credentials(ctx=info.context, login=user, pw=pw)):
-        return {
-            'ok': False,
-            'error': 'Invalid Credentials'
-        }
-    else:
-        access = {
-            'token': u.userid,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(minutes=15)
-        }
-        refresh = {
-            'token': u.userid,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(days=7)
-        }
-        return {
-            'ok': True,
-            'access': info.context.jwt.encode(access, kind='access'),
-            'refresh': info.context.jwt.encode(refresh, kind='refresh')
-        }
+    try:
+        if not (u := await User.from_credentials(ctx=info.context, login=user, pw=pw)):
+            return 'Invalid Credentials'
+        return u
+    except ExpiredSignatureError:
+        return 'Token has expired'
 
 
 @query.field('token')
 async def r_get_token(_, info):
     if (cookie := info.context.req.cookies.get(info.context.cookie_name)):
         send = cookie.encode('utf-8')
-        jsn = info.context.jwt.decode(send, kind='refresh')
-        return await User.from_refresh(ctx=info.context, refresh_token=jsn['token'])
-    return None
+        try:
+            jsn = info.context.jwt.decode(send, kind='refresh')
+        except ExpiredSignatureError:
+            return 'Token has expired'
+        return await User.from_auth(ctx=info.context, auth=jsn['token'])
+    return 'No refresh token'
 
 
 @query.field('BTCAddress')
@@ -88,7 +79,7 @@ async def r_balance(_, info):
     if not addr:
         await u.generate_address()
     await u.account_for_possible_txids()
-    balance = u.get_balance()
+    balance = await u.get_balance()
     if (balance < 0):
         balance = 0
     return {
@@ -116,4 +107,66 @@ async def r_info(_, info):
         'ok': True,
         **d
     }
-    
+
+@query.field('txs')
+async def r_txs(obj, info):
+    if not (u =: await info.context.user_from_header()):
+        return {
+            'ok': False,
+            'error': 'Invalid auth token'
+        }
+    if not await u.get_address():
+        u.generate_address()
+    await u.account_for_possible_txids()
+    txs = await u.get_txs()
+    locked_payments = await u.get_locked_payments()
+    for locked in locked_payments:
+        txs.append({
+            'type': 'paid_invoice',
+            'fee': floor(locked['amount'] * 0.01),
+            'value': locked['amount'] + floor(locked['amount'] * 0.01),
+            'timestamp': locked['timestamp'],
+            'memo': 'Payment in transition'
+        })
+    return txs
+
+
+@query.field('invoices')
+async def r_invoices(obj, info, last):
+    if not (u =: await info.context.user_from_header()):
+        return {
+            'ok': False,
+            'error': 'Invalid auth token'
+        }
+    invoices = await u.get_user_invoices()
+    return invoices[-1 * last]
+
+@query.field('pending')
+async def r_pending(obj, info):
+    if not (u =: await info.context.user_from_header()):
+        return {
+            'ok': False,
+            'error': 'Invalid auth token'
+        }
+    if not await u.get_address():
+        await u.generate_address()
+    await u.account_for_possible_txids()
+    return await u.get_pending_txs()
+
+
+@query.field('decodeInvoice')
+async def r_decode_invoice(obj, info, invoice):
+    if not (u =: await info.context.user_from_header()):
+        return {
+            'ok': False,
+            'error': 'Invalid auth token'
+        }    
+    request = ln.PayReqString(pay_req=invoice)
+    res = await fwrap(info.context.lnd.DecodePayReq.future(request, timeout=5000))
+    return protobuf_to_dict(res)
+
+
+@query.field('checkRouteInvoice')
+async def r_check_route(obj, info, invoice):
+   pass 
+

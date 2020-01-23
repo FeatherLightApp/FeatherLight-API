@@ -7,9 +7,9 @@ type Query {
     balance: BalancePayload!
     #info: GetInfoPayload!
     txs: TxsPayload!
-    invoices: InvoicesPayload!
+    invoices(last: Int): InvoicesPayload!
     pending: PendingPayload!
-    decodeInvoice: DecodeInvoicePayload!
-    checkRouteInvoice: CheckRouteInvoicePayload!
+    decodeInvoice(invoice: String!): DecodeInvoicePayload!
+    checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload!
 }
