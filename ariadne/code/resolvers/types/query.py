@@ -11,7 +11,7 @@ from protobuf_to_dict import protobuf_to_dict
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
 from code.classes.User import User
-from code.helpers.async_future import fwrap
+from code.helpers import make_async, authenticate
 
 
 query = QueryType()
@@ -23,7 +23,7 @@ def r_echo(*_, string=None):
 
 @query.field('walletBalance')
 async def r_walllet_balance(_, info):
-    response = await fwrap(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
+    response = await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
     return {
         'totalBalance': response.total_balance,
         'confirmedBalance': response.confirmed_balance
@@ -53,33 +53,25 @@ async def r_get_token(_, info):
 
 
 @query.field('BTCAddress')
-async def r_get_address(_, info):
-    if not (u := await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }
-    addr = await u.get_address()
+@authenticate
+async def r_get_address(_, info, *, user):
+    addr = await user.get_address()
     if not addr:
-        await u.generate_address()
-        addr = await u.get_address()
+        await user.generate_address()
+        addr = await user.get_address()
     return {
         'ok': True,
         'address': addr.decode('utf-8')
     }
 
 @query.field('balance')
-async def r_balance(_, info):
-    if not (u := await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }
-    addr = await u.get_address()
+@authenticate
+async def r_balance(_, info, *, user):
+    addr = await user.get_address()
     if not addr:
-        await u.generate_address()
-    await u.account_for_possible_txids()
-    balance = await u.get_balance()
+        await user.generate_address()
+    await user.account_for_possible_txids()
+    balance = await user.get_balance()
     if (balance < 0):
         balance = 0
     return {
@@ -88,14 +80,10 @@ async def r_balance(_, info):
     }
 
 @query.field('info')
+@authenticate
 async def r_info(_, info):
-    if not (u := await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }
     request = ln.GetInfoRequest()
-    response = await fwrap(info.context.lnd.GetInfo.future(request, timeout=5000))
+    response = await make_async(info.context.lnd.GetInfo.future(request, timeout=5000))
     d = protobuf_to_dict(response)
     if 'chains' in d:
         del d['chains']
@@ -109,17 +97,13 @@ async def r_info(_, info):
     }
 
 @query.field('txs')
-async def r_txs(obj, info):
-    if not (u =: await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }
-    if not await u.get_address():
-        u.generate_address()
-    await u.account_for_possible_txids()
-    txs = await u.get_txs()
-    locked_payments = await u.get_locked_payments()
+@authenticate
+async def r_txs(obj, info, *, user):
+    if not await user.get_address():
+        user.generate_address()
+    await user.account_for_possible_txids()
+    txs = await user.get_txs()
+    locked_payments = await user.get_locked_payments()
     for locked in locked_payments:
         txs.append({
             'type': 'paid_invoice',
@@ -132,41 +116,31 @@ async def r_txs(obj, info):
 
 
 @query.field('invoices')
-async def r_invoices(obj, info, last):
-    if not (u =: await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }
-    invoices = await u.get_user_invoices()
+@authenticate
+async def r_invoices(obj, info, *, last, user):
+    invoices = await user.get_user_invoices()
     return invoices[-1 * last]
 
 @query.field('pending')
+@authenticate
 async def r_pending(obj, info):
-    if not (u =: await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }
-    if not await u.get_address():
-        await u.generate_address()
-    await u.account_for_possible_txids()
-    return await u.get_pending_txs()
+    if not await user.get_address():
+        await user.generate_address()
+    await user.account_for_possible_txids()
+    return await user.get_pending_txs()
 
 
 @query.field('decodeInvoice')
-async def r_decode_invoice(obj, info, invoice):
-    if not (u =: await info.context.user_from_header()):
-        return {
-            'ok': False,
-            'error': 'Invalid auth token'
-        }    
+@authenticate
+async def r_decode_invoice(obj, info, *, invoice):
     request = ln.PayReqString(pay_req=invoice)
-    res = await fwrap(info.context.lnd.DecodePayReq.future(request, timeout=5000))
+    res = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
     return protobuf_to_dict(res)
 
 
-@query.field('checkRouteInvoice')
-async def r_check_route(obj, info, invoice):
-   pass 
+# @query.field('checkRouteInvoice')
+# @authenticate
+# async def r_check_route(obj, info, invoice):
+# TODO
+
 

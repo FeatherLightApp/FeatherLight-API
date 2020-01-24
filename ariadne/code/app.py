@@ -8,8 +8,8 @@ from code.resolvers.schema import schema
 from code.lightning import init_lightning, lnd_tests
 from code.bitcoin import Bitcoin
 from code.helpers.mixins import LoggerMixin
-from code.classes.JWT import JWT
-from code.classes.User import User
+from code.classes import JWT
+from code.classes import User
 
 
 class Context(LoggerMixin):
@@ -53,14 +53,12 @@ class Context(LoggerMixin):
 
 
     async def user_from_header(self):
-        header = self.req.headers['Authorization']
-        if not header:
+        if not 'Authorization' in self.req.headers or not (header := self.req.headers['Authorization']):
             return None
-        trimmed = header.replace('Bearer ', '').encode('utf-8')
-        jsn = self.jwt.decode(trimmed, kind='access')
-        if not jsn:
-            return None
-        self.logger.critical(self.btcd)
+        jsn = self.jwt.decode(
+            header.replace('Bearer ', '').encode('utf-8'),
+            kind='access'
+        )
         return await User.from_auth(
             ctx=self,
             auth=jsn['token']

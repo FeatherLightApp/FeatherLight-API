@@ -7,9 +7,9 @@ from secrets import token_bytes
 from math import floor
 from base64 import b64encode
 import rpc_pb2 as ln
-from code.helpers.async_future import fwrap
+from code.helpers import make_async
 # from code.helpers.bolt11.address import Address
-from code.helpers.mixins import DotDict
+from code.helpers import DotDict
 
 
 
@@ -38,7 +38,7 @@ class Paym:
         returns a gRPC Response: PayReq
         """
         request = ln.PayReqString(pay_req=invoice)
-        response = await fwrap(self._lightning.DecodePayReq.future(request, timeout=5000))
+        response = await make_async(self._lightning.DecodePayReq.future(request, timeout=5000))
         self._decoded = response
         return response
 
@@ -56,7 +56,7 @@ class Paym:
             final_cltv_delta=144,
             fee_limit=fee_limit,
         )
-        return await fwrap(self._lightning.QueryRoutes.future(request, timeout=5000))
+        return await make_async(self._lightning.QueryRoutes.future(request, timeout=5000))
 
     async def send_to_route_sync(self, routes):
         """attempt to send route"""
@@ -70,7 +70,7 @@ class Paym:
             routes=routes
         )
 
-        return await fwrap(self._lightning.SendToRouteSync.future(request, timeout=5000))
+        return await make_async(self._lightning.SendToRouteSync.future(request, timeout=5000))
 
     def process_send_payment_response(self, payment):
         """process the sent payment"""
@@ -122,7 +122,7 @@ class Paym:
     async def list_payments(self):
         """list the payments on the channel"""
         request = ln.ListPaymentsRequest()
-        return await fwrap(self._lightning.ListPayments.future(request, timeout=5000))
+        return await make_async(self._lightning.ListPayments.future(request, timeout=5000))
 
     async def is_expired(self):
         """determine if the invoice is expired"""

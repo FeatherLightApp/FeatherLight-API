@@ -4,10 +4,8 @@ from math import floor
 from secrets import token_bytes
 from hashlib import sha256
 from datetime import datetime
-from code.helpers.async_future import fwrap
-from code.classes.Lock import Lock
-# from code.helpers.bolt11.address import Address as lightningPayReq
-from code.helpers.mixins import LoggerMixin
+from code.helpers import make_async, LoggerMixin
+from code.classes import Lock
 import rpc_pb2 as ln
 
 
@@ -92,7 +90,7 @@ class User(LoggerMixin):
         Imports the address to bitcoind
         """
         request = ln.NewAddressRequest(type=0)
-        response = await fwrap(self._lightning.NewAddress.future(request, timeout=5000))
+        response = await make_async(self._lightning.NewAddress.future(request, timeout=5000))
         await self.add_address(response.address)
         self._bitcoindrpc.req('importaddress', [response.address, response.address, False])
 
@@ -150,8 +148,8 @@ class User(LoggerMixin):
             value=amt,
             expiry=3600*24
         )
-        response = await fwrap(self._lightning.AddInvoice.future(request, timeout=5000))
-        decoded = await fwrap (self._lightning.DecodePayReq.future(ln.PayReqString(pay_req=response.payment_request)))
+        response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
+        decoded = await make_async (self._lightning.DecodePayReq.future(ln.PayReqString(pay_req=response.payment_request)))
         await self._redis.set('payment_hash_' + decoded.paymenthash, self.userid)
         await self._redis.rpush('userinvoices_for_' + self.userid, json.dumps(response))
         return response
@@ -176,7 +174,7 @@ class User(LoggerMixin):
         request = ln.PaymentHash(
             r_hash=payment_hash,
         )
-        return await fwrap(self._lightning.LookupInvoice.future(request, timeout=5000))
+        return await make_async(self._lightning.LookupInvoice.future(request, timeout=5000))
 
     # Doesnt belong here FIXME
     async def get_payment_hash_paid(self, payment_hash):
@@ -188,7 +186,7 @@ class User(LoggerMixin):
         for invoice in ranges:
             invoice_dict = json.loads(invoice)
             req = ln.PayReqString(pay_req=invoice_dict['payment_request'])
-            decoded = await fwrap(self._lightning.DecodePayReq.future(req, timeout=5000))
+            decoded = await make_async(self._lightning.DecodePayReq.future(req, timeout=5000))
             invoice_ispaid = False
             if self.cache and decoded.paymenthash in self.cache['invoice_ispaid']:
                 invoice_ispaid = True

@@ -7,8 +7,7 @@ import aioredis
 from protobuf_to_dict import protobuf_to_dict
 from ariadne import MutationType
 from code.classes import User, Lock, Paym
-from code.helpers.async_future import fwrap
-from code.helpers.mixins import DotDict
+from code.helpers import make_async, DotDict
 import rpc_pb2 as ln
 
 mutation = MutationType()
@@ -54,7 +53,7 @@ async def r_pay_invoice(_, info, invoice, amt):
         return 'DB is locked try again later'
     user_balance = await u.get_calculated_balance()
     request = ln.PayReqString(pay_req=invoice)
-    response = await fwrap(info.context.lnd.DecodePayReq.future(request, timeout=5000))
+    response = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
     real_amount = response.num_satoshis if response.num_satoshis > 0 else amt
     info.context.logger.info(
         'paying invoice user:{} with balance {}, for {}'
