@@ -55,14 +55,9 @@ async def r_pay_invoice(_, info, invoice, amt):
     request = ln.PayReqString(pay_req=invoice)
     response = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
     real_amount = response.num_satoshis if response.num_satoshis > 0 else amt
-    info.context.logger.info(
-        'paying invoice user:{} with balance {}, for {}'
-        .format(u.userid, user_balance, real_amount)
-    )
+    info.context.logger.info(f'paying invoice user:{u.userid} with balance {user_balance}, for {real_amount}')
     if not real_amount:
-        info.context.logger.warning(
-            'Invalid amount when paying invoice for user {}'.format(u.userid)
-        )
+        info.context.logger.warning(f'Invalid amount when paying invoice for user {u.userid}')
         return 'Invalid invoice amount'
     # check if user has enough balance including possible fees
     if not user_balance >= real_amount + floor(real_amount * 0.01):

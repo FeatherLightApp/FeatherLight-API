@@ -5,10 +5,10 @@ import grpc
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
 
-def init_lightning(host):
+def init_lightning(host, network):
     os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
-    with open('/root/.lnd/data/chain/bitcoin/regtest/admin.macaroon', 'rb') as m:
+    with open(f'/root/.lnd/data/chain/bitcoin/{network}/admin.macaroon', 'rb') as m:
         macaroon = codecs.encode(m.read(), 'hex')
 
     def metadata_callback(context, callback):

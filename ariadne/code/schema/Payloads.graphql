@@ -41,11 +41,20 @@ type BalancePayload {
 type InvoicesPayload {
     ok: Boolean!
     error: String
+    invoices: [Invoice]!
 }
 
 type DecodeInvoicePayload {
     ok: Boolean!
     error: String
+    destination: String
+    paymentHash: String
+    numSatoshis: Int
+    timestamp: Int
+    expiry: Int
+    description: String
+    descriptionHash: String
+    fallbackAddr: String
 }
 
 type CheckRouteInvoicePayload {

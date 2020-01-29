@@ -123,7 +123,7 @@ async def r_invoices(obj, info, *, last, user):
 
 @query.field('pending')
 @authenticate
-async def r_pending(obj, info):
+async def r_pending(obj, info, **kwargs):
     if not await user.get_address():
         await user.generate_address()
     await user.account_for_possible_txids()
@@ -132,10 +132,13 @@ async def r_pending(obj, info):
 
 @query.field('decodeInvoice')
 @authenticate
-async def r_decode_invoice(obj, info, *, invoice):
+async def r_decode_invoice(obj, info, *, invoice, user):
     request = ln.PayReqString(pay_req=invoice)
     res = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
-    return protobuf_to_dict(res)
+    return {
+        'ok': True,
+        **protobuf_to_dict(res)
+    }
 
 
 # @query.field('checkRouteInvoice')

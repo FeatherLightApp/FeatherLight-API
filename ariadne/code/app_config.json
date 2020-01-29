@@ -11,5 +11,6 @@
     "lnd": {
         "grpc": "lnd:10009",
         "password": ""
-    }
+    },
+    "network": "regtest"
 }
