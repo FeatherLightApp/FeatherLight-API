@@ -45,7 +45,6 @@ class Context(LoggerMixin):
         self.logger.info('Destroying redis instance')
         self.redis.close()
         await self.redis.wait_closed()
-        await self.btcd.aclose()
 
 
     async def user_from_header(self):

@@ -21,6 +21,7 @@ async def r_create(_, info):
     )
     await u.create()
     return {
+        'ok': True,
         'login': u.login,
         'password': u.pw
     }

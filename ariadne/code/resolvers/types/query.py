@@ -31,7 +31,7 @@ async def r_walllet_balance(_, info):
 
 
 @query.field('login')
-async def r_auth(obj, info, user, pw):
+async def r_auth(obj, info, user, password):
     try:
         if not (u := await User.from_credentials(ctx=info.context, login=user, pw=pw)):
             return 'Invalid Credentials'
