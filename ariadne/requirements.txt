@@ -1,6 +1,7 @@
 ariadne
 httpx
 requests
+pytest
 pylint
 pyjwt
 protobuf3-to-dict
