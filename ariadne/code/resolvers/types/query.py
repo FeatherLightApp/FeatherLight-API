@@ -1,5 +1,6 @@
 """resolvers for query types"""
 from math import floor
+import pytest
 from datetime import (
     datetime,
     timedelta
@@ -16,10 +17,6 @@ from code.helpers import make_async, authenticate
 
 query = QueryType()
 
-@query.field('echo')
-def r_echo(*_, string=None):
-    return string
-
 
 @query.field('walletBalance')
 async def r_walllet_balance(_, info):
@@ -29,7 +26,7 @@ async def r_walllet_balance(_, info):
         'confirmedBalance': response.confirmed_balance
     }
 
-
+@pytest.fixture
 @query.field('login')
 async def r_auth(obj, info, user, password):
     try:

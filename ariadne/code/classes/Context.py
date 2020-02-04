@@ -1,9 +1,11 @@
 """Module for defining the context class of the application"""
 import aioredis
+import pytest
 from code.lightning import init_lightning, lnd_tests
 from code.bitcoin import Bitcoin
 from code.helpers import LoggerMixin
 from code.classes import JWT, User
+
 
 class Context(LoggerMixin):
     """class for passing context values"""
