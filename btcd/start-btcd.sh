@@ -40,7 +40,7 @@ set_default() {
 
 # Set default variables if needed.
 DEBUG=$(set_default "$DEBUG" "rpc")
-NETWORK=$(set_default "$NETWORK" "regtest")
+NETWORK=$(set_default "$NETWORK" "testnet")
 
 PARAMS=""
 if [ "$NETWORK" != "mainnet" ]; then
