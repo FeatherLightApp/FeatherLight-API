@@ -50,4 +50,4 @@ RUN touch __init__.py
 
 EXPOSE 5000
 
-CMD [ "python", "-m", "uvicorn",  "app:app", "--host", "0.0.0.0", "--port", "5000", "--log-level", "info", "--reload", "--reload-dir", "/app"]
+CMD [ "python", "-m", "uvicorn",  "app:app", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]

@@ -41,7 +41,7 @@ services:
             - /mnt/volume_tor1_01/lnd:/root/.lnd
             # - shared:/rpc
         ports:
-            - '127.0.0.1:5000:5001'
+            - '127.0.0.1:5001:5001'
         depends_on: 
             - lnd
             - redis
