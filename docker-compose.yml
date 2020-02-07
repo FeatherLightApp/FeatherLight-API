@@ -9,10 +9,10 @@ services:
             - bitcoin:/data
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
         environment:
-            - RPCUSER
-            - RPCPASS
-            - NETWORK
-            - DEBUG
+            - RPCUSER=devuser
+            - RPCPASS=devpass
+            - NETWORK=testnet
+            - DEBUG=rpc
             - MINING_ADDRESS
     
     lnd:
@@ -24,11 +24,11 @@ services:
             - lnd:/root/.lnd
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
         environment: 
-            - RPCUSER
-            - RPCPASS
-            - NETWORK
-            - CHAIN
-            - DEBUG
+            - RPCUSER=devuser
+            - RPCPASS=devpass
+            - NETWORK=testnet
+            - CHAIN=bitcoin
+            - DEBUG=debug
         depends_on: 
             - btcd
 
