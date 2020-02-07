@@ -15,7 +15,7 @@ mutation = MutationType()
 
 @mutation.field('create')
 # TODO add post limiter?
-async def r_create(_, info):
+async def r_create(_: None, info) -> dict:
     u = User(
         ctx=info.context
     )
@@ -27,7 +27,8 @@ async def r_create(_, info):
     }
 
 @mutation.field('addInvoice')
-async def r_add_invoice(_, info, memo, amt):
+# TODO add more flexiblilty in invoice creation
+async def r_add_invoice(_: None, info, memo: str, amt: int) -> dict:
     if not (u := await info.context.user_from_header()):
         return {
             'ok': False,
@@ -37,7 +38,7 @@ async def r_add_invoice(_, info, memo, amt):
     return protobuf_to_dict(response)
 
 @mutation.field('payInvoice')
-async def r_pay_invoice(_, info, invoice, amt):
+async def r_pay_invoice(_: None, info, invoice: str, amt: int) -> dict:
     assert not amt or amt >= 0
     if not (u := await info.context.user_from_header()):
         return {
