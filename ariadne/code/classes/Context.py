@@ -1,6 +1,7 @@
 """Module for defining the context class of the application"""
 import aioredis
 import pytest
+from starlette.requests import Request
 from code.lightning import init_lightning, lnd_tests
 from code.bitcoin import Bitcoin
 from code.helpers import LoggerMixin
@@ -10,7 +11,7 @@ from code.classes import JWT, User
 class Context(LoggerMixin):
     """class for passing context values"""
 
-    def __init__(self, config):
+    def __init__(self, config: dict):
         super().__init__()
         self.logger.info(config)
         self._config = config
@@ -32,7 +33,7 @@ class Context(LoggerMixin):
         self.jwt = JWT(config['refresh_secret'], config['access_secret'])
         self.cookie_name = config['cookie_name']
     
-    def __call__(self, req):
+    def __call__(self, req: Request):
         self.req = req
         return self
 
@@ -49,7 +50,7 @@ class Context(LoggerMixin):
         await self.redis.wait_closed()
 
 
-    async def user_from_header(self):
+    async def user_from_header(self) -> User:
         if not 'Authorization' in self.req.headers or not (header := self.req.headers['Authorization']):
             return None
         jsn = self.jwt.decode(
