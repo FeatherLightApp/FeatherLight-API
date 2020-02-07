@@ -2,6 +2,7 @@
 import logging
 
 class LoggerMixin(object):
+    """Mixin for adding logger to a class"""
     @property
     def logger(self):
         name = '.'.join([

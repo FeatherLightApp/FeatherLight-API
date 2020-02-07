@@ -14,7 +14,8 @@ GraphLightning has many dependencies in many different languages. Docker is the 
 4. Configure /ariadne/code/app_config.json
 5. Configure /btcd/btcd.conf
 6. Configure /lnd/lnd.conf
-7. `docker-compose up`
+7. Configure env variables in docker-compose.yml
+8. `docker-compose up`
 
 
 ### Reponsible Disclosure
@@ -28,4 +29,6 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - write function level tests
 - write app level tests
 - switch to argon2 cffi password hashing
+- restructure code directory
 - create simple frontend for api
+- create python package wrapper to call api from other python projects

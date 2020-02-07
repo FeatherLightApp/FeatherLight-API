@@ -17,7 +17,7 @@ from .subscription import subs
 #     # TODO Route type
 # )
 
-types = [
+TYPES = [
     query,
     mutation,
     # add_invoice_payload,

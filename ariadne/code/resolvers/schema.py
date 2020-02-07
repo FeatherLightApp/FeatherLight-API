@@ -1,7 +1,11 @@
 """import and define schem execution"""
-from ariadne import load_schema_from_path, make_executable_schema, snake_case_fallback_resolvers
-from .types import types 
+from ariadne import (
+    load_schema_from_path,
+    make_executable_schema,
+    snake_case_fallback_resolvers
+)
+from .types import TYPES
 
-type_defs = load_schema_from_path('code/schema/')
+TYPE_DEFS = load_schema_from_path('code/schema/')
 
-schema = make_executable_schema(type_defs, types, snake_case_fallback_resolvers)
+SCHEMA = make_executable_schema(TYPE_DEFS, TYPES, snake_case_fallback_resolvers)

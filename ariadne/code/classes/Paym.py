@@ -1,15 +1,12 @@
-# TODO add type annotations
-from datetime import (
-    datetime,
-    timedelta
-)
-from secrets import token_bytes
+# TODO Re-write or remove this file, few of its functions are used
+"""define class for tracking payments"""
+from datetime import datetime
 from math import floor
 from base64 import b64encode
-import rpc_pb2 as ln
 from code.helpers import make_async
 # from code.helpers.bolt11.address import Address
 from code.helpers import DotDict
+import rpc_pb2 as ln
 
 
 
@@ -44,8 +41,10 @@ class Paym:
 
     async def query_routes(self):
         """queries the routes"""
-        if not self._bolt11: raise RuntimeError('bolt11 is not provided')
-        if not self._decoded: await self.decode_payreq_rpc(self._bolt11)
+        if not self._bolt11:
+            raise RuntimeError('bolt11 is not provided')
+        if not self._decoded:
+            await self.decode_payreq_rpc(self._bolt11)
 
         fee_limit = ln.FeeLimit(
             fixed=floor(self._decoded.num_satoshis * 0.01) + 1
@@ -77,12 +76,13 @@ class Paym:
         if payment and payment.payment_route and payment.payment_route.total_amt_msat:
             # paid just now
             self._ispaid = True
-            payment.payment_route.total_fees = payment.payment_route.total_fees + floor(payment.payment_route.total_amt * Paym.fee())
+            payment.payment_route.total_fees = payment.payment_route.total_fees \
+                + floor(payment.payment_route.total_amt * Paym.fee())
             if self._bolt11:
                 payment.pay_req = self._bolt11
             if self._decoded:
                 payment.decoded = self._decoded
-        
+
         if payment.payment_error and 'already paid' in payment.payment_error:
             # already paid
             self._ispaid = True

@@ -1,11 +1,12 @@
 import functools
+from typing import Callable, Optional, Any
 from inspect import iscoroutinefunction
 from code.classes import User
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
-def authenticate(func):
+def authenticate(func: Callable) -> Callable:
     @functools.wraps(func)
-    async def authwrapper(obj, info, **kwargs):
+    async def authwrapper(obj: Optional[dict], info, **kwargs: Any) -> dict:
         try:
             if not (u := await info.context.user_from_header()):
                 return {
