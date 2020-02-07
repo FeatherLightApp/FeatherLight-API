@@ -49,10 +49,12 @@ if [[ "$CHAIN" == "litecoin" ]]; then
     BACKEND="ltcd"
 fi
 
+echo "Command: bitcoind $PARAMS"
+
 exec lnd \
     --noseedbackup \
     "--$CHAIN.active" \
-    "--$CHAIN.$NETWORK" \
+    "--bitcoind.testnet" \
     "--$CHAIN.node"="bitcoind" \
     "--$BACKEND.rpchost"="btcd" \
     "--$BACKEND.rpcuser"="$RPCUSER" \
