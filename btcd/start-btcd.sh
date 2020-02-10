@@ -65,4 +65,4 @@ PARAMS="$PARAMS $@"
 
 # Print command and start bitcoin node.
 echo "Command: bitcoind $PARAMS"
-exec bitcoind -daemon $PARAMS
+exec bitcoind $PARAMS
