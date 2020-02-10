@@ -1,6 +1,6 @@
 """module for classes required by the application"""
-from .jwt import JWT
-from .lock import Lock
-from .paym import Paym
-from .user import User
-from .context import Context
+from .JWT import JWT
+from .Llock import Lock
+from .Paym import Paym
+from .User import User
+from .Context import Context
