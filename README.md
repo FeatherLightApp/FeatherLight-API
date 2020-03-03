@@ -25,6 +25,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 ### TODOs
 
 - write subscriptions
+- consolidate configs into global config
 - mypy type checking
 - write function level tests
 - write app level tests
