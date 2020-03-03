@@ -23,7 +23,7 @@ def write_keys(directory: str):
         json.dump(data, file, indent=4)
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         raise ValueError('Received too many arguments')
 
     CURDIR = os.getcwd() if len(sys.argv) == 1 else sys.argv[1]

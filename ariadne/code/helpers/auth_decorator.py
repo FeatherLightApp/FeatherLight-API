@@ -6,7 +6,7 @@ from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 def authenticate(func: Callable) -> Callable:
     @functools.wraps(func)
-    async def authwrapper(obj: Optional[dict], info, **kwargs: Any) -> dict:
+    async def authwrapper(obj: Optional[Any], info, **kwargs: Any) -> dict:
         try:
             if not (u := await info.context.user_from_header()):
                 return {

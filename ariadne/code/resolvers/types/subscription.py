@@ -1,5 +1,6 @@
 from ariadne import SubscriptionType
 from code.helpers import authenticate
+from code.classes import User
 
 subs = SubscriptionType()
 
