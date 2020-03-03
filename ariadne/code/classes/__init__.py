@@ -4,4 +4,4 @@ from .Lock import Lock
 from .Paym import Paym
 from .User import User
 from .Context import Context
-from .Bitcoin import Bitcoin
+from .Bitcoin import BitcoinClient

@@ -4,7 +4,7 @@ import pytest
 from starlette.requests import Request
 from code.init_lightning import init_lightning, lnd_tests
 from code.helpers import LoggerMixin
-from code.classes import JWT, User, Bitcoin
+from code.classes import JWT, User, BitcoinClient
 
 
 class Context(LoggerMixin):
@@ -21,7 +21,7 @@ class Context(LoggerMixin):
             network=config['network']
         )
         self.id_pubkey = None
-        self.btcd = Bitcoin(config['btcd'])
+        self.btcd = BitcoinClient(config['btcd'])
         self.logger.warning('initialized context')
         # DEFINE cached variables in global context
         self.cache = {
