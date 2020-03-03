@@ -20,7 +20,7 @@ GraphLightning has many dependencies in many different languages. Docker is the 
 
 ### Reponsible Disclosure
 
-This software is responsible for handling and transfering valuable Bitcoins. If you have found a vulnerability in the software please email me at sean.aye2@gmail.com. 
+This software is responsible for handling and transfering valuable Bitcoins. If you have found a vulnerability in the software please email me at hello@seanaye.ca. 
 
 ### TODOs
 
