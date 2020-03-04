@@ -1,0 +1,2 @@
+docker-compose.yml merge=ours
+.gitattributes merge=ours
