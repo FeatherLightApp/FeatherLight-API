@@ -6,7 +6,7 @@ services:
             context: 'btcd/'
         volumes:
             # - shared:/rpc
-            - bitcoin:/data
+            - /mnt/volume_tor1_01/bitcoin:/data
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
         environment:
             - RPCUSER=devuser
@@ -21,7 +21,7 @@ services:
             context: 'lnd/'
         volumes: 
             # - shared:/rpc
-            - lnd:/root/.lnd
+            - /mnt/volume_tor1_01/lnd:/root/.lnd
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
         environment: 
             - RPCUSER=devuser
@@ -38,7 +38,7 @@ services:
             context: 'ariadne/'
         volumes: 
             - ./ariadne/code/:/app/code
-            - lnd:/root/.lnd
+            - /mnt/volume_tor1_01/lnd:/root/.lnd
             # - shared:/rpc
         ports:
             - '127.0.0.1:5001:5001'
@@ -49,19 +49,9 @@ services:
     redis:
         image: redis:alpine
         volumes: 
-            - redis:/data
+            - /mnt/volume_tor1_01/redis:/data
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
 
 
 volumes:
     # shared:
-    #     driver: local
-
-    lnd:
-        driver: local
-
-    bitcoin:
-        driver: local
-
-    redis:
-        driver: local
