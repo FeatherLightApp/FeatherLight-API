@@ -154,6 +154,13 @@ async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
     res = await info.context.btcd.req(command, params=None if not params else json.loads(params))
     return json.dumps(res)
 
+
+@query.field('databaseDump')
+async def r_dump_db(_: None, info):
+    res = await info.context.redis.keys('*')
+    info.context.logger.critical(res)
+    return res    
+
 # @query.field('checkRouteInvoice')
 # @authenticate
 # async def r_check_route(obj, info, invoice):

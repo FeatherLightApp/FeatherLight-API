@@ -5,6 +5,7 @@ from .mutation import mutation
 from .union import invoice
 from .tokenpayload import token_payload
 from .subscription import subs
+from .scalar import JSON
 # from .localinvoice import (
 #     local_invoice,
 #     route_hint,
@@ -23,7 +24,8 @@ TYPES = [
     # add_invoice_payload,
     invoice,
     token_payload,
-    subs
+    subs,
+    JSON
     # local_invoice,
     # route_hint,
     # hop_hint,

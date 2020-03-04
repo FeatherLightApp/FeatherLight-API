@@ -11,7 +11,7 @@ services:
         environment:
             - RPCUSER=devuser
             - RPCPASS=devpass
-            - NETWORK=testnet
+            - NETWORK=regtest
             - DEBUG=rpc
             - MINING_ADDRESS
     
@@ -26,7 +26,7 @@ services:
         environment: 
             - RPCUSER=devuser
             - RPCPASS=devpass
-            - NETWORK=testnet
+            - NETWORK=regtest
             - CHAIN=bitcoin
             - DEBUG=debug
         depends_on: 
