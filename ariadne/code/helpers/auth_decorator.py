@@ -1,7 +1,7 @@
 import functools
 from typing import Callable, Optional, Any
 from inspect import iscoroutinefunction
-from code.classes import User
+from code.classes.user import User
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 def authenticate(func: Callable) -> Callable:

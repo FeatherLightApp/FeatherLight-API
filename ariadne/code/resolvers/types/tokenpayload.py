@@ -1,6 +1,6 @@
 from datetime import ( datetime, timedelta )
 from ariadne import ObjectType
-from code.classes import User
+from code.classes.user import User
 
 token_payload = ObjectType('TokenPayload')
 

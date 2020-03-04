@@ -1,7 +1,7 @@
 """define app entry point"""
 from json import loads
-from code.resolvers import SCHEMA
-from code.classes import Context
+from code.resolvers.schema import SCHEMA
+from code.classes.context import Context
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
 

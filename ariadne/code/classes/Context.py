@@ -3,8 +3,10 @@ import aioredis
 import pytest
 from starlette.requests import Request
 from code.init_lightning import init_lightning, lnd_tests
-from code.helpers import LoggerMixin
-from code.classes import JWT, User, BitcoinClient
+from code.helpers.mixins import LoggerMixin
+from code.classes.jwt import JWT
+from code.classes.user import User
+from code.classes.bitcoin import BitcoinClient
 
 
 class Context(LoggerMixin):

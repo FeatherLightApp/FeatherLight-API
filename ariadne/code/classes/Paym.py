@@ -3,9 +3,9 @@
 from datetime import datetime
 from math import floor
 from base64 import b64encode
-from code.helpers import make_async
+from code.helpers.async_future import make_async
 # from code.helpers.bolt11.address import Address
-from code.helpers import DotDict
+from code.helpers.mixins import DotDict
 import rpc_pb2 as ln
 
 

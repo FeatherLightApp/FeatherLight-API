@@ -48,4 +48,4 @@ ADD code/app.py .
 
 EXPOSE 5000
 
-CMD [ "python", "-m", "uvicorn",  "app:app", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]
+CMD [ "python", "-m", "uvicorn",  "app:APP", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]

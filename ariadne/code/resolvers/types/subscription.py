@@ -1,6 +1,6 @@
 from ariadne import SubscriptionType
-from code.helpers import authenticate
-from code.classes import User
+from code.helpers.auth_decorator import authenticate
+from code.classes.user import User
 
 subs = SubscriptionType()
 

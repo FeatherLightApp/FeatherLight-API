@@ -6,8 +6,11 @@ from datetime import (
 import aioredis
 from protobuf_to_dict import protobuf_to_dict
 from ariadne import MutationType
-from code.classes import User, Lock, Paym
-from code.helpers import make_async, DotDict
+from code.classes.user import User
+from code.classes.lock import Lock
+from code.classes.paym import Paym
+from code.helpers.async_future import make_async
+from code.helpers.mixins import DotDict
 import rpc_pb2 as ln
 
 mutation = MutationType()

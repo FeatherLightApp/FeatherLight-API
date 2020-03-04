@@ -10,7 +10,7 @@ def _fwrap(f, gf):
     except Exception as e:
         f.set_exception(e)
 
-def fwrap(gf, loop=None):
+def make_async(gf, loop=None):
     '''
         Wraps a GRPC result in a future that can be yielded by asyncio
         

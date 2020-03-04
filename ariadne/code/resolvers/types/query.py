@@ -12,8 +12,9 @@ from jwt.exceptions import ExpiredSignatureError
 from protobuf_to_dict import protobuf_to_dict
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
-from code.classes import User
-from code.helpers import make_async, authenticate
+from code.classes.user import User
+from code.helpers.async_future import make_async
+from code.helpers.auth_decorator import authenticate
 
 
 query = QueryType()
