@@ -60,3 +60,11 @@ type Route {
     #hops: [Hop]! TODO
 }
 
+type PeerInfo {
+    id: Int!
+    addr: String!
+    conntime: Int!
+    bytessent: Int!
+    bytesrecv: Int!
+    #TODO finish implementing https://bitcoin.org/en/developer-reference#getpeerinfo
+}

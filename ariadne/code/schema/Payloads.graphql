@@ -93,3 +93,9 @@ type TxsPayload {
     error: String
     
 }
+
+type GetPeersPayload {
+    ok: Boolean!
+    error: String
+    peerInfo: [PeerInfo]!
+}

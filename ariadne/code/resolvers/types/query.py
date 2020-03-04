@@ -140,6 +140,16 @@ async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
     }
 
 
+@query.field('peers')
+async def r_get_peers(_: None, info) -> dict:
+    res = await info.context.btcd.req('getpeerinfo')
+    info.context.logger.critical(res['result'])
+    return {
+        'ok': True,
+        'peer_info': res.get('result') or []
+    }
+
+
 # @query.field('checkRouteInvoice')
 # @authenticate
 # async def r_check_route(obj, info, invoice):

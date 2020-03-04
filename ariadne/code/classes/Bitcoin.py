@@ -12,8 +12,8 @@ class BitcoinClient(AsyncClient, LoggerMixin):
         self._user = config['user']
         self._pass = config['pass']
 
-    async def req(self, method, params=None, reqid=None):
-        """make a request to bitcoin rpc and return response json sync"""
+    async def req(self, method: str, params=None, reqid=None):
+        """make a request to bitcoin rpc and return response json"""
         url = f'http://{self._host}:{self._port}'
         self.logger.critical(url)
         js = {'method': method}
