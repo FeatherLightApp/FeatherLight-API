@@ -54,7 +54,7 @@ echo "Command: bitcoind $PARAMS"
 exec lnd \
     --noseedbackup \
     "--$CHAIN.active" \
-    "--bitcoind.testnet" \
+    "--$CHAIN.$NETWORK" \
     "--$CHAIN.node"="bitcoind" \
     "--$BACKEND.rpchost"="btcd" \
     "--$BACKEND.rpcuser"="$RPCUSER" \

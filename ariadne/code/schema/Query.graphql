@@ -13,4 +13,5 @@ type Query {
     decodeInvoice(invoice: String!): DecodeInvoicePayload!
     checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload!
+    genericRPC(command: String! params: String): String
 }
