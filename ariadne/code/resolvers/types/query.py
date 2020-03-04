@@ -24,10 +24,8 @@ query = QueryType()
 @query.field('walletBalance')
 async def r_walllet_balance(_: None, info) -> dict:
     response = await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
-    return {
-        'totalBalance': response.total_balance,
-        'confirmedBalance': response.confirmed_balance
-    }
+    info.context.logger.critical(response)
+    return response
 
 @pytest.fixture
 @query.field('login')

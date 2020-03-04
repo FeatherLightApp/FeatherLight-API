@@ -7,7 +7,6 @@ services:
         volumes:
             # - shared:/rpc
             - /mnt/volume_tor1_01/bitcoin:/data
-            - /mnt/volume_tor1_01/rpc:/rpc
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
         environment:
             - RPCUSER=devuser
@@ -24,7 +23,6 @@ services:
             # - shared:/rpc
             - /mnt/volume_tor1_01/lnd:/root/.lnd
             - /mnt/volume_tor1_01/bitcoin:/bitcoindata
-            - /mnt/volume_tor1_01/rpc:/rpc
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
         environment: 
             - RPCUSER=devuser
@@ -42,7 +40,6 @@ services:
         volumes: 
             - ./ariadne/code/:/app/code
             - /mnt/volume_tor1_01/lnd:/root/.lnd
-            - /mnt/volume_tor1_01/rpc:/rpc
         ports:
             - '5001:5001'
         depends_on: 
@@ -56,5 +53,7 @@ services:
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
 
 
-#volumes:
+# volumes:
     # shared:
+        #driver: local
+

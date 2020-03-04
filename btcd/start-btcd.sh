@@ -47,7 +47,7 @@ if [ "$NETWORK" != "mainnet" ]; then
    PARAMS="--$NETWORK"
 fi
 
-PARAMS=$(echo "--testnet" \
+PARAMS=$(echo "--$NETWORK" \
     "--debug=$DEBUG" \
     "--datadir=/data" \
     "--debuglogfile=/data/debug.log" \

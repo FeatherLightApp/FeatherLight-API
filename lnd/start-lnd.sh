@@ -56,8 +56,8 @@ exec lnd \
     "--$CHAIN.active" \
     "--$CHAIN.$NETWORK" \
     "--$CHAIN.node"="bitcoind" \
-    "--$BACKEND.rpchost"="btcd" \
-    "--$BACKEND.rpcuser"="$RPCUSER" \
-    "--$BACKEND.rpcpass"="$RPCPASS" \
-    --debuglevel="$DEBUG" \
+    #"--$BACKEND.rpchost"="btcd" \
+    #"--$BACKEND.rpcuser"="$RPCUSER" \
+    #"--$BACKEND.rpcpass"="$RPCPASS" \
+    #--debuglevel="$DEBUG" \
     "$@"
