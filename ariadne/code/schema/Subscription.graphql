@@ -1,0 +1,9 @@
+type Subscription {
+    paymentChannel: channelPayload!
+}
+
+type channelPayload {
+    ok: Boolean!
+    error: String
+    # add info from grpc docs
+}

@@ -1,27 +1,27 @@
 """define app entry point"""
 from json import loads
+from code.resolvers import SCHEMA
+from code.classes import Context
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
-from code.resolvers.schema import schema
-from code.classes import Context
 
-conf = loads(open('code/app_config.json').read())
-keys = loads(open('code/keys.json').read())
+CONF = loads(open('code/app_config.json').read())
+KEYS = loads(open('code/keys.json').read())
 
-conf.update(keys)
+CONF.update(KEYS)
 
-ctx = Context(conf)
+CTX = Context(CONF)
 
-app = Starlette(
+APP = Starlette(
     debug=True,
-    on_startup=[ctx.init_redis, ctx.smoke_tests],
-    on_shutdown=[ctx.destroy]
+    on_startup=[CTX.init_redis, CTX.smoke_tests],
+    on_shutdown=[CTX.destroy]
 )
-app.mount(
+APP.mount(
     '/graphql',
     GraphQL(
-        schema,
+        SCHEMA,
         debug=True,
-        context_value=ctx
+        context_value=CTX
     )
 )

@@ -10,7 +10,7 @@ import rpc_pb2 as ln
 
 
 class User(LoggerMixin):
-    """defines an instance of a user cache variable is only necessary in 
+    """defines an instance of a user cache variable is only necessary in
     queries or mutations that call functions requiring the global cache values"""
     def __init__(self, ctx):
         super().__init__()
@@ -34,18 +34,6 @@ class User(LoggerMixin):
         return this
 
     @classmethod
-    async def from_refresh(cls, ctx, refresh_token):
-        # TODO remove this method in favor of jwt toekn only no DB tokens
-        """Factory method for creating instance from refresh token"""
-        user_id = await ctx.redis.get('userid_for_' + refresh_token)
-        if user_id:
-            this = cls(ctx)
-            this.userid = user_id.decode('utf-8')
-            await this._generate_tokens()
-            return this
-        return None
-
-    @classmethod
     async def from_credentials(cls, ctx, login, pw):
         """factory method for instantiating from credentials"""
         userid = await ctx.redis.get('user_' + login + '_' + cls.hash(pw))
@@ -64,7 +52,7 @@ class User(LoggerMixin):
         pw = token_bytes(10).hex()
 
         userid = token_bytes(10).hex()
-        
+
         self.login = login
         self.pw = pw
         self.userid = userid
@@ -79,6 +67,7 @@ class User(LoggerMixin):
         return await self._redis.get('bitcoin_address_for_' + self.userid)
 
     async def add_address(self, address):
+        """add btc address to redis"""
         await self._redis.set('bitcoin_address_for_' + self.userid, address)
 
     async def generate_address(self):
@@ -125,7 +114,7 @@ class User(LoggerMixin):
             calculated_balance -= paym.amount + floor(paym.amount * 0.01) #fee limit
 
         return calculated_balance
-    
+
     async def save_balance(self, balance):
         """save balance to redis"""
         key = 'balance_for_' + self.userid
@@ -138,7 +127,8 @@ class User(LoggerMixin):
         return self._redis.delete(key)
 
     async def save_paid_invoice(self, doc):
-        return await self._redis.rpush('txs_for_' + self.userid, dumps(doc))
+        """saves paid invoice to redis"""
+        return await self._redis.rpush('txs_for_' + self.userid, json.dumps(doc))
 
     async def add_invoice(self, memo, amt):
         """add invoice and save invoice to redis"""
@@ -149,17 +139,23 @@ class User(LoggerMixin):
             expiry=3600*24
         )
         response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
-        decoded = await make_async (self._lightning.DecodePayReq.future(ln.PayReqString(pay_req=response.payment_request)))
+        decoded = await make_async(
+            self._lightning.DecodePayReq.future(
+                ln.PayReqString(pay_req=response.payment_request)
+            )
+        )
         await self._redis.set('payment_hash_' + decoded.paymenthash, self.userid)
         await self._redis.rpush('userinvoices_for_' + self.userid, json.dumps(response))
         return response
 
     # Doesnt belong here FIXME
     async def get_user_by_payment_hash(self, payment_hash):
+        """retrives the user by a payment hash in redis"""
         return await self._redis.get('payment_hash_' + payment_hash)
 
     # Doesnt belong here FIXME
     async def set_payment_hash_paid(self, payment_hash):
+        """sets a payment hash as paid in redis"""
         return await self._redis.set('ispaid_' + payment_hash, 1)
 
 
@@ -178,9 +174,11 @@ class User(LoggerMixin):
 
     # Doesnt belong here FIXME
     async def get_payment_hash_paid(self, payment_hash):
-        return await self._redies.get('ispaid_' + payment_hash)
+        """checks if payment hash is paid in redis"""
+        return await self._redis.get('ispaid_' + payment_hash)
 
     async def get_user_invoices(self):
+        """retrives the invoices for the user from lnd via grpc"""
         ranges = await self._redis.lrange('userinvoices_for_' + self.userid, 0, -1)
         result = []
         for invoice in ranges:
@@ -203,17 +201,18 @@ class User(LoggerMixin):
                         await self.clear_balance_cache()
             else:
                 self.cache['invoice_ispaid'][decoded.paymenthash] = True
-            
+
             invoice_dict['amount'] = decoded.amount
             invoice_dict['expires'] = decoded.expires
             # TODO ^^ make sure this is correct
             invoice_dict['timestamp'] = decoded.timestamp
             invoice_dict['type'] = 'user_invoice'
             result.append(invoice_dict)
-        
+
         return result
 
     async def get_txs(self):
+        """retrives the transcations for a user"""
         addr = await self.get_address()
         if not addr:
             await self.generate_address()
@@ -224,21 +223,20 @@ class User(LoggerMixin):
         txs = txs['result']
         result = []
         for tx in txs:
-            if (
-                'confirmations' in tx and 'address' in tx and 'category' in tx
-                and tx['confirmations'] >= 3 and tx['address'] == addr and tx['category'] == 'receive'
-            ):
+            if 'confirmations' in tx and 'address' in tx and 'category' in tx \
+            and tx['confirmations'] >= 3 and tx['address'] == addr and tx['category'] == 'receive':
                 tx.type = 'bitcoind_tx'
                 result.append(tx)
-            
+
         ranges = await self._redis.lrange('txs_for_' + self.userid, 0, -1)
         for invoice in ranges:
-            invoice = JSON.loads(invoice)
+            invoice = json.loads(invoice)
             invoice['type'] = 'paid_invoice'
 
             if invoice['payment_route']:
                 invoice['fee'] = abs(invoice['payment_route']['total_fees'])
-                invoice['value'] = abs(invoice['payment_route']['total_fees']) + invoice['payment_route']['total_amt']
+                invoice['value'] = abs(invoice['payment_route']['total_fees']) \
+                    + invoice['payment_route']['total_amt']
             else:
                 invoice['fee'] = 0
 
@@ -261,15 +259,15 @@ class User(LoggerMixin):
         response = self.cache['list_transactions']
         utc_seconds = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
         if response:
-            if (utc_seconds > self.cache['list_transactions_cache_expiry']):
+            if utc_seconds > self.cache['list_transactions_cache_expiry']:
                 # invalidate cache
                 self.cache['list_transactions'] = None
                 self.logger.info('Invalidating context transaction cache')
             try:
                 return json.loads(response)
-            except json.decoder.JSONDecodeError as e:
-                self.logger.critical('Could not read json from global transaction cache ', e)
-        
+            except json.decoder.JSONDecodeError as error:
+                self.logger.critical('Could not read json from global transaction cache %s', error)
+
         txs = await self._bitcoindrpc.req('listtransactions', ['*', 100500, 0, True])
         self.logger.critical(txs)
         ret = {'result': []}
@@ -287,6 +285,7 @@ class User(LoggerMixin):
         return ret
 
     async def get_pending_txs(self):
+        """retrives the pending transactions for a user"""
         addr = await self.get_address()
         if not addr:
             await self.generate_address()
@@ -320,21 +319,23 @@ class User(LoggerMixin):
         await self._redis.set('user_{}_{}'.format(self.login, self.hash(self.pw)), self.userid)
 
     async def account_for_possible_txids(self):
+        """performs accounting check for txs"""
         onchain_txs = await self.get_txs()
         imported_txids = await self._redis.lrange('imported_txids_for_' + self.userid, 0, -1)
         for tx in onchain_txs:
-            if tx.type != 'bitcoind_tx': continue
+            if tx.type != 'bitcoind_tx':
+                continue
             already_imported = False
             for imported_txid in imported_txids:
                 if tx.txid == imported_txid:
                     already_imported = True
-            
+
             if not already_imported and tx.category == 'receive':
                 lock = Lock(self._redis, 'importing_' + tx.txid)
                 if not await lock.obtain_lock():
                     # someones already importing this tx
                     return
-                
+
                 # lock obtained successfully
                 user_balance = await self.get_calculated_balance()
                 await self.save_balance(user_balance)
@@ -371,22 +372,23 @@ class User(LoggerMixin):
         for doc in save_back:
             await self._redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
 
-        
+
     async def get_locked_payments(self):
+        """retrives the locked payments for a user"""
         payments = await self._redis.lrange('locked_payments_for_' + self.userid, 0, -1)
         result = []
         for paym in payments:
             try:
-                d = json.loads(paym)
-                result.append(d)
-            except json.decoder.JSONDecodeError as e:
-                logging.critical(e)
+                data = json.loads(paym)
+                result.append(data)
+            except json.decoder.JSONDecodeError as error:
+                self.logger.critical(error)
 
         return result
 
     @staticmethod
     def hash(string):
         """returns hex digest of string"""
-        h = sha256()
-        h.update(string.encode('utf-8'))
-        return h.digest().hex()
+        hasher = sha256()
+        hasher.update(string.encode('utf-8'))
+        return hasher.digest().hex()

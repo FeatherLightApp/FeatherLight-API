@@ -1,5 +1,6 @@
 """resolvers for query types"""
 from math import floor
+from typing import Optional
 import pytest
 from datetime import (
     datetime,
@@ -11,7 +12,7 @@ from jwt.exceptions import ExpiredSignatureError
 from protobuf_to_dict import protobuf_to_dict
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
-from code.classes.User import User
+from code.classes import User
 from code.helpers import make_async, authenticate
 
 
@@ -19,7 +20,7 @@ query = QueryType()
 
 
 @query.field('walletBalance')
-async def r_walllet_balance(_, info):
+async def r_walllet_balance(_: None, info) -> dict:
     response = await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
     return {
         'totalBalance': response.total_balance,
@@ -28,7 +29,7 @@ async def r_walllet_balance(_, info):
 
 @pytest.fixture
 @query.field('login')
-async def r_auth(obj, info, user, password):
+async def r_auth(_: None, info, user: str, password: str) -> dict:
     try:
         if not (u := await User.from_credentials(ctx=info.context, login=user, pw=pw)):
             return 'Invalid Credentials'
@@ -38,7 +39,7 @@ async def r_auth(obj, info, user, password):
 
 
 @query.field('token')
-async def r_get_token(_, info):
+async def r_get_token(_: None, info) -> dict:
     if (cookie := info.context.req.cookies.get(info.context.cookie_name)):
         send = cookie.encode('utf-8')
         try:
@@ -51,7 +52,7 @@ async def r_get_token(_, info):
 
 @query.field('BTCAddress')
 @authenticate
-async def r_get_address(_, info, *, user):
+async def r_get_address(_: None, info, *, user: User) -> dict:
     addr = await user.get_address()
     if not addr:
         await user.generate_address()
@@ -63,7 +64,7 @@ async def r_get_address(_, info, *, user):
 
 @query.field('balance')
 @authenticate
-async def r_balance(_, info, *, user):
+async def r_balance(_: None, info, *, user: User) -> dict:
     addr = await user.get_address()
     if not addr:
         await user.generate_address()
@@ -78,7 +79,7 @@ async def r_balance(_, info, *, user):
 
 @query.field('info')
 @authenticate
-async def r_info(_, info):
+async def r_info(_: None, info) -> dict:
     request = ln.GetInfoRequest()
     response = await make_async(info.context.lnd.GetInfo.future(request, timeout=5000))
     d = protobuf_to_dict(response)
@@ -95,7 +96,7 @@ async def r_info(_, info):
 
 @query.field('txs')
 @authenticate
-async def r_txs(obj, info, *, user):
+async def r_txs(_: None, info, *, user: User) -> dict:
     if not await user.get_address():
         user.generate_address()
     await user.account_for_possible_txids()
@@ -114,7 +115,7 @@ async def r_txs(obj, info, *, user):
 
 @query.field('invoices')
 @authenticate
-async def r_invoices(obj, info, *, last, user):
+async def r_invoices(_: None, info, *, last: Optional[int], user: User):
     invoices = await user.get_user_invoices()
     return invoices[-1 * last]
 
@@ -129,7 +130,7 @@ async def r_pending(obj, info, **kwargs):
 
 @query.field('decodeInvoice')
 @authenticate
-async def r_decode_invoice(obj, info, *, invoice, user):
+async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
     request = ln.PayReqString(pay_req=invoice)
     res = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
     return {

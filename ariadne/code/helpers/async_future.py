@@ -1,3 +1,7 @@
+"""
+Allows grpc calls to be wrapped in asyncio friendly future
+this allows for awaiting grpc calls asynchronously
+"""
 import asyncio
 
 def _fwrap(f, gf):

@@ -3,7 +3,7 @@ from secrets import token_hex
 from httpx import AsyncClient
 from code.helpers.mixins import LoggerMixin
 
-class Bitcoin(AsyncClient, LoggerMixin):
+class BitcoinClient(AsyncClient, LoggerMixin):
     """Subclass for making btcd rpc requests"""
     def __init__(self, config):
         LoggerMixin()
