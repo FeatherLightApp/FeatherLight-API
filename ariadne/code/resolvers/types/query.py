@@ -1,8 +1,7 @@
 """resolvers for query types"""
 from math import floor
 import json
-from typing import Optional
-import pytest
+from typing import Optional, Union
 from datetime import (
     datetime,
     timedelta
@@ -14,60 +13,39 @@ from protobuf_to_dict import protobuf_to_dict
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
 from code.classes.user import User
+from code.classes.error import Error
 from code.helpers.async_future import make_async
 from code.helpers.auth_decorator import authenticate
 
 
-query = QueryType()
+QUERY = QueryType()
+
+@QUERY.field('me')
+@authenticate
+async def r_me(_, info, user: Union[Error,User]) -> Union[Error, User]:
+    return user
 
 
-@query.field('walletBalance')
+@QUERY.field('walletBalance')
 async def r_walllet_balance(_: None, info) -> dict:
     response = await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
     info.context.logger.critical(response)
     return response
 
-@pytest.fixture
-@query.field('login')
-async def r_auth(_: None, info, user: str, password: str) -> dict:
-    try:
-        if not (u := await User.from_credentials(ctx=info.context, login=user, pw=pw)):
-            return 'Invalid Credentials'
-        return u
-    except ExpiredSignatureError:
-        return 'Token has expired'
 
-
-@query.field('token')
-async def r_get_token(_: None, info) -> dict:
-    if (cookie := info.context.req.cookies.get(info.context.cookie_name)):
-        send = cookie.encode('utf-8')
-        try:
-            jsn = info.context.jwt.decode(send, kind='refresh')
-        except ExpiredSignatureError:
-            return 'Token has expired'
-        return await User.from_auth(ctx=info.context, auth=jsn['token'])
-    return 'No refresh token'
-
-
-@query.field('BTCAddress')
+@QUERY.field('BTCAddress')
 @authenticate
 async def r_get_address(_: None, info, *, user: User) -> dict:
     addr = await user.get_address()
-    if not addr:
-        await user.generate_address()
-        addr = await user.get_address()
     return {
         'ok': True,
         'address': addr.decode('utf-8')
     }
 
-@query.field('balance')
+@QUERY.field('balance')
 @authenticate
 async def r_balance(_: None, info, *, user: User) -> dict:
     addr = await user.get_address()
-    if not addr:
-        await user.generate_address()
     await user.account_for_possible_txids()
     balance = await user.get_balance()
     if (balance < 0):
@@ -77,7 +55,7 @@ async def r_balance(_: None, info, *, user: User) -> dict:
         'availableBalance': balance
     }
 
-@query.field('info')
+@QUERY.field('info')
 @authenticate
 async def r_info(_: None, info) -> dict:
     request = ln.GetInfoRequest()
@@ -94,11 +72,10 @@ async def r_info(_: None, info) -> dict:
         **d
     }
 
-@query.field('txs')
+@QUERY.field('txs')
 @authenticate
 async def r_txs(_: None, info, *, user: User) -> dict:
-    if not await user.get_address():
-        user.generate_address()
+    address = await user.get_address()
     await user.account_for_possible_txids()
     txs = await user.get_txs()
     locked_payments = await user.get_locked_payments()
@@ -113,22 +90,21 @@ async def r_txs(_: None, info, *, user: User) -> dict:
     return txs
 
 
-@query.field('invoices')
+@QUERY.field('invoices')
 @authenticate
 async def r_invoices(_: None, info, *, last: Optional[int], user: User):
     invoices = await user.get_user_invoices()
     return invoices[-1 * last]
 
-@query.field('pending')
+@QUERY.field('pending')
 @authenticate
 async def r_pending(obj, info, **kwargs):
-    if not await user.get_address():
-        await user.generate_address()
+    address = await user.get_address()
     await user.account_for_possible_txids()
     return await user.get_pending_txs()
 
 
-@query.field('decodeInvoice')
+@QUERY.field('decodeInvoice')
 @authenticate
 async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
     request = ln.PayReqString(pay_req=invoice)
@@ -139,7 +115,7 @@ async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
     }
 
 
-@query.field('peers')
+@QUERY.field('peers')
 async def r_get_peers(_: None, info) -> dict:
     res = await info.context.btcd.req('getpeerinfo')
     info.context.logger.critical(res['result'])
@@ -149,17 +125,10 @@ async def r_get_peers(_: None, info) -> dict:
     }
 
 # TODO remove temp query for generic rpc
-@query.field('genericRPC')
+@QUERY.field('genericRPC')
 async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
     res = await info.context.btcd.req(command, params=None if not params else json.loads(params))
-    return json.dumps(res)
-
-
-@query.field('databaseDump')
-async def r_dump_db(_: None, info):
-    res = await info.context.redis.keys('*')
-    info.context.logger.critical(res)
-    return res    
+    return json.dumps(res)  
 
 # @query.field('checkRouteInvoice')
 # @authenticate

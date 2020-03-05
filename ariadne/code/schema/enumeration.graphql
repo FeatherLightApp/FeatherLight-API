@@ -1,0 +1,4 @@
+"""Possible types of errors"""
+enum ErrorType {
+    AuthenticationError
+}

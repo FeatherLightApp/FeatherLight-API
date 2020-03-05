@@ -1,11 +1,11 @@
 """import all types"""
-from .query import query
-from .mutation import mutation
+from .query import QUERY
+from .mutation import MUTATION
 # from .addinvoicepayload import add_invoice_payload
 from .union import invoice
-from .tokenpayload import token_payload
 from .subscription import subs
-from .scalar import JSON
+from .user_response import USER_RESPONSE, USER
+from .enum import ERROR_TYPE
 # from .localinvoice import (
 #     local_invoice,
 #     route_hint,
@@ -19,13 +19,14 @@ from .scalar import JSON
 # )
 
 TYPES = [
-    query,
-    mutation,
+    QUERY,
+    MUTATION,
+    USER_RESPONSE,
+    USER,
+    ERROR_TYPE,
     # add_invoice_payload,
     invoice,
-    token_payload,
     subs,
-    JSON
     # local_invoice,
     # route_hint,
     # hop_hint,
