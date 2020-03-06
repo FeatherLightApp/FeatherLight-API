@@ -1,2 +1,4 @@
 """User response can resolve to either a User object or an error"""
 union UserResponse = User | Error
+
+union TokenResponse = TokenPayload | Error

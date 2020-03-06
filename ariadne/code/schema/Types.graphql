@@ -4,10 +4,9 @@ type User {
     """Username is only ever returned once, upon user craetion. It is the clients responsibility to store the username"""
     username: String
     """Access token is a jwt which must be supplied in the header for authorized requests"""
-    accessToken: String!
-    """Refresh token is a jwt which must be supplied as a cookie to regenerate """
-    refreshToken: String!
+    tokens: TokenPayload!
     # balance: Int
+    btcAddress: String!
 }
 
 

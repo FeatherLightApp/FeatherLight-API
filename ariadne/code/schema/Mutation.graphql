@@ -1,7 +1,7 @@
 type Mutation {
     createUser: UserResponse!
     login(username: String! password: String!): UserResponse!
-    refreshAccessToken: UserResponse!
+    refreshAccessToken: TokenResponse!
     addInvoice(memo: String! amt: Int!): AddInvoicePayload!
     payInvoice(invoice: String! amt: Int): PayInvoicePayload!
 }

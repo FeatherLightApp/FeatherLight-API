@@ -29,51 +29,19 @@ class User(LoggerMixin):
         self.cache = ctx.cache
 
 
-    async def get_token(self, token_type: Union['access', 'refresh'], force_revoke: bool = False) -> str:
-        assert token_type == 'access' or token_type == 'refresh'
-        token = self._access_token if token_type == 'access' else self._refresh_token
-        # Token is not loaded on class instance or we are revoking old token. Get token from redis
-        if force_revoke or not token:
-            token = await self._redis.get(f"{token_type}_token_for_{self.userid}")
-            # If token is found in redis decode bytes value else set token to empty
-            token = '' if not token else token.decode('utf-8')
-        # If we are focing revoke remove old tokens
-        if force_revoke:
-            await self._redis.delete(f"userid_for_{token}")
-            await self._redis.delete(f"{token_type}_token_for{self.userid}")
-        # if we deleted old tokens or could not find tokens from redis
-        if force_revoke or not token:
-            self.logger.info(f"Generating new {token_type} token for user: {self.userid}")
-            token = token_hex(20)
-            #set new token
-            if token_type == 'refresh':
-                self._refresh_token = token
-                await self._redis.set('userid_for_' + token, self.userid, expire=604800)
-                await self._redis.set('refresh_token_for_' + self.userid, token, expire=604800)
-
-            if token_type == 'access':
-                self._access_token = token
-                await self._redis.set('userid_for_' + token, self.userid, expire=900)
-                await self._redis.set('access_token_for_' + self.userid, token, expire=900)
-
-
-        return token
-
-
     @classmethod
     async def from_jwt(cls, ctx, token: str, kind: str) -> Union[Error, 'User']:
         """Factory method for creating instance from hex token"""
         try:
             jsn = ctx.jwt.decode(token, kind)
-            if (userid := await ctx.redis.get(f"userid_for_{jsn.get('token')}")):
-                this = cls(ctx)
-                this.userid = userid.decode('utf-8')
-                return this
-            return Error(error_type='AuthenticationError', message='User lookup failed')
-        except InvalidTokenError:
-            return Error(error_type='AuthenticationError', message='Invalid JSON Web Token')
+            this = cls(ctx)
+            this.userid = jsn['id']
+            this.logger.info(f"initalized user: {this.userid}")
+            return this
         except ExpiredSignatureError:
             return Error(error_type='AuthenticationError', message='Token has expired')
+        except InvalidTokenError:
+            return Error(error_type='AuthenticationError', message='Invalid JSON Web Token')
 
 
     @classmethod
@@ -118,8 +86,10 @@ class User(LoggerMixin):
         if not (address := await self._redis.get('bitcoin_address_for_' + self.userid)):
             request = ln.NewAddressRequest(type=0)
             response = await make_async(self._lightning.NewAddress.future(request, timeout=5000))
-            adress = response.address
+            self.logger.critical(response)
+            address = response.address
             await self._redis.set('bitcoin_address_for_' + self.userid, address)
+            self.logger.info(f"Created address: {address} for user: {self.userid}")
             self._bitcoindrpc.req('importaddress', [address, address, False])
             return address
         return address.decode('utf-8')
