@@ -36,6 +36,8 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
 
 @MUTATION.field('refreshAccessToken')
 async def r_get_token(_: None, info) -> Union[User, Error]:
+    info.context.logger.critical(info.context.req)
+    info.context.logger.critical(info.context.req.cookies)
     if (cookie := info.context.req.cookies.get('refresh')):
         userResult = await User.from_jwt(ctx=info.context, token=cookie, kind='refresh')
         return userResult

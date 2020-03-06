@@ -29,24 +29,35 @@ class User(LoggerMixin):
         self.cache = ctx.cache
 
 
-    async def get_tokens(self) -> dict:
-        #lookup if tokens exist
-        if not self._access_token:
-            self._access_token = await self._redis.get(f"access_token_for_{self.userid}")
-            # convert from bytes to string if access token exists else set value to None
-            self._access_token = None if not self._access_token else self._access_token.decode('utf-8')
-        if not self._refresh_token:
-            self._refresh_token = await self._redis.get(f"refresh_token_for_{self.userid}")
-            # convert from bytes to string if refresf token exists else set value to None
-            self._refresh_token = None if not self._refresh_token else self._refresh_token.decode('utf-8')
-        
-        # generate token if they could not be found in redis
-        await self._generate_tokens(access = not self._access_token, refresh = not self._refresh_token)
-        return {
-            'access': self._access_token,
-            'refresh': self._refresh_token
-        }
+    async def get_token(self, token_type: Union['access', 'refresh'], force_revoke: bool = False) -> str:
+        assert token_type == 'access' or token_type == 'refresh'
+        token = self._access_token if token_type == 'access' else self._refresh_token
+        # Token is not loaded on class instance or we are revoking old token. Get token from redis
+        if force_revoke or not token:
+            token = await self._redis.get(f"{token_type}_token_for_{self.userid}")
+            # If token is found in redis decode bytes value else set token to empty
+            token = '' if not token else token.decode('utf-8')
+        # If we are focing revoke remove old tokens
+        if force_revoke:
+            await self._redis.delete(f"userid_for_{token}")
+            await self._redis.delete(f"{token_type}_token_for{self.userid}")
+        # if we deleted old tokens or could not find tokens from redis
+        if force_revoke or not token:
+            self.logger.info(f"Generating new {token_type} token for user: {self.userid}")
+            token = token_hex(20)
+            #set new token
+            if token_type == 'refresh':
+                self._refresh_token = token
+                await self._redis.set('userid_for_' + token, self.userid, expire=604800)
+                await self._redis.set('refresh_token_for_' + self.userid, token, expire=604800)
 
+            if token_type == 'access':
+                self._access_token = token
+                await self._redis.set('userid_for_' + token, self.userid, expire=900)
+                await self._redis.set('access_token_for_' + self.userid, token, expire=900)
+
+
+        return token
 
 
     @classmethod
@@ -73,8 +84,9 @@ class User(LoggerMixin):
             this = cls(ctx)
             this.userid = userid.decode('utf-8')
             this.username = username
+            await this.get_token(token_type='access', force_revoke=True)
+            await this.get_token(token_type='refresh', force_revoke=True)
             # User is loging in with credentials, revoke old tokens and issue new ones
-            await this._generate_tokens(refresh=True, access=True)
             return this
         return Error(error_type='AuthenticationError', message='Invalid Credentials')
 
@@ -321,32 +333,7 @@ class User(LoggerMixin):
         for tx in txs:
             if tx.confirmations < 3 and tx.address == addr and tx.category == 'receive':
                 result.append(tx)
-        return result
-
-
-    async def _generate_tokens(self, **kwargs):
-        #function for revoking old tokens if they exist and creating new ones
-        # delete old refresh and expire keys before making new ones
-        for (token_type, value) in kwargs.items():
-            if value and token_type == 'access' or token_type == 'refresh':
-                #revoke old token
-                self.logger.info(f"Generating new {token_type} token for user: {self.userid}")
-                old_token = await self._redis.get(f'{token_type}_token_for_{self.userid}')
-                old_token = '' if not old_token else old_token.decode('utf-8')
-                await self._redis.delete(f'userid_for_{old_token}')
-                await self._redis.delete(f'{token_type}_token_for_{self.userid}')
-
-                #set new token
-                if token_type == 'refresh':
-                    self._refresh_token = token_hex(20)
-                    await self._redis.set('userid_for_' + self._refresh_token, self.userid, expire=604800)
-                    await self._redis.set('refresh_token_for_' + self.userid, self._refresh_token, expire=604800)
-
-                if token_type == 'access':
-                    self._access_token = token_hex(20)
-                    await self._redis.set('userid_for_' + self._access_token, self.userid, expire=900)
-                    await self._redis.set('access_token_for_' + self.userid, self._access_token, expire=900)
-        
+        return result        
         
 
     async def account_for_possible_txids(self):

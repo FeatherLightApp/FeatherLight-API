@@ -5,7 +5,6 @@ from .mutation import MUTATION
 from .union import invoice
 from .subscription import subs
 from .user_response import USER_RESPONSE, USER
-from .enum import ERROR_TYPE
 # from .localinvoice import (
 #     local_invoice,
 #     route_hint,
@@ -23,7 +22,6 @@ TYPES = [
     MUTATION,
     USER_RESPONSE,
     USER,
-    ERROR_TYPE,
     # add_invoice_payload,
     invoice,
     subs,

@@ -11,8 +11,7 @@ from code.classes.error import Error
 USER_RESPONSE = UnionType('UserResponse')
 
 @USER_RESPONSE.type_resolver
-def r_user_response(obj, info, other):
-    info.context.logger.critical(other)
+def r_user_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
     if isinstance(obj, User):
@@ -32,7 +31,7 @@ def r_password(obj: User, _) -> Optional[str]:
 @USER.field('accessToken')
 async def r_access_token(obj: User, info) -> str:
     access_json = {
-        'token': (await obj.get_tokens())['access'],
+        'token': await obj.get_token(token_type='access'),
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(minutes=15)
     }
@@ -41,9 +40,9 @@ async def r_access_token(obj: User, info) -> str:
 @USER.field('refreshToken')
 async def r_refresh_token(obj: User, info) -> str:
     refresh_json = {
-        'token': (await obj.get_tokens())['refresh'],
+        'token': await obj.get_token(token_type='refresh'),
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(days=7)
     }
-    return info.context.jwt.encode(refresh_json, kind='access')
+    return info.context.jwt.encode(refresh_json, kind='refresh')
 
