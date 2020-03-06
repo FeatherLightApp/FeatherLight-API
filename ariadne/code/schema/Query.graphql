@@ -1,11 +1,9 @@
 type Query {
-    echo(string: String): String
-    walletBalance: WalletBalance!
-    peers: GetPeersPayload!
-    login(user: String! password: String!): TokenPayload!
-    token: TokenPayload!
+    me: UserResponse!
+    walletBalance: WalletBalance! # temp
+    peers: GetPeersPayload! # temp
     BTCAddress: AddressPayload!
-    balance: BalancePayload!
+    balance: BalancePayload! # move into User type
     #info: GetInfoPayload!
     txs: TxsPayload!
     invoices(last: Int): InvoicesPayload!
@@ -13,5 +11,5 @@ type Query {
     decodeInvoice(invoice: String!): DecodeInvoicePayload!
     checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload!
-    genericRPC(command: String! params: String): String
+    genericRPC(command: String! params: String): String # temp
 }

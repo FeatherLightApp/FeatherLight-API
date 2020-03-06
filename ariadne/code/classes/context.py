@@ -50,19 +50,6 @@ class Context(LoggerMixin):
         self.redis.close()
         await self.redis.wait_closed()
 
-
-    async def user_from_header(self) -> User:
-        if not 'Authorization' in self.req.headers or not (header := self.req.headers['Authorization']):
-            return None
-        jsn = self.jwt.decode(
-            header.replace('Bearer ', '').encode('utf-8'),
-            kind='access'
-        )
-        return await User.from_auth(
-            ctx=self,
-            auth=jsn['token']
-        )
-
     # TODO smoke tests for connected containers
     async def smoke_tests(self):
         self.id_pubkey = await lnd_tests()

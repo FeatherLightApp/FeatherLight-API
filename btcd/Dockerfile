@@ -23,7 +23,7 @@ RUN apk add --upgrade && \
     apk add --no-cache \
     bash \
     bitcoin \
-&&  mkdir "/rpc" "/root/.btcd" "/root/.btcctl" \
+&&  mkdir "/root/.btcd" "/root/.btcctl" \
 # &&  chmod +x start-btcctl.sh \
 &&  chmod +x start-btcd.sh 
 

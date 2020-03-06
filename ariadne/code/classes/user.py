@@ -1,12 +1,15 @@
 """module for defining the user class"""
 import json
+from typing import Union
 from math import floor
-from secrets import token_bytes
+from secrets import token_hex
 from hashlib import sha256
 from datetime import datetime
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from code.helpers.async_future import make_async
 from code.helpers.mixins import LoggerMixin
 from code.classes.lock import Lock
+from code.classes.error import Error
 import rpc_pb2 as ln
 
 
@@ -19,70 +22,77 @@ class User(LoggerMixin):
         self._bitcoindrpc = ctx.btcd
         self._lightning = ctx.lnd
         self.userid = None
-        self.login = None
-        self.pw = None
-        self.access_token = None
-        self.refresh_token = None
-        self._balance = 0
+        self.username = None
+        self.password = None #only on newly created users. generated pw must be returned to user
+        self._access_token = None
+        self._refresh_token = None
         self.cache = ctx.cache
 
-    @classmethod
-    async def from_auth(cls, ctx, auth):
-        """Factory method for creating instance from auth token"""
-        this = cls(ctx)
-        this.userid = auth
-        ctx.logger.critical(ctx.btcd)
-        return this
 
     @classmethod
-    async def from_credentials(cls, ctx, login, pw):
+    async def from_jwt(cls, ctx, token: str, kind: str) -> Union[Error, 'User']:
+        """Factory method for creating instance from hex token"""
+        try:
+            jsn = ctx.jwt.decode(token, kind)
+            this = cls(ctx)
+            this.userid = jsn['id']
+            this.logger.info(f"initalized user: {this.userid}")
+            return this
+        except ExpiredSignatureError:
+            return Error(error_type='AuthenticationError', message='Token has expired')
+        except InvalidTokenError:
+            return Error(error_type='AuthenticationError', message='Invalid JSON Web Token')
+
+
+    @classmethod
+    async def from_credentials(cls, ctx, username: str, password: str) -> Union[Error, 'User']:
         """factory method for instantiating from credentials"""
-        userid = await ctx.redis.get('user_' + login + '_' + cls.hash(pw))
+        userid = await ctx.redis.get('user_' + username + '_' + cls.hash(password))
         if userid:
             this = cls(ctx)
             this.userid = userid.decode('utf-8')
-            this.login = login
-            await this._generate_tokens()
+            this.username = username
+            await this.get_token(token_type='access', force_revoke=True)
+            await this.get_token(token_type='refresh', force_revoke=True)
+            # User is loging in with credentials, revoke old tokens and issue new ones
             return this
-        return None
+        return Error(error_type='AuthenticationError', message='Invalid Credentials')
 
     async def create(self):
         """create a new user and save to db"""
-        login = token_bytes(10).hex()
+        username = token_hex(10)
 
-        pw = token_bytes(10).hex()
+        password = token_hex(10)
 
-        userid = token_bytes(10).hex()
+        userid = token_hex(10)
 
-        self.login = login
-        self.pw = pw
+        self.username = username
+        self.password = password
         self.userid = userid
-        await self._save_to_db()
+        await self._redis.set(f'user_{self.username}_{self.hash(self.password)}', self.userid)
 
     async def save_metadata(self, metadata):
         """save metadata for user to redis"""
         return await self._redis.set('metadata_for_' + self.userid, json.dumps(metadata))
 
     async def get_address(self):
-        """return bitcoin address of user"""
-        return await self._redis.get('bitcoin_address_for_' + self.userid)
-
-    async def add_address(self, address):
-        """add btc address to redis"""
-        await self._redis.set('bitcoin_address_for_' + self.userid, address)
-
-    async def generate_address(self):
         """
+        return bitcoin address of user. If the address does not exist
         asynchronously generate a new lightning address
         gRPC Response: NewAddressResponse
         see https://api.lightning.community/#newaddress
         for more info
-        Imports the address to bitcoind
         """
-        request = ln.NewAddressRequest(type=0)
-        response = await make_async(self._lightning.NewAddress.future(request, timeout=5000))
-        await self.add_address(response.address)
-        self._bitcoindrpc.req('importaddress', [response.address, response.address, False])
+        if not (address := await self._redis.get('bitcoin_address_for_' + self.userid)):
+            request = ln.NewAddressRequest(type=0)
+            response = await make_async(self._lightning.NewAddress.future(request, timeout=5000))
+            self.logger.critical(response)
+            address = response.address
+            await self._redis.set('bitcoin_address_for_' + self.userid, address)
+            self.logger.info(f"Created address: {address} for user: {self.userid}")
+            self._bitcoindrpc.req('importaddress', [address, address, False])
+            return address
+        return address.decode('utf-8')
 
 
     async def get_balance(self):
@@ -216,9 +226,6 @@ class User(LoggerMixin):
         """retrives the transcations for a user"""
         addr = await self.get_address()
         if not addr:
-            await self.generate_address()
-            addr = await self.get_address()
-        if not addr:
             raise Exception('cannot get transactions" no onchain address assigned to user')
         txs = await self._list_transactions()
         txs = txs['result']
@@ -289,35 +296,15 @@ class User(LoggerMixin):
         """retrives the pending transactions for a user"""
         addr = await self.get_address()
         if not addr:
-            await self.generate_address()
-            addr = await self.get_address()
-        if not addr:
-            raise RuntimeError('cannot get transactions: no onchain address assigned to user')
+            raise Exception('cannot get transactions: no onchain address assigned to user')
         txs = await self._list_transactions()
         txs = txs.result
         result = []
         for tx in txs:
             if tx.confirmations < 3 and tx.address == addr and tx.category == 'receive':
                 result.append(tx)
-        return result
-
-
-    async def _generate_tokens(self):
-        # delete old refresh and expire keys before making new ones
-
-        buffer = token_bytes(20)
-        self.access_token = buffer.hex()
-
-        buffer = token_bytes(20)
-        self.refresh_token = buffer.hex()
-
-        await self._redis.set('userid_for_' + self.access_token, self.userid, expire=900)
-        await self._redis.set('userid_for_' + self.refresh_token, self.userid, expire=604800)
-        await self._redis.set('access_token_for_' + self.userid, self.access_token, expire=900)
-        await self._redis.set('refresh_token_for_' + self.userid, self.refresh_token, expire=604800)
-
-    async def _save_to_db(self):
-        await self._redis.set('user_{}_{}'.format(self.login, self.hash(self.pw)), self.userid)
+        return result        
+        
 
     async def account_for_possible_txids(self):
         """performs accounting check for txs"""
@@ -384,8 +371,8 @@ class User(LoggerMixin):
                 result.append(data)
             except json.decoder.JSONDecodeError as error:
                 self.logger.critical(error)
-
         return result
+
 
     @staticmethod
     def hash(string):

@@ -1,15 +1,6 @@
-type CreatePayload {
-    login: String
-    password: String
-    ok: Boolean!
-    error: String
-}
-
 type TokenPayload {
-    access: String
-    refresh: String
-    ok: Boolean!
-    error: String
+    accessToken: String!
+    refreshToken: String!
 }
 
 type AddInvoicePayload {

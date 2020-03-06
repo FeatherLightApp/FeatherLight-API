@@ -31,13 +31,13 @@ class JWT:
             return decode_jwt(
                 token,
                 self._refresh_secret,
-                algorithms=['HS256']
+                algorithms='HS256'
             )
         if kind == 'access':
             return decode_jwt(
                 token,
                 self._access_secret,
-                algorithms=['HS256']
+                algorithms='HS256'
             )
 
         raise ValueError('token kind must be either refresh or access')
