@@ -15,12 +15,10 @@ class BitcoinClient(AsyncClient, LoggerMixin):
     async def req(self, method: str, params=None, reqid=None):
         """make a request to bitcoin rpc and return response json"""
         url = f'http://{self._host}:{self._port}'
-        self.logger.critical(url)
         js = {'method': method}
         if params:
             js['params'] = params
         js['id'] = reqid if reqid else token_hex(4)
-        self.logger.critical(js)
         async with AsyncClient() as client:
             res = await client.post(
                 url,

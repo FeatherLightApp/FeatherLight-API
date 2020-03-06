@@ -29,9 +29,7 @@ async def r_me(_, info, user: Union[Error,User]) -> Union[Error, User]:
 
 @QUERY.field('walletBalance')
 async def r_walllet_balance(_: None, info) -> dict:
-    response = await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
-    info.context.logger.critical(response)
-    return response
+    return await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
 
 
 @QUERY.field('BTCAddress')
@@ -119,7 +117,6 @@ async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
 @QUERY.field('peers')
 async def r_get_peers(_: None, info) -> dict:
     res = await info.context.btcd.req('getpeerinfo')
-    info.context.logger.critical(res['result'])
     return {
         'ok': True,
         'peer_info': res.get('result') or []
@@ -129,7 +126,6 @@ async def r_get_peers(_: None, info) -> dict:
 @QUERY.field('genericRPC')
 async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
     param_dict = None if not params else ast.literal_eval(params)
-    info.context.logger.critical(param_dict)
     res = await info.context.btcd.req(command, params=param_dict)
     return json.dumps(res)  
 

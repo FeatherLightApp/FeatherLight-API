@@ -90,7 +90,15 @@ class User(LoggerMixin):
             address = response.address
             await self._redis.set('bitcoin_address_for_' + self.userid, address)
             self.logger.info(f"Created address: {address} for user: {self.userid}")
-            self._bitcoindrpc.req('importaddress', [address, address, False])
+            import_response = await self._bitcoindrpc.req(
+                'importaddress',
+                params={
+                    'address': address, 
+                    'label': self.userid,
+                    'rescan': False
+                }
+            )
+            self.logger.critical(import_response)
             return address
         return address.decode('utf-8')
 
