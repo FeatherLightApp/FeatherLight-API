@@ -20,6 +20,7 @@ class BitcoinClient(AsyncClient, LoggerMixin):
         if params:
             js['params'] = params
         js['id'] = reqid if reqid else token_hex(4)
+        self.logger.critical(js)
         async with AsyncClient() as client:
             res = await client.post(
                 url,

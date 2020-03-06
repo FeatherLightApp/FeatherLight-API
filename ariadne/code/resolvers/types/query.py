@@ -1,6 +1,7 @@
 """resolvers for query types"""
 from math import floor
 import json
+import ast
 from typing import Optional, Union
 from datetime import (
     datetime,
@@ -127,7 +128,9 @@ async def r_get_peers(_: None, info) -> dict:
 # TODO remove temp query for generic rpc
 @QUERY.field('genericRPC')
 async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
-    res = await info.context.btcd.req(command, params=None if not params else json.loads(params))
+    param_dict = None if not params else ast.literal_eval(params)
+    info.context.logger.critical(param_dict)
+    res = await info.context.btcd.req(command, params=param_dict)
     return json.dumps(res)  
 
 # @query.field('checkRouteInvoice')
