@@ -71,44 +71,6 @@ class Paym:
 
         return await make_async(self._lightning.SendToRouteSync.future(request, timeout=5000))
 
-    def process_send_payment_response(self, payment):
-        """process the sent payment"""
-        if payment and payment.payment_route and payment.payment_route.total_amt_msat:
-            # paid just now
-            self._ispaid = True
-            payment.payment_route.total_fees = payment.payment_route.total_fees \
-                + floor(payment.payment_route.total_amt * Paym.fee())
-            if self._bolt11:
-                payment.pay_req = self._bolt11
-            if self._decoded:
-                payment.decoded = self._decoded
-
-        if payment.payment_error and 'already paid' in payment.payment_error:
-            # already paid
-            self._ispaid = True
-            if self._decoded:
-                payment.decoded = self._decoded
-                if self._bolt11:
-                    payment.pay_req = self._bolt11
-                # trying to guess the fee
-                payment.payment_route = payment.payment_route if payment.payment_route else DotDict()
-                payment.payment_route.total_fees = floor(self._decoded.num_satoshis * 0.01)
-                payment.payment_route.total_amt = self._decoded.num_satoshis
-
-        if payment.payment_error and 'unable to' in payment.payment_error:
-            # failed to pay
-            self._ispaid = False
-
-        if payment.payment_error and 'FinalExpiryTooSoon' in payment.payment_error:
-            self._ispaid = False
-
-        if payment.payment_error and 'UnknownPaymentHash' in payment.payment_error:
-            self._ispaid = False
-
-        if payment.payment_error and 'payment is in transition' in payment.payment_error:
-            self._ispaid = None # None is default but lets set it anyway
-
-        return payment
 
     def get_is_paid(self):
         """getter method for the payment status"""

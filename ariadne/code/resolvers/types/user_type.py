@@ -28,3 +28,7 @@ async def r_btc_address(obj: User, _) -> str:
 def r_tokens(obj: User, _) -> str:
     # pass user to token payload resolver
     return obj
+
+@USER.field('balance')
+async def r_balance(obj: User, _) -> str:
+    return await obj.invoice_manager.get_balance()
