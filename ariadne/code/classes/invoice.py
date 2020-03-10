@@ -197,9 +197,9 @@ class InvoiceManager(LoggerMixin):
                     invoice['payment_route']['total_amt_msat'] / 1000 != int(invoice['payment_route']['total_amt'])
                 ):
                     # account for mSats
-                    invoice['value'] = invoice['payment_route']['total_fees'] + \
-                        # value is fees plus max of either value plus one to account for extra sat
-                        max(int(invoice['payment_route']['total_amt_msat']) / 1000, int(invoice['payment_route']['total_amt'])) + 1
+                    # value is fees plus max of either value plus one to account for extra sat
+                    invoice['value'] = invoice['payment_route']['total_fees'] \
+                        + max(int(invoice['payment_route']['total_amt_msat'] / 1000), int(invoice['payment_route']['total_amt'])) + 1
             else:
                 invoice['fee'] = 0
 
