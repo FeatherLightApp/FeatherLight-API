@@ -46,11 +46,10 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
 @authenticate
 # TODO add more flexiblilty in invoice creation
 async def r_add_invoice(*_, memo: str, amt: int, user: User) -> dict:
+    # response is protobuf with hex encoded bytes hash
+    # convert to dict and resolve with default resolver
     response = await user.invoice_manager.add_invoice(memo, amt)
-    out = protobuf_to_dict(response)
-    #hex encode hash bytes so it may be returned
-    out['r_hash'] = out['r_hash'].hex()
-    return out
+    return protobuf_to_dict(response)
 
 
 @MUTATION.field('payInvoice')
