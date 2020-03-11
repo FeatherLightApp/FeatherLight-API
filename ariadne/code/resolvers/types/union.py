@@ -33,5 +33,5 @@ ADD_INVOICE_RESPONSE = UnionType('AddInvoiceResponse')
 def r_add_invoice_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
-    if isinstance(obj, dict) and obj.get('paymentRequest'):
+    if isinstance(obj, dict) and obj.get('r_hash'):
         return 'AddInvoicePayload'
