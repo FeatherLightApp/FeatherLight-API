@@ -30,7 +30,7 @@ def r_user_response(obj, info, resolve_type):
 ADD_INVOICE_RESPONSE = UnionType('AddInvoiceResponse')
 
 @ADD_INVOICE_RESPONSE.type_resolver
-def r_add_invoice_response(obj, _):
+def r_add_invoice_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
     if isinstance(obj, dict) and obj.get('paymentRequest'):
