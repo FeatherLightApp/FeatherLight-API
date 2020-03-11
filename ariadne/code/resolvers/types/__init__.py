@@ -2,7 +2,7 @@
 from .query import QUERY
 from .mutation import MUTATION
 # from .addinvoicepayload import add_invoice_payload
-from .union import invoice, USER_RESPONSE, TOKEN_RESPONSE
+from .union import invoice, USER_RESPONSE, TOKEN_RESPONSE, ADD_INVOICE_RESPONSE
 from .subscription import subs
 from .user_type import USER
 from .token_payload import TOKEN_PAYLOAD
@@ -25,6 +25,7 @@ TYPES = [
     USER,
     TOKEN_RESPONSE,
     TOKEN_PAYLOAD,
+    ADD_INVOICE_RESPONSE,
     # add_invoice_payload,
     invoice,
     subs,
