@@ -1,5 +1,5 @@
 import json
-import protobuf_to_json
+from protobuf_to_dict import protobuf_to_dict
 from code.helpers.async_future import make_async
 from code.helpers.mixins import LoggerMixin
 import rpc_pb2 as ln
@@ -10,7 +10,7 @@ class InvoiceManager(LoggerMixin):
         super().__init__()
         self._redis = redis
         self._lightning = lightning
-        self.bitcoind = bitcoind
+        self._bitcoind = bitcoind
         self.userid = userid
         self.address = None # this is set by calling get_address() on parent user class
 
@@ -99,7 +99,8 @@ class InvoiceManager(LoggerMixin):
                 req = ln.PaymentHash(r_hash=bytes.fromhex(invoice_json['r_hash']))
                 lookup_info = await make_async(self._lightning.lookupInvoice.future(req, timeout=5000))
 
-                if (invoice_json['ispaid'] := lookup_info.state == 1):
+                invoice_json['ispaid'] = lookup_info.state == 1
+                if invoice_json['ispaid']:
                     #invoice has actually been paid, cache this in redis
                     await self._redis.set(f"is_paid_{invoice_json['r_hash']}")
                 

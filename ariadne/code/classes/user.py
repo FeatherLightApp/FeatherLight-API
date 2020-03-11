@@ -39,7 +39,7 @@ class User(LoggerMixin):
             this.invoice_manager = InvoiceManager(
                 redis=this._redis,
                 lightning=this._lightning,
-                bitcoind=this.bitcoind,
+                bitcoind=this._bitcoind,
                 userid=this.userid
             )
             this.logger.info(f"initalized user: {this.userid}")
