@@ -83,7 +83,7 @@ class InvoiceManager(LoggerMixin):
             invoice_json = json.loads(payments_json_bytes.decode('utf-8'))
 
             decoded = await make_async(
-                self._lightning.decodePayReq.future(invoice_json.get('payment_request'), timeout=5000)
+                self._lightning.DecodePayReq.future(invoice_json.get('payment_request'), timeout=5000)
             )
 
             # Determine if invoice has been paid via redis using hex encoded string of payment hash
@@ -95,7 +95,7 @@ class InvoiceManager(LoggerMixin):
                 
 
                 req = ln.PaymentHash(r_hash=bytes.fromhex(invoice_json['r_hash']))
-                lookup_info = await make_async(self._lightning.lookupInvoice.future(req, timeout=5000))
+                lookup_info = await make_async(self._lightning.LookupInvoice.future(req, timeout=5000))
 
                 invoice_json['ispaid'] = lookup_info.state == 1
                 if invoice_json['ispaid']:
