@@ -4,11 +4,9 @@ type TokenPayload {
 }
 
 type AddInvoicePayload {
-    ok: Boolean!
-    error: String
-    hash: String
-    paymentReq: String
-    addIndex: Int
+    rHash: String!
+    paymentRequest: String!
+    addIndex: Int!
 }
 
 type PayInvoicePayload {

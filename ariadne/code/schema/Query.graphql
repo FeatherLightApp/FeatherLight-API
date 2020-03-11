@@ -3,9 +3,8 @@ type Query {
     walletBalance: WalletBalance! # temp
     peers: GetPeersPayload! # temp
     BTCAddress: AddressPayload!
-    balance: BalancePayload! # move into User type
     #info: GetInfoPayload!
-    txs: TxsPayload!
+    txs: TxsPayload! #move into user
     invoices(last: Int): InvoicesPayload!
     pending: PendingPayload!
     decodeInvoice(invoice: String!): DecodeInvoicePayload!

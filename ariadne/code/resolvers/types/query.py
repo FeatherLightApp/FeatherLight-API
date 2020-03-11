@@ -41,18 +41,6 @@ async def r_get_address(_: None, info, *, user: User) -> dict:
         'address': addr.decode('utf-8')
     }
 
-@QUERY.field('balance')
-@authenticate
-async def r_balance(_: None, info, *, user: User) -> dict:
-    addr = await user.get_address()
-    await user.account_for_possible_txids()
-    balance = await user.get_balance()
-    if (balance < 0):
-        balance = 0
-    return {
-        'ok': True,
-        'availableBalance': balance
-    }
 
 @QUERY.field('info')
 @authenticate
