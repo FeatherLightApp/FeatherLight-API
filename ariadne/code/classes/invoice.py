@@ -52,15 +52,13 @@ class InvoiceManager(LoggerMixin):
             expiry=3600*24
         )
         response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
-        req_hash = response.r_hash
-        # Hex encode byte hash for storage in redis
-        hex_hash = req_hash.hex()
+        output = protobuf_to_dict(response)
+        output['r_hash'] = response.r_hash.hex()
         #change the bytes object to hex string for json serialization
-        response.r_hash = hex_hash
-        #serialize to json and store in redis
-        await self._redis.rpush(f"userinvoices_for_{self.userid}", json.dumps(protobuf_to_json(response)))
-        await self._redis.set(f"payment_hash_{hex_hash}", self.userid)
-        return response
+        await self._redis.rpush(f"userinvoices_for_{self.userid}", json.dumps(output))
+        # add hex encoded bytes hash to redis
+        await self._redis.set(f"payment_hash_{output['r_hash']}", self.userid)
+        return output
 
 
     async def get_user_invoices(self, only_paid=True):
