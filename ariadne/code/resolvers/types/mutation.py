@@ -45,10 +45,12 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
 @MUTATION.field('addInvoice')
 @authenticate
 # TODO add more flexiblilty in invoice creation
-async def r_add_invoice(*_, memo: str, amt: int, user: User) -> dict:
+async def r_add_invoice(*_, memo: str, amt: int, user: Union[Error, User]) -> dict:
     # response is json protobuf with hex encoded bytes hash
-    return await user.invoice_manager.add_invoice(memo, amt)
-
+    if isinstance(user, User):
+        return await user.invoice_manager.add_invoice(memo, amt)
+    #return error for union type resolver
+    return user
 
 
 @MUTATION.field('payInvoice')
