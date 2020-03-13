@@ -4,7 +4,6 @@ from code.classes.error import Error
 
 invoice = UnionType('Invoice')
 
-
 @invoice.type_resolver
 def r_invoice_type(obj, _):
     if obj.hash:
@@ -12,19 +11,24 @@ def r_invoice_type(obj, _):
     return 'LocalInvoice'
 
 TOKEN_RESPONSE = UnionType('TokenResponse')
-USER_RESPONSE = UnionType('UserResponse')
 
 @TOKEN_RESPONSE.type_resolver
+def r_token_response(obj, *_) -> str:
+    if isinstance(obj, Error):
+        return 'Error'
+    if isinstance(obj, str):
+        return 'TokenPayload'
+
+
+USER_RESPONSE = UnionType('UserResponse')
+
 @USER_RESPONSE.type_resolver
 def r_user_response(obj, info, resolve_type):
     info.context.logger.critical(resolve_type)
     if isinstance(obj, Error):
         return 'Error'
     if isinstance(obj, User):
-        if str(resolve_type) == 'TokenResponse':
-            return 'TokenPayload'
-        if str(resolve_type) == 'UserResponse':
-            return 'User'
+        return 'User'
         
 
 ADD_INVOICE_RESPONSE = UnionType('AddInvoiceResponse')

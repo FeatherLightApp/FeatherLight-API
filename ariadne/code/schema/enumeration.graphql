@@ -2,3 +2,12 @@
 enum ErrorType {
     AuthenticationError
 }
+
+enum Permission {
+    AddInvoice
+}
+
+enum Role {
+    USER
+    ADMIN
+}

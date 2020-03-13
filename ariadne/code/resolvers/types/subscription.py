@@ -1,11 +1,10 @@
 from ariadne import SubscriptionType
-from code.helpers.auth_decorator import authenticate
 from code.classes.user import User
 
 subs = SubscriptionType()
 
 @subs.field('paymentChannel')
-@authenticate
+# @authenticate
 async def r_sub_channel(_: None, info, user: User) -> dict:
     # pseudocode 
     # access lnd stub via context

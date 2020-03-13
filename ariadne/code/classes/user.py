@@ -1,13 +1,13 @@
 """module for defining the user class"""
 import json
-from typing import Union
+from typing import Union, Optional
 from math import floor, ceil
 from secrets import token_hex
 from hashlib import sha256
 from datetime import datetime
-from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from code.helpers.async_future import make_async
 from code.helpers.mixins import LoggerMixin
+from code.helpers.crypto import hash_string
 from code.classes.lock import Lock
 from code.classes.error import Error
 from code.classes.invoice import InvoiceManager
@@ -17,55 +17,15 @@ import rpc_pb2 as ln
 class User(LoggerMixin):
     """defines an instance of a user cache variable is only necessary in
     queries or mutations that call functions requiring the global cache values"""
-    def __init__(self, ctx):
+    def __init__(self, *, ctx, userid: Optional[str] = None):
         super().__init__()
-        self._redis = ctx.redis
-        self._bitcoind = ctx.btcd
-        self._lightning = ctx.lnd
-        self.userid = None
+        self.ctx = ctx
+        self.userid = userid
         self.username = None
         self.password = None #only on newly created users. generated pw must be returned to user
-        self.cache = ctx.cache
+        # self.cache = ctx.cache
         self.invoice_manager = None
 
-
-    @classmethod
-    async def from_jwt(cls, ctx, token: str, kind: str) -> Union[Error, 'User']:
-        """Factory method for creating instance from hex token"""
-        try:
-            jsn = ctx.jwt.decode(token, kind)
-            this = cls(ctx)
-            this.userid = jsn['id']
-            this.invoice_manager = InvoiceManager(
-                redis=this._redis,
-                lightning=this._lightning,
-                bitcoind=this._bitcoind,
-                userid=this.userid
-            )
-            this.logger.info(f"initalized user: {this.userid}")
-            return this
-        except ExpiredSignatureError:
-            return Error(error_type='AuthenticationError', message='Token has expired')
-        except InvalidTokenError:
-            return Error(error_type='AuthenticationError', message='Invalid JSON Web Token')
-
-
-    @classmethod
-    async def from_credentials(cls, ctx, username: str, password: str) -> Union[Error, 'User']:
-        """factory method for instantiating from credentials"""
-        userid = await ctx.redis.get('user_' + username + '_' + cls.hash(password))
-        if userid:
-            this = cls(ctx)
-            this.userid = userid.decode('utf-8')
-            this.username = username
-            this.invoice_manager = InvoiceManager(
-                redis=this._redis,
-                lightning=this._lightning,
-                bitcoind=this._bitcoind,
-                userid=this.userid
-            )
-            return this
-        return Error(error_type='AuthenticationError', message='Invalid Credentials')
 
     async def create(self):
         """create a new user and save to db"""
@@ -78,13 +38,14 @@ class User(LoggerMixin):
         self.username = username
         self.password = password
         self.userid = userid
-        await self._redis.set(f'user_{self.username}_{self.hash(self.password)}', self.userid)
+        await self.ctx.redis.set(f'user_{self.username}_{hash_string(self.password)}', self.userid)
 
     async def save_metadata(self, metadata):
         """save metadata for user to redis"""
-        return await self._redis.set('metadata_for_' + self.userid, json.dumps(metadata))
+        assert self.userid
+        return await self.ctx.redis.set('metadata_for_' + self.userid, json.dumps(metadata))
 
-    async def get_address(self):
+    async def btc_address(self, *_):
         """
         return bitcoin address of user. If the address does not exist
         asynchronously generate a new lightning address
@@ -94,14 +55,15 @@ class User(LoggerMixin):
 
         also sets the invoice managers address
         """
-        if not (address := await self._redis.get('bitcoin_address_for_' + self.userid)):
+        assert self.userid
+        if not (address := await self.ctx.redis.get('bitcoin_address_for_' + self.userid)):
             request = ln.NewAddressRequest(type=0)
-            response = await make_async(self._lightning.NewAddress.future(request, timeout=5000))
+            response = await make_async(self.ctx.lnd.NewAddress.future(request, timeout=5000))
             self.logger.critical(response)
             address = response.address
-            await self._redis.set('bitcoin_address_for_' + self.userid, address)
+            await self.ctx.redis.set('bitcoin_address_for_' + self.userid, address)
             self.logger.info(f"Created address: {address} for user: {self.userid}")
-            import_response = await self._bitcoind.req(
+            import_response = await self.ctx.bitcoind.req(
                 'importaddress',
                 params={
                     'address': address, 
@@ -111,13 +73,13 @@ class User(LoggerMixin):
             )
             self.logger.critical(import_response)
             return address
-        self.invoice_manager.address = address.decode('utf-8')
-        return self.invoice_manager.address
+        # self.invoice_manager.address = address.decode('utf-8')
+        return address.decode('utf-8')
 
 
     # async def get_balance(self):
     #     """get the balance for the user"""
-    #     balance = await self._redis.get('balance_for_' + self.userid)
+    #     balance = await self.ctx.redis.get('balance_for_' + self.userid)
     #     if not balance:
     #         balance = await self.get_calculated_balance()
     #         await self.save_balance(balance)
@@ -127,27 +89,29 @@ class User(LoggerMixin):
     # async def save_balance(self, balance):
     #     """save balance to redis"""
     #     key = 'balance_for_' + self.userid
-    #     await self._redis.set(key, balance)
-    #     await self._redis.expire(key, 1800)
+    #     await self.ctx.redis.set(key, balance)
+    #     await self.ctx.redis.expire(key, 1800)
 
     # async def clear_balance_cache(self):
     #     """clear balance from redis"""
     #     key = 'balance_for_' + self.userid
-    #     return self._redis.delete(key)
+    #     return self.ctx.redis.delete(key)
 
     async def save_paid_invoice(self, doc):
         """
         saves paid invoice to redis to associate with userid
         invoice can either 
         """
-        return await self._redis.rpush('paid_invoices_for' + self.userid, json.dumps(doc))
+        assert self.userid
+        return await self.ctx.redis.rpush('paid_invoices_for' + self.userid, json.dumps(doc))
 
 
 
     # Doesnt belong here FIXME
     async def get_user_by_payment_hash(self, payment_hash):
         """retrives the user by a payment hash in redis"""
-        return await self._redis.get('payment_hash_' + payment_hash)
+        assert self.userid
+        return await self.ctx.redis.get('payment_hash_' + payment_hash)
 
     # async def _list_transactions(self):
     #     response = self.cache['list_transactions']
@@ -180,7 +144,7 @@ class User(LoggerMixin):
 
     # async def get_pending_txs(self):
     #     """retrives the pending transactions for a user"""
-    #     addr = await self.get_address()
+    #     addr = await self.btc_address()
     #     if not addr:
     #         raise Exception('cannot get transactions: no onchain address assigned to user')
     #     txs = await self._list_transactions()
@@ -194,8 +158,9 @@ class User(LoggerMixin):
 
     async def account_for_possible_txids(self):
         """performs accounting check for txs"""
+        assert self.userid
         onchain_txs = await self.get_txs()
-        imported_txids = await self._redis.lrange('imported_txids_for_' + self.userid, 0, -1)
+        imported_txids = await self.ctx.redis.lrange('imported_txids_for_' + self.userid, 0, -1)
         for tx in onchain_txs:
             if tx.type != 'bitcoind_tx':
                 continue
@@ -205,7 +170,7 @@ class User(LoggerMixin):
                     already_imported = True
 
             if not already_imported and tx.category == 'receive':
-                lock = Lock(self._redis, 'importing_' + tx.txid)
+                lock = Lock(self.ctx.redis, 'importing_' + tx.txid)
                 if not await lock.obtain_lock():
                     # someones already importing this tx
                     return
@@ -213,7 +178,7 @@ class User(LoggerMixin):
                 # lock obtained successfully
                 user_balance = await self.get_calculated_balance()
                 await self.save_balance(user_balance)
-                await self._redis.rpush('imported_txids_for_' + self.userid, tx.txid)
+                await self.ctx.redis.rpush('imported_txids_for_' + self.userid, tx.txid)
                 await lock.release_lock()
 
 
@@ -223,33 +188,28 @@ class User(LoggerMixin):
         Used to calculate balance till the lock is lifted
         (payment is in determined state - success or fail)
         """
+        assert self.userid
         utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
         doc = {
             'pay_req': pay_req,
             'amount': decoded_invoice.num_satoshis,
             'timestamp': utc_seconds
         }
-        return self._redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
+        return self.ctx.redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
 
 
     async def unlock_funds(self, pay_req):
         """
         Strips specific payreq from the list of locked payments
         """
+        assert self.userid
         payments = await self.get_locked_payments()
         save_back = []
         for paym in payments:
             if paym.pay_req != pay_req:
                 save_back.append(paym)
 
-        await self._redis.delete('locked_payments_for_' + self.userid)
+        await self.ctx.redis.delete('locked_payments_for_' + self.userid)
         for doc in save_back:
-            await self._redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
+            await self.ctx.redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
 
-
-    @staticmethod
-    def hash(string):
-        """returns hex digest of string"""
-        hasher = sha256()
-        hasher.update(string.encode('utf-8'))
-        return hasher.digest().hex()

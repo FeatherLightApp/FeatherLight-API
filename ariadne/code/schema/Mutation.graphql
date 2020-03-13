@@ -4,4 +4,5 @@ type Mutation {
     refreshAccessToken: TokenResponse!
     addInvoice(memo: String! amt: Int!): AddInvoiceResponse!
     payInvoice(invoice: String! amt: Int): PayInvoicePayload!
+    forceUser(user: String!): UserResponse!
 }

@@ -20,7 +20,7 @@ class InvoiceManager(LoggerMixin):
 
         # get  offchain invoices added by the user
         for inv in await self.get_user_invoices(only_paid=True):
-            calculated_balance += inv.amt
+            calculated_balance += inv['amt']
 
         for tx in await self.get_onchain_txs():
             # Valid onchain btc transactions sent to this user's address
@@ -40,25 +40,7 @@ class InvoiceManager(LoggerMixin):
         return calculated_balance
 
 
-    async def add_invoice(self, memo, amt):
-        """
-        add invoice and associate user with hash in redis
-        stores json representation of rpc protobuf in redis array
-        """
-        # TODO add suport for more custom invoices
-        request = ln.Invoice(
-            memo=memo,
-            value=amt,
-            expiry=3600*24
-        )
-        response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
-        output = protobuf_to_dict(response)
-        output['r_hash'] = response.r_hash.hex()
-        #change the bytes object to hex string for json serialization
-        await self._redis.rpush(f"userinvoices_for_{self.userid}", json.dumps(output))
-        # add hex encoded bytes hash to redis
-        await self._redis.set(f"payment_hash_{output['r_hash']}", self.userid)
-        return output
+
 
 
     async def get_user_invoices(self, only_paid=True):
@@ -81,9 +63,11 @@ class InvoiceManager(LoggerMixin):
         for payments_json_bytes in await self._redis.lrange(f"userinvoices_for_{self.userid}", 0, -1):
             #decode bytes string and parse into json of AddInvoice Response grpc
             invoice_json = json.loads(payments_json_bytes.decode('utf-8'))
+            self.logger.critical(invoice_json)
 
+            req = ln.PayReqString(pay_req=invoice_json.get('payment_request'))
             decoded = await make_async(
-                self._lightning.DecodePayReq.future(invoice_json.get('payment_request'), timeout=5000)
+                    self._lightning.DecodePayReq.future(req, timeout=5000)
             )
 
             # Determine if invoice has been paid via redis using hex encoded string of payment hash
@@ -100,7 +84,7 @@ class InvoiceManager(LoggerMixin):
                 invoice_json['ispaid'] = lookup_info.state == 1
                 if invoice_json['ispaid']:
                     #invoice has actually been paid, cache this in redis
-                    await self._redis.set(f"is_paid_{invoice_json['r_hash']}")
+                    await self._redis.set(f"is_paid_{invoice_json['r_hash']}", 1)
                 
             invoice_json['amt'] = decoded.num_satoshis
             invoice_json['expiry'] = decoded.expiry

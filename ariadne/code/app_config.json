@@ -1,5 +1,5 @@
 {
-    "btcd": {
+    "bitcoind": {
         "host": "btcd",
         "port": 18443,
         "user": "devuser",

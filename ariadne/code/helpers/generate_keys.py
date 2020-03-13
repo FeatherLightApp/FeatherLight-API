@@ -17,8 +17,7 @@ def write_keys(directory: str):
     with open(os.path.join(directory, 'keys.json'), 'x') as file:
         data = {
             'refresh_secret': token_hex(20),
-            'access_secret': token_hex(20),
-            'cookie_name': token_hex(10)
+            'access_secret': token_hex(20)
         }
         json.dump(data, file, indent=4)
 

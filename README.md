@@ -24,7 +24,9 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 
 ### TODOs
 
-- fix zmqpubhashblock port binding
+- ~~fix zmqpubhashblock port binding~~
+- add hold invoices
+- restructure schema
 - write subscriptions
 - consolidate configs into global config
 - mypy type checking

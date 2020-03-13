@@ -9,41 +9,23 @@ from datetime import (
 )
 from secrets import token_hex
 from ariadne import QueryType
-from jwt.exceptions import ExpiredSignatureError
 from protobuf_to_dict import protobuf_to_dict
 import rpc_pb2 as ln
 import rpc_pb2_grpc as lnrpc
 from code.classes.user import User
 from code.classes.error import Error
 from code.helpers.async_future import make_async
-from code.helpers.auth_decorator import authenticate
 
 
 QUERY = QueryType()
-
-@QUERY.field('me')
-@authenticate
-async def r_me(_, info, user: Union[Error,User]) -> Union[Error, User]:
-    return user
-
 
 @QUERY.field('walletBalance')
 async def r_walllet_balance(_: None, info) -> dict:
     return await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
 
 
-@QUERY.field('BTCAddress')
-@authenticate
-async def r_get_address(_: None, info, *, user: User) -> dict:
-    addr = await user.get_address()
-    return {
-        'ok': True,
-        'address': addr.decode('utf-8')
-    }
-
-
 @QUERY.field('info')
-@authenticate
+#@authenticate
 async def r_info(_: None, info) -> dict:
     request = ln.GetInfoRequest()
     response = await make_async(info.context.lnd.GetInfo.future(request, timeout=5000))
@@ -60,9 +42,9 @@ async def r_info(_: None, info) -> dict:
     }
 
 @QUERY.field('txs')
-@authenticate
+#@authenticate
 async def r_txs(_: None, info, *, user: User) -> dict:
-    address = await user.get_address()
+    address = await user.btc_address()
     await user.account_for_possible_txids()
     txs = await user.get_txs()
     locked_payments = await user.get_locked_payments()
@@ -78,13 +60,13 @@ async def r_txs(_: None, info, *, user: User) -> dict:
 
 
 @QUERY.field('invoices')
-@authenticate
+#@authenticate
 async def r_invoices(_: None, info, *, last: Optional[int], user: User):
     invoices = await user.get_user_invoices()
     return invoices[-1 * last]
 
 @QUERY.field('pending')
-@authenticate
+#@authenticate
 async def r_pending(obj, info, **kwargs):
     address = await user.get_address()
     await user.account_for_possible_txids()
@@ -92,7 +74,7 @@ async def r_pending(obj, info, **kwargs):
 
 
 @QUERY.field('decodeInvoice')
-@authenticate
+#@authenticate
 async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
     request = ln.PayReqString(pay_req=invoice)
     res = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
@@ -104,7 +86,7 @@ async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
 
 @QUERY.field('peers')
 async def r_get_peers(_: None, info) -> dict:
-    res = await info.context.btcd.req('getpeerinfo')
+    res = await info.context.bitcoind.req('getpeerinfo')
     return {
         'ok': True,
         'peer_info': res.get('result') or []
@@ -114,7 +96,7 @@ async def r_get_peers(_: None, info) -> dict:
 @QUERY.field('genericRPC')
 async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
     param_dict = None if not params else ast.literal_eval(params)
-    res = await info.context.btcd.req(command, params=param_dict)
+    res = await info.context.bitcoind.req(command, params=param_dict)
     return json.dumps(res)  
 
 # @query.field('checkRouteInvoice')

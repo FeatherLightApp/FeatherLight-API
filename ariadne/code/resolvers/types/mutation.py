@@ -1,5 +1,5 @@
 from math import floor
-from typing import Union
+from typing import Union, Optional, Dict
 from datetime import (
     datetime,
     timedelta
@@ -13,7 +13,7 @@ from code.classes.paym import Paym
 from code.classes.error import Error
 from code.helpers.async_future import make_async
 from code.helpers.mixins import DotDict
-from code.helpers.auth_decorator import authenticate
+from code.helpers.crypto import decode
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
@@ -31,21 +31,59 @@ async def r_create_user(_: None, info) -> User:
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    return await User.from_credentials(ctx=info.context, username=user, password=password)
+    if (userid := await info.context.redis.get('user_' + username + '_' + cls.hash(password))):
+        #pass to union resolver TODO FIXME
+        return {
+            'id': userid
+        }
+    return Error(error_type='AuthenticationError', message='Invalid Credentials')
+
+#TODO GET RID OF THIS ITS FOR DEBUG
+@MUTATION.field('forceUser')
+def r_force_user(_, info, user: str) -> str:
+    return User(userid=user, ctx=info.context)
 
 
 @MUTATION.field('refreshAccessToken')
 async def r_get_token(_: None, info) -> Union[User, Error]:
-    if (cookie := info.context.req.cookies.get('refresh')):
-        userResult = await User.from_jwt(ctx=info.context, token=cookie, kind='refresh')
-        return userResult
-    return Error(error_type='AuthenticationError', message='No refresh token sent')
+    # catch scenario of no refresh cookie
+    if not (cookie := info.context.req.cookies.get('refresh')):
+        return Error(error_type='AuthenticationError', message='No refresh token sent')
+    decode_response: Union[Dict, Error] = decode(token=cookie, kind='refresh')
+    # pass either error or user instance to union resolver
+    info.context.logger.critical(decode_response)
+    if isinstance(decode_response, Error):
+        return decode_response
+    if isinstance(decode_response, Dict):
+        return decode_response.get('id')
 
 
 @MUTATION.field('addInvoice')
-@authenticate
 # TODO add more flexiblilty in invoice creation
-async def r_add_invoice(*_, memo: str, amt: int, user: Union[Error, User]) -> dict:
+# FIXME doesnt work
+async def r_add_invoice(_, info, *, memo: str, amt: int, invoiceFor: Optional[str] = None) -> dict:
+    """Authenticated route"""
+    # determine if user allows remote invoice add
+    # if invoiceFor and invoiceFor != 
+    async def add_invoice(*args, user: Union[Error, User], memo: str, amt):
+        """
+        add invoice and associate user with hash in redis
+        stores json representation of rpc protobuf in redis array
+        """
+        # TODO add suport for more custom invoices
+        request = ln.Invoice(
+            memo=memo,
+            value=amt,
+            expiry=3600*24
+        )
+        response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
+        output = protobuf_to_dict(response)
+        output['r_hash'] = response.r_hash.hex()
+        #change the bytes object to hex string for json serialization
+        await self._redis.rpush(f"userinvoices_for_{self.userid}", json.dumps(output))
+        # add hex encoded bytes hash to redis
+        await self._redis.set(f"payment_hash_{output['r_hash']}", self.userid)
+        return output
     # response is json protobuf with hex encoded bytes hash
     if isinstance(user, User):
         return await user.invoice_manager.add_invoice(memo, amt)
@@ -54,8 +92,8 @@ async def r_add_invoice(*_, memo: str, amt: int, user: Union[Error, User]) -> di
 
 
 @MUTATION.field('payInvoice')
-@authenticate
 async def r_pay_invoice(_: None, info, invoice: str, amt: int, user: User) -> dict:
+    """Authenticated Route"""
     assert not amt or amt >= 0
     # obtain a db lock
     lock = Lock(
