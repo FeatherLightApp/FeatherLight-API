@@ -1,4 +1,5 @@
 from math import floor
+from secrets import token_hex
 from typing import Union, Optional, Dict
 from datetime import (
     datetime,
@@ -13,35 +14,38 @@ from code.classes.paym import Paym
 from code.classes.error import Error
 from code.helpers.async_future import make_async
 from code.helpers.mixins import DotDict
-from code.helpers.crypto import decode
+from code.helpers.crypto import decode, hash_string
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
-# TODO add JWT support and expire tokens in redis
 
 @MUTATION.field('createUser')
 # TODO add post limiter?
 async def r_create_user(_: None, info) -> User:
-    # create blank user
-    u = User(ctx=info.context)
-    # generate secret credentials
-    await u.create()
-    # pass to user response resolver
-    return u
+    """create a new user and save to db"""
+    #create userid hex
+    user = User(token_hex(10))
+
+    user.username = token_hex(10)
+
+    user.password = token_hex(10)
+
+    await info.context.redis.set(f'user_{user.username}_{hash_string(user.password)}', user.userid)
+
+    return user
+
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if (userid := await info.context.redis.get('user_' + username + '_' + cls.hash(password))):
+    if (userid := await info.context.redis.get('user_' + username + '_' + hash_string(password))):
         #pass to union resolver TODO FIXME
-        return {
-            'id': userid
-        }
+        return User(userid.decode('utf-8'))
     return Error(error_type='AuthenticationError', message='Invalid Credentials')
 
 #TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
 def r_force_user(_, info, user: str) -> str:
-    return User(userid=user, ctx=info.context)
+    return User(userid=user)
 
 
 @MUTATION.field('refreshAccessToken')

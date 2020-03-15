@@ -23,7 +23,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             if isinstance(decode_response, Error):
                 return decode_response
             # User is authenticated. Inject into obj if not defined
-            new_obj = obj or User(decode_response['id'], ctx=info.context)
+            new_obj = obj or User(decode_response['id'])
             if iscoroutinefunction(orig_resolver):
                 return await orig_resolver(new_obj, info, **kwargs)
             else:

@@ -12,7 +12,7 @@ class Context(LoggerMixin):
     """class for passing context values"""
 
     def __init__(self, config: dict):
-        super().__init__()
+        LoggerMixin().__init__()
         self.logger.info(config)
         self._config = config
         self.req = None #populated on each server request
@@ -34,6 +34,7 @@ class Context(LoggerMixin):
         """async init redis db. call before app startup"""
         self.logger.warning('instantiating redis')
         self.redis = await aioredis.create_redis_pool(self._config['redis']['host'])
+        self.logger.warning(self.redis)
 
 
     async def destroy(self):

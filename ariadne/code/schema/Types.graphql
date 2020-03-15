@@ -7,6 +7,7 @@ type User {
     tokens: TokenPayload!
     balance: Int!
     btcAddress: String!
+    invoices: [Invoice]!
 }
 
 
@@ -39,6 +40,15 @@ type LocalInvoice {
     features: [FeaturesEntry]
 }
 
+type RemoteInvoice {
+    error: String
+    preimage: String
+    route: Route
+    hash: String
+    decoded: LocalInvoice
+    payReq: String!
+}
+
 type RouteHint {
     hopHints: [HopHint]
 }
@@ -60,15 +70,6 @@ type Feature {
     name: String
     isRequired: Boolean
     isKnown: Boolean
-}
-
-type RemoteInvoice {
-    error: String
-    preimage: String
-    route: Route
-    hash: String
-    decoded: LocalInvoice
-    payReq: String!
 }
 
 type Route {

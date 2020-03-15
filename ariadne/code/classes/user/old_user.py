@@ -28,17 +28,7 @@ class User(LoggerMixin):
 
 
     async def create(self):
-        """create a new user and save to db"""
-        username = token_hex(10)
 
-        password = token_hex(10)
-
-        userid = token_hex(10)
-
-        self.username = username
-        self.password = password
-        self.userid = userid
-        await self.ctx.redis.set(f'user_{self.username}_{hash_string(self.password)}', self.userid)
 
     async def save_metadata(self, metadata):
         """save metadata for user to redis"""
@@ -46,35 +36,7 @@ class User(LoggerMixin):
         return await self.ctx.redis.set('metadata_for_' + self.userid, json.dumps(metadata))
 
     async def btc_address(self, *_):
-        """
-        return bitcoin address of user. If the address does not exist
-        asynchronously generate a new lightning address
-        gRPC Response: NewAddressResponse
-        see https://api.lightning.community/#newaddress
-        for more info
 
-        also sets the invoice managers address
-        """
-        assert self.userid
-        if not (address := await self.ctx.redis.get('bitcoin_address_for_' + self.userid)):
-            request = ln.NewAddressRequest(type=0)
-            response = await make_async(self.ctx.lnd.NewAddress.future(request, timeout=5000))
-            self.logger.critical(response)
-            address = response.address
-            await self.ctx.redis.set('bitcoin_address_for_' + self.userid, address)
-            self.logger.info(f"Created address: {address} for user: {self.userid}")
-            import_response = await self.ctx.bitcoind.req(
-                'importaddress',
-                params={
-                    'address': address, 
-                    'label': self.userid,
-                    'rescan': False
-                }
-            )
-            self.logger.critical(import_response)
-            return address
-        # self.invoice_manager.address = address.decode('utf-8')
-        return address.decode('utf-8')
 
 
     # async def get_balance(self):
@@ -84,18 +46,6 @@ class User(LoggerMixin):
     #         balance = await self.get_calculated_balance()
     #         await self.save_balance(balance)
     #     return int(balance)
-
-
-    # async def save_balance(self, balance):
-    #     """save balance to redis"""
-    #     key = 'balance_for_' + self.userid
-    #     await self.ctx.redis.set(key, balance)
-    #     await self.ctx.redis.expire(key, 1800)
-
-    # async def clear_balance_cache(self):
-    #     """clear balance from redis"""
-    #     key = 'balance_for_' + self.userid
-    #     return self.ctx.redis.delete(key)
 
     async def save_paid_invoice(self, doc):
         """
