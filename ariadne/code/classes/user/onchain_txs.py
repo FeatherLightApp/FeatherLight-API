@@ -1,10 +1,17 @@
 from .abstract_user_method import AbstractMethod
 from .btc_address import GetBTCAddress
 
+
 class GetOnchainTxs(AbstractMethod):
 
     def __init__(self, min_confirmations=5):
         self.min_confirmations = min_confirmations
+
+    # fct to convert btc amt to sats
+    @staticmethod
+    def _format(tx):
+        tx['amount'] = int(tx['amount'] * 100000000)
+        return tx
 
     async def run(self, user):
         """
@@ -30,4 +37,4 @@ class GetOnchainTxs(AbstractMethod):
             receive = tx.get('category') == 'receive'
             return confirmed and valid_address and receive
 
-        return [tx for tx in txs if valid_tx(tx)]
+        return [self._format(tx) for tx in txs if valid_tx(tx)]

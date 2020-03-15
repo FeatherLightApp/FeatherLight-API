@@ -3,6 +3,7 @@ from .base_user import Base_User
 from .btc_address import GetBTCAddress
 from .invoices import GetUserInvoices
 from .balance import GetBalance
+from .onchain_txs import GetOnchainTxs
 from code.helpers.mixins import LoggerMixin
 
 #TODO create a deafult resolver/ schema directive to abstract away need for this class
@@ -19,11 +20,6 @@ class User(LoggerMixin):
     def _get_gateway(self, ctx):
         return Base_User(self.userid, ctx)
 
-    async def create(self, info):
-        method = CreateUser()
-        user = self._get_gateway(info.context)
-        return await user.execute(method)
-
     async def btc_address(self, info):
         method = GetBTCAddress()
         user = self._get_gateway(info.context)
@@ -35,7 +31,14 @@ class User(LoggerMixin):
         return await user.execute(method)
 
 
-    async def invoices(self, info, *, paid, start: int = 0, end: int = -1):
-        method = GetUserInvoices(only_paid, start, end)
+    async def invoices(self, info, *, paid: bool = False, start: int = 0, end: int = -1):
+        method = GetUserInvoices(only_paid = paid, start = start, end = end)
         user = self._get_gateway(info.context)
         return await user.execute(method)
+
+
+    async def deposits(self, info):
+        method = GetOnchainTxs(min_confirmations=3)
+        user = self._get_gateway(info.context)
+        return await user.execute(method)
+

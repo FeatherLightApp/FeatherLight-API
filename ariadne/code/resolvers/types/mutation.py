@@ -64,35 +64,24 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
 
 @MUTATION.field('addInvoice')
 # TODO add more flexiblilty in invoice creation
+# TODO invoiceFor allows creating invoices for other users on their behalf
 # FIXME doesnt work
-async def r_add_invoice(_, info, *, memo: str, amt: int, invoiceFor: Optional[str] = None) -> dict:
+async def r_add_invoice(user, info, *, memo: str, amt: int, invoiceFor: Optional[str] = None) -> dict:
     """Authenticated route"""
-    # determine if user allows remote invoice add
-    # if invoiceFor and invoiceFor != 
-    async def add_invoice(*args, user: Union[Error, User], memo: str, amt):
-        """
-        add invoice and associate user with hash in redis
-        stores json representation of rpc protobuf in redis array
-        """
-        # TODO add suport for more custom invoices
-        request = ln.Invoice(
-            memo=memo,
-            value=amt,
-            expiry=3600*24
-        )
-        response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
-        output = protobuf_to_dict(response)
-        output['r_hash'] = response.r_hash.hex()
-        #change the bytes object to hex string for json serialization
-        await self._redis.rpush(f"userinvoices_for_{self.userid}", json.dumps(output))
-        # add hex encoded bytes hash to redis
-        await self._redis.set(f"payment_hash_{output['r_hash']}", self.userid)
-        return output
+    request = ln.Invoice(
+        memo=memo,
+        value=amt,
+        expiry=3600*24
+    )
+    response = await make_async(self._lightning.AddInvoice.future(request, timeout=5000))
+    output = protobuf_to_dict(response)
+    output['r_hash'] = response.r_hash.hex()
+    #change the bytes object to hex string for json serialization
+    await self._redis.rpush(f"userinvoices_for_{self.userid}", json.dumps(output))
+    # add hex encoded bytes hash to redis
+    await self._redis.set(f"payment_hash_{output['r_hash']}", self.userid)
     # response is json protobuf with hex encoded bytes hash
-    if isinstance(user, User):
-        return await user.invoice_manager.add_invoice(memo, amt)
-    #return error for union type resolver
-    return user
+    return output
 
 
 @MUTATION.field('payInvoice')

@@ -14,13 +14,13 @@ class GetBalance(AbstractMethod):
         #asking for 0 invoices returns all invoices
         invoice_method = GetUserInvoices(only_paid=True)
         for paid_invoice in await user.execute(invoice_method):
-            balance += paid_invoice['amt']
+            balance += paid_invoice['amount']
 
         onchain_txfer_method = GetOnchainTxs(min_confirmations=3)
         for tx in await user.execute(onchain_txfer_method):
             # Valid onchain btc transactions sent to this user's address
             # Debit user's account balance
-            balance += tx['amount'] * 100000000 # convert btc amount to sats
+            balance += tx['amount']
                 
         offchain_txfer_method = GetOffchainTxs()
         for invoice in await user.execute(offchain_txfer_method):

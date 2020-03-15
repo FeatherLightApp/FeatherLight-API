@@ -8,6 +8,7 @@ type User {
     balance: Int!
     btcAddress: String!
     invoices: [Invoice]!
+    deposits: [Deposit]!
 }
 
 
@@ -22,32 +23,51 @@ type WalletBalance {
     unconfirmedBalance: Int!
 }
 
-
-
-union Invoice = LocalInvoice | RemoteInvoice
-
-type LocalInvoice {
-    destination: String
-    paymentHash: String
-    numSatoshis: Int
-    timestamp: Int
-    expiry: Int
-    description: String
-    fallbackAddress: String
-    cltvExpiry: Int
-    routeHints: [RouteHint]
-    paymentAddress: String
-    features: [FeaturesEntry]
+type Invoice {
+    amount: Int!
+    paid: Boolean!
+    expiry: Int!
+    timestamp: Int!
+    paymentRequest: String!
 }
 
-type RemoteInvoice {
-    error: String
-    preimage: String
-    route: Route
-    hash: String
-    decoded: LocalInvoice
-    payReq: String!
+type Deposit {
+    address: String!
+    amount: Int!
+    confirmations: Int!
+    blockhash: String!
+    blockindex: Int!
+    blocktime: Int!
+    txid: String!
+    time: Int!
+    timereceived: Int!
+    comment: String
 }
+
+# union Invoice = LocalInvoice | RemoteInvoice
+
+# type LocalInvoice {
+#     destination: String
+#     paymentHash: String
+#     numSatoshis: Int
+#     timestamp: Int
+#     expiry: Int
+#     description: String
+#     fallbackAddress: String
+#     cltvExpiry: Int
+#     routeHints: [RouteHint]
+#     paymentAddress: String
+#     features: [FeaturesEntry]
+# }
+
+# type RemoteInvoice {
+#     error: String
+#     preimage: String
+#     route: Route
+#     hash: String
+#     decoded: LocalInvoice
+#     payReq: String!
+# }
 
 type RouteHint {
     hopHints: [HopHint]

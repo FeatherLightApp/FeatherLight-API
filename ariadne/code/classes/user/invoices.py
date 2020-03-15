@@ -33,9 +33,9 @@ class GetUserInvoices(AbstractMethod):
             )
 
             # Determine if invoice has been paid via redis using hex encoded string of payment hash
-            invoice_json['ispaid'] = bool(await user.ctx.redis.get(f"is_paid_{invoice_json['r_hash']}"))
+            invoice_json['paid'] = bool(await user.ctx.redis.get(f"is_paid_{invoice_json['r_hash']}"))
 
-            if not invoice_json['ispaid']:
+            if not invoice_json['paid']:
                 # if not paid from redis check lnd to see if its paid in lnd db
                 # convert hex serialized payment hash to bytes
                 
@@ -43,16 +43,16 @@ class GetUserInvoices(AbstractMethod):
                 req = ln.PaymentHash(r_hash=bytes.fromhex(invoice_json['r_hash']))
                 lookup_info = await make_async(user.ctx.lnd.LookupInvoice.future(req, timeout=5000))
 
-                invoice_json['ispaid'] = lookup_info.state == 1
-                if invoice_json['ispaid']:
+                invoice_json['paid'] = lookup_info.state == 1
+                if invoice_json['paid']:
                     #invoice has actually been paid, cache this in redis
                     await user.ctx.redis.set(f"is_paid_{invoice_json['r_hash']}", 1)
                 
-            invoice_json['amt'] = decoded.num_satoshis
+            invoice_json['amount'] = decoded.num_satoshis
             invoice_json['expiry'] = decoded.expiry
             invoice_json['timestamp'] = decoded.timestamp
             invoice_json['kind'] = 'user_invoice'
 
             invoices.append(invoice_json)
         # if only paid is false return all results else return only settled ammounts
-        return [invoice for invoice in invoices if not self.only_paid or invoice.get('ispaid')]
+        return [invoice for invoice in invoices if not self.only_paid or invoice.get('paid')]
