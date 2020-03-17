@@ -4,15 +4,15 @@ type TokenPayload {
 }
 
 type AddInvoicePayload {
-    rHash: String!
+    rHash: Hex!
     paymentRequest: String!
     addIndex: Int!
 }
 
 type PayInvoicePayload {
-    ok: Boolean!
-    error: String
-    payment: Invoice
+    paymentError: String
+    paymentPreimage: Hex!
+    paymentHash: Hex!
 }
 
 type AddressPayload {
@@ -21,17 +21,6 @@ type AddressPayload {
     address: String
 }
 
-type BalancePayload {
-    ok: Boolean!
-    error: String
-    availableBalance: Int
-}
-
-type InvoicesPayload {
-    ok: Boolean!
-    error: String
-    invoices: [Invoice]!
-}
 
 type DecodeInvoicePayload {
     ok: Boolean!
@@ -46,15 +35,15 @@ type DecodeInvoicePayload {
     fallbackAddr: String
 }
 
-type CheckRouteInvoicePayload {
-    ok: Boolean!
-    error: String
-}
+# type CheckRouteInvoicePayload {
+#     ok: Boolean!
+#     error: String
+# }
 
-type PendingPayload {
-    ok: Boolean!
-    error: String
-}
+# type PendingPayload {
+#     ok: Boolean!
+#     error: String
+# }
 
 type InfoPayload {
     ok: Boolean!
@@ -77,14 +66,14 @@ type InfoPayload {
     #"features": <array FeaturesEntry>,
 }
 
-type TxsPayload {
-    ok: Boolean!
-    error: String
+# type TxsPayload {
+#     ok: Boolean!
+#     error: String
     
-}
+# }
 
-type GetPeersPayload {
-    ok: Boolean!
-    error: String
-    peerInfo: [PeerInfo]!
-}
+# type GetPeersPayload {
+#     ok: Boolean!
+#     error: String
+#     peerInfo: [PeerInfo]!
+# }

@@ -8,9 +8,9 @@ from code.classes.error import Error
 from code.helpers.mixins import LoggerMixin
 import inspect
 
-class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
+class AuthDirective(SchemaDirectiveVisitor):
 
-    def visit_field_definition(self, field, object_type=None):
+    def visit_field_definition(self, field, *_):
         #req_role = self.args.get('requires') TODO Implement roles later
         orig_resolver = field.resolve or default_field_resolver
 
@@ -30,4 +30,49 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                 return orig_resolver(new_obj, info, **kwargs)
         
         field.resolve = check_auth
+        return field
+
+
+class DatetimeDirective(SchemaDirectiveVisitor):
+
+    def visit_field_definition(self, field, *_):
+        orig_resolver = field.resolve or default_field_resolver
+        date_format = self.args.get('format') or self.args.get('defaultFormat')
+
+        def resolve_formatted_date(obj, info, **kwargs):
+            result = orig_resolver(obj, info, **kwargs)
+            if result is None:
+                return None
+
+            return result.strftime(date_format)
+        field.resolve = resolve_formatted_date
+        return field
+
+
+class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
+
+    
+    def visit_field_definition(self, field, *_):
+        orig_resolver = field.resolve or default_field_resolver
+        operations = self.args.get('operations')
+        seconds = self.args.get('seconds')
+        key = self.args.get('limitKey')
+
+        async def check_rate_limit(obj, info, **kwargs):
+            redis_key = f"{key}_{info.context.req.client.host}"
+            num_requests = await info.context.redis.get(redis_key)
+            if not num_requests or int(num_requests) < operations:
+                await info.context.redis.incr(redis_key)
+                if not num_requests:
+                    await info.context.redis.expire(redis_key, seconds)
+                
+                #resolve function
+                if iscoroutinefunction(orig_resolver):
+                    return await orig_resolver(obj, info, **kwargs)
+                else:
+                    return orig_resolver(obj, info, **kwargs)
+            
+            return Error('RateLimited', f"You have exceeded rate limit of {operations} requests per {seconds} seconds")
+            
+        field.resolve = check_rate_limit
         return field

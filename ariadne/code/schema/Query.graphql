@@ -1,14 +1,11 @@
 type Query {
     me: UserResponse! @auth
     walletBalance: WalletBalance! @auth(requires: ADMIN)# temp
-    peers: GetPeersPayload! @auth(requires: ADMIN) #@grpc
+    # peers: GetPeersPayload! @auth(requires: ADMIN) #@grpc
     BTCAddress: AddressPayload!
     #info: GetInfoPayload!
-    txs: TxsPayload! #move into user
-    invoices(last: Int): InvoicesPayload!
-    pending: PendingPayload!
-    decodeInvoice(invoice: String!): DecodeInvoicePayload!
-    checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
+    decodeInvoice(invoice: String!): DecodeInvoicePayload! @auth
+    # checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload! @auth(requires: ADMIN)
     genericRPC(command: String! params: String): String @auth(requires: ADMIN)# temp 
 }

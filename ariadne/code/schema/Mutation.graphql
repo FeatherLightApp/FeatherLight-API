@@ -1,8 +1,8 @@
 type Mutation {
-    createUser: UserResponse!
+    createUser: UserResponse! @limit(operations: 3 seconds: 86400)
     login(username: String! password: String!): UserResponse!
     refreshAccessToken: TokenResponse!
     addInvoice(memo: String! amt: Int!): AddInvoiceResponse! @auth
-    payInvoice(invoice: String! amt: Int): PayInvoicePayload!
+    payInvoice(invoice: String! amt: Int): PayInvoiceResponse! @auth
     forceUser(user: String!): UserResponse!
 }

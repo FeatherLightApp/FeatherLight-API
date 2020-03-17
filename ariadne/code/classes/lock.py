@@ -1,16 +1,19 @@
 """Class for locking Redis instance"""
 from datetime import datetime
+from code.helpers.mixins import LoggerMixin
 
-class Lock:
+class Lock(LoggerMixin):
     """Class for locking redis db"""
     def __init__(self, redis, lock_key):
+        super().__init__()
         self._redis = redis
         self._lock_key = lock_key
 
     async def obtain_lock(self):
         """obtain lock based on current time"""
-        utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
+        utc_seconds = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
         set_result = await self._redis.setnx(self._lock_key, utc_seconds)
+        self.logger.critical(f"set result {set_result}")
         # fail if value already exists
         if not set_result:
             return False

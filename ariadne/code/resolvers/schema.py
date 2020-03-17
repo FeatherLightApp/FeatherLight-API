@@ -5,7 +5,7 @@ from ariadne import (
     snake_case_fallback_resolvers
 )
 from .types import TYPES as resolvers
-from .directives import AuthDirective
+from .directives import AuthDirective, DatetimeDirective, RatelimitDirective
 
 TYPE_DEFS = load_schema_from_path('code/schema/')
 
@@ -14,6 +14,8 @@ SCHEMA = make_executable_schema(
     resolvers,
     snake_case_fallback_resolvers,
     directives={
-        'auth': AuthDirective
+        'auth': AuthDirective,
+        'data': DatetimeDirective,
+        'limit': RatelimitDirective
     }
 )

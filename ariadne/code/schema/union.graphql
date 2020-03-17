@@ -4,3 +4,5 @@ union UserResponse = User | Error
 union TokenResponse = TokenPayload | Error
 
 union AddInvoiceResponse = AddInvoicePayload | Error
+
+union PayInvoiceResponse = PayInvoicePayload | Error

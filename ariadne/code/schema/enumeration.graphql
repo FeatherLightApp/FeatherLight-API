@@ -1,6 +1,8 @@
 """Possible types of errors"""
 enum ErrorType {
     AuthenticationError
+    PaymentError
+    RateLimited
 }
 
 enum Permission {

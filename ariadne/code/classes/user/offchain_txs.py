@@ -16,7 +16,7 @@ class GetOffchainTxs(AbstractMethod):
         Return offchain invoices that were paid by this user and stored in redis via save_paid_invoice
         """
         result = []
-        ranges = await user.ctx.redis.lrange('paid_invoices_for_' + user.userid, self.start, self.end)
+        ranges = await user.ctx.redis.lrange(f"paid_invoices_for_{user.userid}", self.start, self.end)
         #item is a byte encoded json representation of processSendPaymentResponse
         for item in ranges:
             invoice = json.loads(item.decode('utf-8'))
@@ -37,17 +37,13 @@ class GetOffchainTxs(AbstractMethod):
                 invoice['fee'] = 0
 
             if invoice.get('decoded'):
-                invoice['timestamp'] = invoice['decoded']['timestamp']
-                invoice['memo'] = invoice['decoded']['description']
+                invoice['timestamp'] = invoice['decoded'].get('timestamp')
+                invoice['memo'] = invoice['decoded'].get('description')
 
-            # TODO ensure invoice is processed in processSendPaymentReponse and payment_preimage is encoded to hex when saved
-            # if invoice['payment_preimage']:
-            #     invoice['payment_preimage'] = ast.literal_eval(invoice['payment_preimage']).
-
-            del invoice['payment_error']
-            del invoice['payment_route']
-            del invoice['pay_req']
-            del invoice['decoded']
+            # del invoice['payment_error']
+            # del invoice['payment_route']
+            # del invoice['pay_req']
+            # del invoice['decoded']
             self.logger.warning(f"Appending paid invoice {invoice}")
             result.append(invoice)
 

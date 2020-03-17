@@ -4,8 +4,9 @@ from .invoices import GetUserInvoices
 from .onchain_txs import GetOnchainTxs
 from .offchain_txs import GetOffchainTxs
 from .locked_payments import GetLockedPayments
+from code.helpers.mixins import LoggerMixin
 
-class GetBalance(AbstractMethod):
+class GetBalance(AbstractMethod, LoggerMixin):
     """method to get the calculated balance for the user"""
 
     async def run(self, user):
@@ -24,6 +25,7 @@ class GetBalance(AbstractMethod):
                 
         offchain_txfer_method = GetOffchainTxs()
         for invoice in await user.execute(offchain_txfer_method):
+            self.logger.critical(invoice)
             # for each dict in list of invoices paid by this user
             # Credit user's account balance
             balance -= invoice['value']

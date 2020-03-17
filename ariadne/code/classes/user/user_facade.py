@@ -4,6 +4,8 @@ from .btc_address import GetBTCAddress
 from .invoices import GetUserInvoices
 from .balance import GetBalance
 from .onchain_txs import GetOnchainTxs
+from .lock_funds import LockFunds
+from .unlock_funds import UnlockFunds
 from code.helpers.mixins import LoggerMixin
 
 #TODO create a deafult resolver/ schema directive to abstract away need for this class
@@ -42,3 +44,14 @@ class User(LoggerMixin):
         user = self._get_gateway(info.context)
         return await user.execute(method)
 
+
+    async def lock_funds(self, info, pay_req, invoice):
+        method = LockFunds(pay_req, invoice)
+        user = self._get_gateway(info.context)
+        return await user.execute(method)
+
+
+    async def unlock_funds(self, info, pay_req):
+        method = UnlockFunds(pay_req)
+        user = self._get_gateway(info.context)
+        return await user.execute(method)

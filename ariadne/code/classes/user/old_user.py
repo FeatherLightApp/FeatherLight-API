@@ -133,33 +133,9 @@ class User(LoggerMixin):
 
 
     async def lock_funds(self, pay_req, decoded_invoice):
-        """
-        Adds invoice to a list of user's locked payments.
-        Used to calculate balance till the lock is lifted
-        (payment is in determined state - success or fail)
-        """
-        assert self.userid
-        utc_seconds = (datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()
-        doc = {
-            'pay_req': pay_req,
-            'amount': decoded_invoice.num_satoshis,
-            'timestamp': utc_seconds
-        }
-        return self.ctx.redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
+
 
 
     async def unlock_funds(self, pay_req):
-        """
-        Strips specific payreq from the list of locked payments
-        """
-        assert self.userid
-        payments = await self.get_locked_payments()
-        save_back = []
-        for paym in payments:
-            if paym.pay_req != pay_req:
-                save_back.append(paym)
 
-        await self.ctx.redis.delete('locked_payments_for_' + self.userid)
-        for doc in save_back:
-            await self.ctx.redis.rpush('locked_payments_for_' + self.userid, json.dumps(doc))
 
