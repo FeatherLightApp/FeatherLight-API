@@ -3,25 +3,6 @@ type TokenPayload {
     refreshToken: String!
 }
 
-type AddInvoicePayload {
-    rHash: Hex!
-    paymentRequest: String!
-    addIndex: Int!
-}
-
-type PayInvoicePayload {
-    paymentError: String
-    paymentPreimage: Hex!
-    paymentHash: Hex!
-}
-
-type AddressPayload {
-    ok: Boolean!
-    error: String
-    address: String
-}
-
-
 type DecodeInvoicePayload {
     ok: Boolean!
     error: String

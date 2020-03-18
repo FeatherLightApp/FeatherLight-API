@@ -6,6 +6,7 @@ from .union import UNION
 from .subscription import subs
 from .token_payload import TOKEN_PAYLOAD
 from .user import USER 
+from .scalar import SCALAR
 # from .localinvoice import (
 #     local_invoice,
 #     route_hint,
@@ -20,6 +21,7 @@ from .user import USER
 
 TYPES = [
     *UNION,
+    *SCALAR,
     QUERY,
     MUTATION,
     TOKEN_PAYLOAD,

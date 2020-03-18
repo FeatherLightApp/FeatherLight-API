@@ -5,4 +5,6 @@ union TokenResponse = TokenPayload | Error
 
 union AddInvoiceResponse = AddInvoicePayload | Error
 
-union PayInvoiceResponse = PayInvoicePayload | Error
+union PayInvoiceResponse = Invoice | Error
+
+union Invoice = LocalInvoice | RemoteInvoice

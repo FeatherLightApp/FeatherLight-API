@@ -1,8 +1,9 @@
 """File to define method for retriving offchain txs"""
 import json
 from .abstract_user_method import AbstractMethod
+from code.helpers.mixins import LoggerMixin
 
-class GetOffchainTxs(AbstractMethod):
+class GetOffchainTxs(AbstractMethod, LoggerMixin):
     """Method for retrieving offchain txs of a user"""
 
     def __init__(self, start: int = 0, end: int = -1):
@@ -21,30 +22,10 @@ class GetOffchainTxs(AbstractMethod):
         for item in ranges:
             invoice = json.loads(item.decode('utf-8'))
 
-            if invoice.get('payment_route'):
-                invoice['fee'] = int(invoice['payment_route']['total_fees'])
-                invoice['value'] = int(invoice['payment_route']['total_fees']) \
-                    + invoice['payment_route']['total_amt']
-                # check if invoice had mSats
-                if (invoice['payment_route'].get('total_amt_msat') and \
-                    invoice['payment_route']['total_amt_msat'] / 1000 != int(invoice['payment_route']['total_amt'])
-                ):
-                    # account for mSats
-                    # value is fees plus max of either value plus one to account for extra sat
-                    invoice['value'] = invoice['payment_route']['total_fees'] \
-                        + max(int(invoice['payment_route']['total_amt_msat'] / 1000), int(invoice['payment_route']['total_amt'])) + 1
-            else:
-                invoice['fee'] = 0
-
-            if invoice.get('decoded'):
-                invoice['timestamp'] = invoice['decoded'].get('timestamp')
-                invoice['memo'] = invoice['decoded'].get('description')
-
-            # del invoice['payment_error']
-            # del invoice['payment_route']
-            # del invoice['pay_req']
-            # del invoice['decoded']
-            self.logger.warning(f"Appending paid invoice {invoice}")
+            invoice.pop('payment_error', None)
+            invoice.pop('payment_route', None)
+            invoice.pop('pay_req', None)
             result.append(invoice)
 
+        self.logger.info(result)
         return result

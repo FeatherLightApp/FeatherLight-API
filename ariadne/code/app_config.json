@@ -9,7 +9,7 @@
         "host": "redis://redis"
     },
     "lnd": {
-        "grpc": "lnd:10009",
+        "host": "lnd:10009",
         "password": ""
     },
     "network": "testnet"

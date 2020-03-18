@@ -25,8 +25,11 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 ### TODOs
 
 - ~~fix zmqpubhashblock port binding~~
+- restructure context object
+- create 'invoice' class for handling payments
+- add support for lnurl
 - add hold invoices
-- restructure schema
+- ~~restructure schema~~
 - write subscriptions
 - consolidate configs into global config
 - mypy type checking
@@ -35,4 +38,4 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - switch to argon2 cffi password hashing
 - restructure code directory
 - create simple frontend for api
-- create python package wrapper to call api from other python projects
+- create python package wrapper to call api from other projects

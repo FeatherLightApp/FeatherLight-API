@@ -7,7 +7,7 @@ type User {
     tokens: TokenPayload!
     balance: Int!
     btcAddress: String!
-    invoices: [Invoice]!
+    invoices(paid: Boolean start: Int end: Int): [Invoice]!
     deposits: [Deposit]!
 }
 
@@ -25,10 +25,14 @@ type WalletBalance {
 
 type Invoice {
     amount: Int!
+    fee: Int
+    value: Int
     paid: Boolean!
-    expiry: Int!
-    timestamp: Int!
+    expiry: Datetime! @date
+    timestamp: Datetime! @date
     paymentRequest: String!
+    rHash: Hex!
+    memo: String
 }
 
 type Deposit {

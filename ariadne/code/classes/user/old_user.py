@@ -53,7 +53,7 @@ class User(LoggerMixin):
         invoice can either 
         """
         assert self.userid
-        return await self.ctx.redis.rpush('paid_invoices_for' + self.userid, json.dumps(doc))
+        
 
 
 
