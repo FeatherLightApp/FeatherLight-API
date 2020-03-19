@@ -6,7 +6,6 @@ from datetime import (
     datetime,
     timedelta
 )
-import aioredis
 from protobuf_to_dict import protobuf_to_dict
 from ariadne import MutationType
 from classes.user import User

@@ -1,4 +1,7 @@
 ariadne
+databases
+orm
+sqlalchemy
 httpx
 mypy
 requests
