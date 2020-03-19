@@ -3,8 +3,6 @@ union UserResponse = User | Error
 
 union TokenResponse = TokenPayload | Error
 
-union AddInvoiceResponse = AddInvoicePayload | Error
+union AddInvoiceResponse = UserInvoice | Error
 
-union PayInvoiceResponse = Invoice | Error
-
-union Invoice = LocalInvoice | RemoteInvoice
+union PayInvoiceResponse = PaidInvoice | Error

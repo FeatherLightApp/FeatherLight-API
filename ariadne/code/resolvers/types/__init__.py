@@ -7,21 +7,12 @@ from .subscription import subs
 from .token_payload import TOKEN_PAYLOAD
 from .user import USER 
 from .scalar import SCALAR
-# from .localinvoice import (
-#     local_invoice,
-#     route_hint,
-#     hop_hint,
-#     features_entry,
-#     feature
-# )
-# from .remoteinvoice import (
-#     remote_invoice
-#     # TODO Route type
-# )
+from .interface import INTERFACE
 
 TYPES = [
     *UNION,
     *SCALAR,
+    *INTERFACE,
     QUERY,
     MUTATION,
     TOKEN_PAYLOAD,

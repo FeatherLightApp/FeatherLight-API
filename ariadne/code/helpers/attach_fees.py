@@ -1,9 +1,10 @@
-"""Module for adding routing fees to a remote invoice response"""
+"""Module for adding routing fees to a remote invoice response
+DEPRECATED Remove this file in the futuremax 
+"""
 
 def attach_fees(invoice):
 
     if invoice.get('payment_route'):
-        invoice['amount'] = int(invoice['payment_route']['total_amt'])
         invoice['fee'] = int(invoice['payment_route']['total_fees'])
         invoice['value'] = int(invoice['payment_route']['total_fees']) \
             + invoice['payment_route']['total_amt']

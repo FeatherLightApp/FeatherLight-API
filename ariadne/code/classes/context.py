@@ -131,4 +131,4 @@ class RedisConnection(LoggerMixin):
         self.conn = await aioredis.create_redis_pool(self._host)
 
 
-REDIS = RedisConnection(_config['redis']['host'])
+REDIS = RedisConnection(_config['redis']['host'], None, None)

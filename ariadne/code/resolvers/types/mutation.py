@@ -91,13 +91,14 @@ async def r_add_invoice(user: User, info, *, memo: str, amt: int, invoiceFor: Op
     pay_req_string = ln.PayReqString(pay_req=response.payment_request)
     decoded_invoice = await make_async(LND.stub.DecodePayReq.future(pay_req_string, timeout=5000))
     return {
+        #payment_preimage is resolved in invoice_resolver
         'amount': decoded_invoice.num_satoshis,
         'memo': decoded_invoice.description,
-        'r_hash': decoded_invoice.payment_hash,
+        'payment_hash': decoded_invoice.payment_hash,
         'paid': False,
         'expiry': decoded_invoice.expiry,
         'timestamp': decoded_invoice.timestamp,
-        'payment_request': response.payment_request
+        'payment_request': response.payment_request,
     }
 
 
@@ -119,17 +120,20 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
     real_amount = decoded_invoice.num_satoshis if decoded_invoice.num_satoshis > 0 else amt
     decoded_invoice.num_satoshis = real_amount
     _mutation_logger.logger.info(f"paying invoice user:{user.userid} with balance {user_balance}, for {real_amount}")
+    
     if not real_amount:
         _mutation_logger.logger.warning(f"Invalid amount when paying invoice for user {user.userid}")
+        await lock.release_lock()
         return Error(error_type='PaymentError', message='Invalid invoice amount')
     # check if user has enough balance including possible fees
     if not user_balance >= real_amount + floor(real_amount * 0.01):
+        await lock.release_lock()
         return Error('PaymentError', 'Not enough balance to pay invoice')
 
     # determine destination of funds
     if LND.id_pubkey == decoded_invoice.destination:
         # this is internal invoice now, receiver add balance
-        _mutation_logger.logger.(decoded_invoice.payment_hash)
+        _mutation_logger.logger.info(decoded_invoice.payment_hash)
         
         if not (userid_payee := await info.context.redis.get(f"payment_hash_{decoded_invoice.payment_hash}")):
             await lock.release_lock()
@@ -140,14 +144,13 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
             _mutation_logger.logger.warning('Attempted to pay invoice that was already paid')
             return Error('PaymentError', 'Invoice has already been paid')
 
-        get_invoice_req = ln.PaymentHash(r_hash=decoded_invoice.payment_hash)
-        if not (full_invoice := await make_async(LND.stub.LookupInvoice.future(get_invoice_req, timeout=5000))):
-            return Error('PaymentError', 'Invoice details could not be retrieved')
 
         # initialize internal user payee
         payee = User(userid_payee)
 
         doc_to_save = {
+            #paid is implied by storage key
+            #payment_preimage is resolved in invoice_resolver
             'amount': real_amount,
             'value': real_amount + floor(real_amount * 0.003),
             'fee': floor(real_amount * 0.003),
@@ -155,7 +158,6 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
             'timestamp': decoded_invoice.timestamp,
             'memo': decoded_invoice.description,
             'type': 'local_invoice',
-            'payment_preimage': full_invoice.r_preimage,
             'payment_hash': decoded_invoice.payment_hash
         }
 
@@ -173,13 +175,14 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
 
     else:
         # this is a standard lightning network payment
+        fee_limit = floor(real_amount * 0.005) + 1
 
         def req_gen():
             # define a request generator that yields a single payment request
             yield ln.SendRequest(
                 payment_request=invoice,
                 amt=real_amount, # amount is only used for tip invoices,
-                fee_limit=ln.FeeLimit(fixed=floor(real_amount * 0.005) + 1)
+                fee_limit=ln.FeeLimit(fixed=fee_limit)
             )
 
         await user.lock_funds(info, invoice, decoded_invoice)
@@ -193,12 +196,11 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
                 pay_dict['pay_req'] = invoice
                 pay_dict['timestamp'] = decoded_invoice.timestamp
                 pay_dict['memo'] = decoded_invoice.description
+                pay_dict['amount'] = decoded_invoice.num_satoshis
+                pay_dict['fee'] = max(fee_limit, pay_res.payment_route.total_fees)
+                pay_dict['value'] = pay_dict['amount'] + pay_dict['fee']
                 pay_dict['type'] = 'remote_invoice'
-                #attaches:
-                #amount
-                #value
-                #fee
-                pay_dict = attach_fees(pay_dict)
+                pay_dict.pop('payment_error', None)
                 pay_json = json.dumps(pay_dict, cls=HexEncoder)
                 _mutation_logger.logger.info(pay_json)
 

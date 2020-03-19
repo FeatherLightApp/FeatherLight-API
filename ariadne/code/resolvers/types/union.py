@@ -15,24 +15,32 @@ def r_token_response(obj, *_) -> str:
 _USER_RESPONSE = UnionType('UserResponse')
 
 @_USER_RESPONSE.type_resolver
-def r_user_response(obj, info, resolve_type):
+def r_user_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
     if isinstance(obj, User):
         return 'User'
         
 
-_INVOICE_RESPONSE = UnionType('AddInvoiceResponse')
+_add_invoice_response = UnionType('AddInvoiceResponse')
+_pay_invoice_response = UnionType('PayInvoiceResponse')
 
-@_INVOICE_RESPONSE.type_resolver
-def r_add_invoice_response(obj, *_):
+
+@_add_invoice_response.type_resolver
+@_pay_invoice_response.type_resolver
+def r_add_invoice_response(obj, info, resolve_type):
+    info.context.logger.critical(resolve_type)
     if isinstance(obj, Error):
         return 'Error'
-    if getattr(obj, 'r_hash', None):
-        return 'AddInvoicePayload'
+    if getattr(obj, 'payment_hash', None) or obj.get('payment_hash'):
+        if str(resolve_type) == 'PayInvoiceResponse':
+            return 'PaidInvoice'
+        if str(resolve_type) == 'AddInvoiceResponse':
+            return 'UserInvoice'
 
 UNION = [
     _TOKEN_RESPONSE,
     _USER_RESPONSE,
-    _INVOICE_RESPONSE
+    _add_invoice_response,
+    _pay_invoice_response
 ]

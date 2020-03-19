@@ -4,6 +4,7 @@ from .btc_address import GetBTCAddress
 from .invoices import GetUserInvoices
 from .balance import GetBalance
 from .onchain_txs import GetOnchainTxs
+from .offchain_txs import GetOffchainTxs
 from .lock_funds import LockFunds
 from .unlock_funds import UnlockFunds
 from code.helpers.mixins import LoggerMixin
@@ -35,6 +36,12 @@ class User(LoggerMixin):
 
     async def invoices(self, info, *, paid: bool = False, start: int = 0, end: int = -1):
         method = GetUserInvoices(only_paid = paid, start = start, end = end)
+        user = self._get_gateway(info.context)
+        return await user.execute(method)
+
+
+    async def payments(self, info, start: int = 0, end: int = -1):
+        method = GetOffchainTxs()
         user = self._get_gateway(info.context)
         return await user.execute(method)
 

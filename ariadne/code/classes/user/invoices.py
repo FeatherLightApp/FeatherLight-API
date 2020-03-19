@@ -52,7 +52,10 @@ class GetUserInvoices(AbstractMethod):
             invoice_json['expiry'] = decoded.expiry
             invoice_json['timestamp'] = decoded.timestamp
             invoice_json['kind'] = 'user_invoice'
-
+            invoice_json['memo'] = decoded.description
+            # TODO find fix for this
+            invoice_json['payment_hash'] = invoice_json['r_hash']
+            
             invoices.append(invoice_json)
         # if only paid is false return all results else return only settled ammounts
         return [invoice for invoice in invoices if not self.only_paid or invoice.get('paid')]

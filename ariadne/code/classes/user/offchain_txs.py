@@ -22,9 +22,9 @@ class GetOffchainTxs(AbstractMethod, LoggerMixin):
         for item in ranges:
             invoice = json.loads(item.decode('utf-8'))
 
+            invoice['paid'] = True
             invoice.pop('payment_error', None)
             invoice.pop('payment_route', None)
-            invoice.pop('pay_req', None)
             result.append(invoice)
 
         self.logger.info(result)
