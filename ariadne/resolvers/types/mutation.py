@@ -11,14 +11,13 @@ from protobuf_to_dict import protobuf_to_dict
 from ariadne import MutationType
 from classes.user import User
 from classes.lock import Lock
-from classes.paym import Paym
 from classes.error import Error
 from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 from helpers.crypto import decode, hash_string
 from helpers.hexify import HexEncoder
 from helpers.attach_fees import attach_fees
-from context import LND
+from context import LND, REDIS
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
@@ -36,14 +35,14 @@ async def r_create_user(_: None, info) -> User:
 
     user.password = token_hex(10)
 
-    await info.context.redis.set(f'user_{user.username}_{hash_string(user.password)}', user.userid)
+    await REDIS.conn.set(f'user_{user.username}_{hash_string(user.password)}', user.userid)
 
     return user
 
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if (userid := await info.context.redis.get('user_' + username + '_' + hash_string(password))):
+    if (userid := await REDIS.conn.get('user_' + username + '_' + hash_string(password))):
         #pass to union resolver TODO FIXME
         return User(userid.decode('utf-8'))
     return Error(error_type='AuthenticationError', message='Invalid Credentials')
@@ -83,10 +82,10 @@ async def r_add_invoice(user: User, info, *, memo: str, amt: int, invoiceFor: Op
     response = await make_async(LND.stub.AddInvoice.future(request, timeout=5000))
     output = protobuf_to_dict(response)
     #change the bytes object to hex string for json serialization
-    await info.context.redis.rpush(f"userinvoices_for_{user.userid}", json.dumps(output, cls=HexEncoder))
+    await REDIS.conn.rpush(f"userinvoices_for_{user.userid}", json.dumps(output, cls=HexEncoder))
     # add hex encoded bytes hash to redis
     _mutation_logger.logger.critical(f"setting key: payment_hash_{output['r_hash']} to {user.userid}")
-    await info.context.redis.set(f"payment_hash_{output['r_hash'].hex()}", user.userid)
+    await REDIS.conn.set(f"payment_hash_{output['r_hash'].hex()}", user.userid)
     # decode response and return GraphQL invoice type
     pay_req_string = ln.PayReqString(pay_req=response.payment_request)
     decoded_invoice = await make_async(LND.stub.DecodePayReq.future(pay_req_string, timeout=5000))
@@ -108,7 +107,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
     assert not amt or amt >= 0
     # obtain a db lock
     lock = Lock(
-        info.context.redis,
+        REDIS.conn,
         'invoice_paying_for_' + user.userid
     )
     if not await lock.obtain_lock():
@@ -135,10 +134,10 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
         # this is internal invoice now, receiver add balance
         _mutation_logger.logger.info(decoded_invoice.payment_hash)
         
-        if not (userid_payee := await info.context.redis.get(f"payment_hash_{decoded_invoice.payment_hash}")):
+        if not (userid_payee := await REDIS.conn.get(f"payment_hash_{decoded_invoice.payment_hash}")):
             await lock.release_lock()
             return Error('PaymentError', 'Could not get user by payment hash')
-        if await info.context.redis.get(f"is_paid_{decoded_invoice.payment_hash}"):
+        if await REDIS.conn.get(f"is_paid_{decoded_invoice.payment_hash}"):
             # invoice has already been paid
             await lock.release_lock()
             _mutation_logger.logger.warning('Attempted to pay invoice that was already paid')
@@ -162,11 +161,11 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
         }
 
         # sender spent his balance
-        await info.context.redis.rpush(
+        await REDIS.conn.rpush(
             f"paid_invoices_for_{user.userid}",
             json.dumps(doc_to_save, cls=HexEncoder)
         )
-        await info.context.redis.set(f"is_paid_{decoded_invoice.payment_hash}", 1)
+        await REDIS.conn.set(f"is_paid_{decoded_invoice.payment_hash}", 1)
         await lock.release_lock()
         return doc_to_save
 
@@ -201,7 +200,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
                 pay_json = json.dumps(pay_dict, cls=HexEncoder)
                 _mutation_logger.logger.info(pay_json)
 
-                await info.context.redis.rpush(f"paid_invoices_for_{user.userid}", pay_json)
+                await REDIS.conn.rpush(f"paid_invoices_for_{user.userid}", pay_json)
                 await lock.release_lock()
                 return pay_dict
             else:
