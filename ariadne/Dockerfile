@@ -28,23 +28,17 @@ FROM base as build-image
 
 WORKDIR /app
 
-COPY --from=compile-image /temp/env /app/env
+COPY --from=compile-image /temp/env /env
 
-ENV PATH="/app/env/bin:$PATH"
+ENV PATH="/env/bin:$PATH"
 
 COPY rpc.proto .
 
-WORKDIR /app/googleapis
-
-COPY googleapis ./
-
-WORKDIR /app
+COPY googleapis ./googleapis
 
 RUN ls -a /app
 
 RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
-
-ADD code/app.py .
 
 EXPOSE 5000
 

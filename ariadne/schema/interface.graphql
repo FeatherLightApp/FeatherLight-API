@@ -1,0 +1,34 @@
+interface Invoice {
+    amount: Int!
+    expiry: Datetime! @date
+    timestamp: Datetime! @date
+    paymentRequest: String!
+    paymentHash: Hex!
+    paymentPreimage: Hex!
+    memo: String
+}
+
+
+type UserInvoice implements Invoice {
+    amount: Int!
+    paid: Boolean!
+    expiry: Datetime! @date
+    timestamp: Datetime! @date
+    paymentRequest: String!
+    paymentHash: Hex!
+    paymentPreimage: Hex!
+    memo: String 
+}
+
+
+type PaidInvoice implements Invoice {
+    amount: Int!
+    fee: Int!
+    value: Int!
+    expiry: Datetime! @date
+    timestamp: Datetime! @date
+    paymentRequest: String!
+    paymentHash: Hex!
+    paymentPreimage: Hex!
+    memo: String
+}
