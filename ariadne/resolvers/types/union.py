@@ -37,6 +37,14 @@ def r_add_invoice_response(obj, info, resolve_type):
         if str(resolve_type) == 'AddInvoiceResponse':
             return 'UserInvoice'
 
+
+_wallet_response = UnionType('WalletResponse')
+def r_wallet_response(obj *_):
+    if isinstance(obj, Error):
+        return 'Error'
+    return 'WalletBalance'
+
+
 UNION = [
     _TOKEN_RESPONSE,
     _USER_RESPONSE,

@@ -6,3 +6,5 @@ union TokenResponse = TokenPayload | Error
 union AddInvoiceResponse = UserInvoice | Error
 
 union PayInvoiceResponse = PaidInvoice | Error
+
+union WalletResponse = WalletBalance | Error

@@ -16,7 +16,9 @@ from helpers.mixins import LoggerMixin
 from helpers.crypto import decode, hash_string
 from helpers.hexify import HexEncoder
 from helpers.attach_fees import attach_fees
-from context import LND, REDIS
+from context import LND, REDIS, ARGON
+from argon2.exceptions import VerificationError
+import models
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
@@ -41,10 +43,20 @@ async def r_create_user(_: None, info) -> User:
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if (userid := await REDIS.conn.get('user_' + username + '_' + hash_string(password))):
-        #pass to union resolver TODO FIXME
-        return User(userid.decode('utf-8'))
-    return Error(error_type='AuthenticationError', message='Invalid Credentials')
+    if not (user_obj := await models.user.objects.get(useranme=username)):
+        return Error('Authentication Error', 'User not found')
+    #verify pw hash
+    try:
+        ARGON.verify(user_obj.password,  password)
+    except VerificationError:
+        return Error('AuthenticationError', 'Incorrect password')
+
+    if ARGON.check_needs_rehash(user_obj.password):
+        await user_obj.update(password=ARGON.hash(password))
+    pass #TODO finish this
+
+    
+
 
 #TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')

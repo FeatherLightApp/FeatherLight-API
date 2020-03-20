@@ -15,3 +15,5 @@ jsonrpc-async
 grpcio
 grpcio-tools
 googleapis-common-protos
+argon2-cffi
+
