@@ -1,5 +1,5 @@
 ariadne
-databases
+databases[sqlite]
 orm
 sqlalchemy
 httpx
