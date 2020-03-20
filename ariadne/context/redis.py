@@ -1,5 +1,6 @@
 import os
 import aioredis
+from helpers.mixins import LoggerMixin
 
 class RedisConnection(LoggerMixin):
 
