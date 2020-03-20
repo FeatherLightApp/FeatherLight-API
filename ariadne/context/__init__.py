@@ -1,4 +1,10 @@
+import json
 from .lightning import LightningStub
 from .bitcoin import BitcoinClient
 from .redis import RedisConnection
-from .database import 
+from .database import DBConnection
+
+REDIS = RedisConnection()
+LND = LightningStub()
+BITCOIND = BitcoinClient()
+DB = DBConnection()
