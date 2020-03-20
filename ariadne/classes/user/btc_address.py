@@ -21,7 +21,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         assert user.userid
         if not (address := await REDIS.conn.get('bitcoin_address_for_' + user.userid)):
             request = ln.NewAddressRequest(type=0)
-            response = await make_async(LND.NewAddress.future(request, timeout=5000))
+            response = await make_async(LND.stub.NewAddress.future(request, timeout=5000))
             address = response.address
             await REDIS.conn.set('bitcoin_address_for_' + user.userid, address)
             self.logger.info(f"Created address: {address} for user: {user.userid}")

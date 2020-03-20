@@ -30,7 +30,7 @@ class GetUserInvoices(AbstractMethod):
 
             req = ln.PayReqString(pay_req=invoice_json.get('payment_request'))
             decoded = await make_async(
-                    LND.DecodePayReq.future(req, timeout=5000)
+                    LND.stub.DecodePayReq.future(req, timeout=5000)
             )
 
             # Determine if invoice has been paid via redis using hex encoded string of payment hash
@@ -42,7 +42,7 @@ class GetUserInvoices(AbstractMethod):
                 
 
                 req = ln.PaymentHash(r_hash=bytes.fromhex(invoice_json['r_hash']))
-                lookup_info = await make_async(LND.LookupInvoice.future(req, timeout=5000))
+                lookup_info = await make_async(LND.stub.LookupInvoice.future(req, timeout=5000))
 
                 invoice_json['paid'] = lookup_info.state == 1
                 if invoice_json['paid']:
