@@ -8,12 +8,8 @@ services:
             # - shared:/rpc
             - /mnt/volume_tor1_01/bitcoin:/data
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
-        environment:
-            - RPCUSER=devuser
-            - RPCPASS=devpass
-            - NETWORK=testnet
-            - DEBUG=rpc
-            - MINING_ADDRESS
+        env_file: 
+            - global.env
     
     lnd:
         image: lnd
@@ -24,12 +20,8 @@ services:
             - /mnt/volume_tor1_01/lnd:/root/.lnd
             - /mnt/volume_tor1_01/bitcoin:/bitcoindata
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
-        environment: 
-            - RPCUSER=devuser
-            - RPCPASS=devpass
-            - NETWORK=testnet
-            - CHAIN=bitcoin
-            - DEBUG=debug
+        env_file: 
+            - global.env
         depends_on: 
             - btcd
 
@@ -45,12 +37,16 @@ services:
         depends_on: 
             - lnd
             - redis
+        env_file: 
+            - global.env
 
     redis:
         image: redis:alpine
         volumes: 
             - /mnt/volume_tor1_01/redis:/data
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+        env_file: 
+            - global.env
 
 #
 # volumes:
