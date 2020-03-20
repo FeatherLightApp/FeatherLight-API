@@ -15,20 +15,21 @@ import rpc_pb2_grpc as lnrpc
 from classes.user import User
 from classes.error import Error
 from helpers.async_future import make_async
+from context import LND, BITCOIND
 
 
 QUERY = QueryType()
 
 @QUERY.field('walletBalance')
 async def r_walllet_balance(_: None, info) -> dict:
-    return await make_async(info.context.lnd.WalletBalance.future(ln.WalletBalanceRequest()))
+    return await make_async(LND.stub.WalletBalance.future(ln.WalletBalanceRequest()))
 
 
 @QUERY.field('info')
 #@authenticate
 async def r_info(_: None, info) -> dict:
     request = ln.GetInfoRequest()
-    response = await make_async(info.context.lnd.GetInfo.future(request, timeout=5000))
+    response = await make_async(LND.stub.GetInfo.future(request, timeout=5000))
     d = protobuf_to_dict(response)
     if 'chains' in d:
         del d['chains']
@@ -77,7 +78,7 @@ async def r_info(_: None, info) -> dict:
 #@authenticate
 async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
     request = ln.PayReqString(pay_req=invoice)
-    res = await make_async(info.context.lnd.DecodePayReq.future(request, timeout=5000))
+    res = await make_async(LND.stub.DecodePayReq.future(request, timeout=5000))
     return {
         'ok': True,
         **protobuf_to_dict(res)
@@ -96,7 +97,7 @@ async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
 @QUERY.field('genericRPC')
 async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
     param_dict = None if not params else ast.literal_eval(params)
-    res = await info.context.bitcoind.req(command, params=param_dict)
+    res = await BITCOIND.req(command, params=param_dict)
     return json.dumps(res)  
 
 # @query.field('checkRouteInvoice')

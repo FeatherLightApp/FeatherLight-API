@@ -55,7 +55,7 @@ def r_force_user(_, info, user: str) -> str:
 @MUTATION.field('refreshAccessToken')
 async def r_get_token(_: None, info) -> Union[User, Error]:
     # catch scenario of no refresh cookie
-    if not (cookie := info.context.req.cookies.get('refresh')):
+    if not (cookie := info.context['request'].cookies.get('refresh')):
         return Error(error_type='AuthenticationError', message='No refresh token sent')
     decode_response: Union[Dict, Error] = decode(token=cookie, kind='refresh')
     # pass either error or user instance to union resolver

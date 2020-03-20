@@ -17,7 +17,7 @@ class AuthDirective(SchemaDirectiveVisitor):
 
         #define wrapper
         async def check_auth(obj, info, **kwargs):
-            if not (auth_header := info.context.req.headers.get('Authorization')):
+            if not (auth_header := info.context['request'].headers.get('Authorization')):
                 return Error('AuthenticationError', 'No access token sent. You are not logged in')
             decode_response: Union[Dict, Error] = decode(auth_header.replace('Bearer ', ''), kind='access')
             # if decode fails return the error
@@ -62,7 +62,7 @@ class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
         key = self.args.get('limitKey')
 
         async def check_rate_limit(obj, info, **kwargs):
-            redis_key = f"{key}_{info.context.req.client.host}"
+            redis_key = f"{key}_{info.context['request'].client.host}"
             num_requests = await REDIS.conn.get(redis_key)
             if not num_requests or int(num_requests) < operations:
                 await REDIS.conn.incr(redis_key)
