@@ -5,7 +5,6 @@ from .mutation import MUTATION
 from .union import UNION
 from .subscription import subs
 from .token_payload import TOKEN_PAYLOAD
-from .user import USER 
 from .scalar import SCALAR
 from .interface import INTERFACE
 
@@ -16,7 +15,6 @@ TYPES = [
     QUERY,
     MUTATION,
     TOKEN_PAYLOAD,
-    USER,
     # add_invoice_payload,
     subs,
     # local_invoice,

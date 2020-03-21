@@ -27,16 +27,22 @@ _mutation_logger = LoggerMixin()
 
 @MUTATION.field('createUser')
 # TODO add post limiter?
-async def r_create_user(_: None, info) -> User:
+async def r_create_user(_: None, info, role: str = 'user') -> User:
     """create a new user and save to db"""
     #create userid hex
-    user = User(token_hex(10))
+    userid = token_hex(10)
+    user = User(userid=userid, role=role)
 
     user.username = token_hex(10)
 
     user.password = token_hex(10)
 
-    await REDIS.conn.set(f'user_{user.username}_{hash_string(user.password)}', user.userid)
+    await models.user.objects.create(
+        id=userid,
+        username=user.username,
+        password=ARGON.hash(user.password),
+        role=role
+    )
 
     return user
 
@@ -53,7 +59,11 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
 
     if ARGON.check_needs_rehash(user_obj.password):
         await user_obj.update(password=ARGON.hash(password))
-    pass #TODO finish this
+    
+    return User(
+        userid = user_obj.id,
+        role = user_obj.role
+    )
 
     
 
