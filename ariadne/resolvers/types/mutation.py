@@ -37,7 +37,7 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
 
     user.password = token_hex(10)
 
-    await models.user.objects.create(
+    await models.User.objects.create(
         id=userid,
         username=user.username,
         password=ARGON.hash(user.password),
@@ -49,7 +49,7 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if not (user_obj := await models.user.objects.get(useranme=username)):
+    if not (user_obj := await models.User.objects.get(useranme=username)):
         return Error('Authentication Error', 'User not found')
     #verify pw hash
     try:
