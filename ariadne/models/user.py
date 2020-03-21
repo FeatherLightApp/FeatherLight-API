@@ -1,7 +1,6 @@
 """module to define user orm of database"""
 import orm
 from context import DB
-from .base import BaseModel
 
 
 class User(BaseModel):
