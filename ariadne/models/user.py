@@ -1,8 +1,13 @@
+"""module to define user orm of database"""
 import orm
+from context import DB
 from .base import BaseModel
 
 
 class User(BaseModel):
+    """user model"""
+    __database__ = DB.db
+    __metadata__ = DB.metadata
     __tablename__ = 'users'
 
     id = orm.String(max_length=20, primary_key=True)

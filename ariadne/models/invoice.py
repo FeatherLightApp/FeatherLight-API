@@ -1,10 +1,12 @@
 """Module to define the orm for an invoice"""
 import orm
-from .base import BaseModel
+from context import DB
 from .user import User
 
 class Invoice(BaseModel):
     """invoice orm"""
+    __database__ = DB.db
+    __metadata__ = DB.metadata
     __tablename__ = 'invoices'
 
     payment_hash = orm.String(max_length=64, min_length=64, primary_key=True)
