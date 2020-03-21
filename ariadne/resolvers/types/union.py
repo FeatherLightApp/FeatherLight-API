@@ -28,7 +28,7 @@ _pay_invoice_response = UnionType('PayInvoiceResponse')
 
 @_add_invoice_response.type_resolver
 @_pay_invoice_response.type_resolver
-def r_add_invoice_response(obj, info, resolve_type):
+def r_add_invoice_response(obj, _, resolve_type):
     if isinstance(obj, Error):
         return 'Error'
     if getattr(obj, 'payment_hash', None) or obj.get('payment_hash'):
@@ -39,7 +39,9 @@ def r_add_invoice_response(obj, info, resolve_type):
 
 
 _wallet_response = UnionType('WalletResponse')
-def r_wallet_response(obj *_):
+
+@_wallet_response.type_resolver
+def r_wallet_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
     return 'WalletBalance'
