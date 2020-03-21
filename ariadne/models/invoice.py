@@ -3,7 +3,7 @@ import orm
 from context import DB
 from .user import User
 
-class Invoice(BaseModel):
+class Invoice(orm.Model):
     """invoice orm"""
     __database__ = DB.db
     __metadata__ = DB.metadata

@@ -3,7 +3,7 @@ import orm
 from context import DB
 
 
-class User(BaseModel):
+class User(orm.Model):
     """user model"""
     __database__ = DB.db
     __metadata__ = DB.metadata
