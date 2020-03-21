@@ -27,7 +27,7 @@ _mutation_logger = LoggerMixin()
 
 @MUTATION.field('createUser')
 # TODO add post limiter?
-async def r_create_user(_: None, info, role: str = 'user') -> User:
+async def r_create_user(_: None, info, role: str = 'USER') -> User:
     """create a new user and save to db"""
     #create userid hex
     userid = token_hex(10)
