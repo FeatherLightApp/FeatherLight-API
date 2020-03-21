@@ -9,7 +9,7 @@ from ariadne.asgi import GraphQL
 
 APP = Starlette(
     debug=True,
-    on_startup=[context.LND.initialize, context.REDIS.initialize],
+    on_startup=[context.LND.initialize, context.REDIS.initialize, context.DB.create],
     on_shutdown=[context.REDIS.destroy]
 )
 
