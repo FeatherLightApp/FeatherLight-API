@@ -6,7 +6,7 @@ from helpers.crypto import encode
 TOKEN_PAYLOAD = ObjectType('TokenPayload')
 
 @TOKEN_PAYLOAD.field('accessToken')
-def r_access_token(userid: User, _) -> str:
+def r_access_token(user: User, _) -> str:
     access_json = {
         'id': user.userid,
         'role': user.role,
