@@ -14,7 +14,7 @@ class UnlockFunds(AbstractMethod):
         """
         assert user.userid
         locked_payments_method = GetLockedPayments()
-        payments = await user.execute(locked_payments_method)
+        payments = await user(locked_payments_method)
         save_back = []
         for paym in payments:
             if paym['pay_req'] != self.pay_req:
