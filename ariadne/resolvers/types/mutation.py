@@ -70,8 +70,10 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
 
 #TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
-def r_force_user(_, info, user: str) -> str:
-    return User(userid=user)
+async def r_force_user(_, info, user: str) -> str:
+    if not (user_obj := await models.User.objects.get(id=user)):
+        return Error('AuthenticationError', 'User not found in DB')
+    return User(user_obj.id, user_obj.role)
 
 
 @MUTATION.field('refreshAccessToken')
@@ -166,6 +168,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
 
 
         # initialize internal user payee
+        # TODO FIXME change to sql db
         payee = User(userid_payee)
 
         doc_to_save = {

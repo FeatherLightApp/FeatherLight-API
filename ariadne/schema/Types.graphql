@@ -10,6 +10,7 @@ type User {
     invoices(paid: Boolean start: Int end: Int): [UserInvoice]!
     payments(start: Int end: Int): [PaidInvoice]!
     deposits: [Deposit]!
+    role: Role!
 }
 
 

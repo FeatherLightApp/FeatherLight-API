@@ -19,6 +19,7 @@ class User(LoggerMixin):
     password = None
 
     def __init__(self, userid, role):
+        assert userid and role
         self.userid = userid
         self.role = role
 
