@@ -1,7 +1,7 @@
 from math import floor
 import json
 from secrets import token_hex
-from typing import Union, Optional, Dict
+from typing import Union, Optional
 from datetime import (
     datetime,
     timedelta
@@ -81,13 +81,13 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
     # catch scenario of no refresh cookie
     if not (cookie := info.context['request'].cookies.get('refresh')):
         return Error(error_type='AuthenticationError', message='No refresh token sent')
-    decode_response: Union[Dict, Error] = decode(token=cookie, kind='refresh')
+    decode_response: Union[dict, Error] = decode(token=cookie, kind='refresh')
     # pass either error or user instance to union resolver
     _mutation_logger.logger.critical(decode_response)
     if isinstance(decode_response, Error):
         return decode_response
-    if isinstance(decode_response, Dict):
-        return decode_response.get('id')
+    if isinstance(decode_response, dict):
+        return User(decode_response['id'], decode_response['role'])
 
 
 @MUTATION.field('addInvoice')

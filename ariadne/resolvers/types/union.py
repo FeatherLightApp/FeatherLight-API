@@ -51,5 +51,6 @@ UNION = [
     _TOKEN_RESPONSE,
     _USER_RESPONSE,
     _add_invoice_response,
-    _pay_invoice_response
+    _pay_invoice_response,
+    _wallet_response
 ]

@@ -8,6 +8,7 @@ services:
             # - shared:/rpc
             - /mnt/volume_tor1_01/bitcoin:/data
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
+        restart: unless-stopped
         env_file: 
             - global.env
     
@@ -20,6 +21,7 @@ services:
             - /mnt/volume_tor1_01/lnd:/root/.lnd
             - /mnt/volume_tor1_01/bitcoin:/bitcoindata
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
+        restart: unless-stopped
         env_file: 
             - global.env
         depends_on: 
@@ -37,6 +39,7 @@ services:
         depends_on: 
             - lnd
             - redis
+        restart: unless-stopped
         env_file: 
             - global.env
 
@@ -45,6 +48,7 @@ services:
         volumes: 
             - /mnt/volume_tor1_01/redis:/data
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+        restart: unless-stopped
         env_file: 
             - global.env
 
