@@ -2,7 +2,7 @@ import os
 from gino import Gino
 
 class GinoInstance:
-
+    """Gino connection manager"""
     def __init__(self):
         self._host = os.environ.get('POSTGRES_HOST')
         self._user = os.environ.get('POSTGRES_USER')
@@ -11,8 +11,12 @@ class GinoInstance:
         self.db = Gino()
 
     async def initialize(self):
-        await self.db.set_bind(f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}")
+        """init db connection"""
+        await self.db.set_bind(
+            f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
+        )
         await self.db.gino.create_all()
 
     async def destroy(self):
-        await self.db.pop_bind.close()
+        """ close connection"""
+        await self.db.pop_bind().close()

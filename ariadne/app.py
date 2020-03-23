@@ -1,16 +1,14 @@
 """define app entry point"""
-import json
-from resolvers.schema import SCHEMA
-import context
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
-
+from .context import LND, REDIS, GINO
+from .resolvers.schema import SCHEMA
 
 
 APP = Starlette(
     debug=True,
-    on_startup=[context.LND.initialize, context.REDIS.initialize, context.DB.create],
-    on_shutdown=[context.REDIS.destroy]
+    on_startup=[LND.initialize, REDIS.initialize, GINO.initialize],
+    on_shutdown=[REDIS.destroy, GINO.destroy]
 )
 
 APP.mount(
