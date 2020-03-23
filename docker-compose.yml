@@ -59,9 +59,3 @@ services:
         restart: unless-stopped
         env_file: 
             - global.env
-
-#
-# volumes:
-    # shared:
-        #driver: local
-
