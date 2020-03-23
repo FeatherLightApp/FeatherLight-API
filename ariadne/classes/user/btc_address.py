@@ -2,7 +2,7 @@ from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
 from helpers.async_future import make_async
 from context import BITCOIND, LND
-import models
+from models import User as DB_User
 import rpc_pb2 as ln
 
 class GetBTCAddress(AbstractMethod, LoggerMixin):
@@ -19,7 +19,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         for more info
 
         """
-        user_obj = await models.User.objects.get(id=user.userid)
+        user_obj = await DB_User.query.get(user.userid)
         assert user_obj
         # return address if it exists
         if (address := user_obj.bitcoin_address):
@@ -29,7 +29,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         request = ln.NewAddressRequest(type=0)
         response = await make_async(LND.stub.NewAddress.future(request, timeout=5000))
         address = response.address
-        await user_obj.update(address=address)
+        await user_obj.update(address=address).apply()
         self.logger.info(f"Created address: {address} for user: {user.userid}")
         import_response = await BITCOIND.req(
             'importaddress',

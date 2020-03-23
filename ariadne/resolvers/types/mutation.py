@@ -72,7 +72,7 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
 #TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
 async def r_force_user(_, info, user: str) -> str:
-    if not (user_obj := await DB_User.query.where(id == user).gino.first()):
+    if not (user_obj := await DB_User.get(user)):
         return Error('AuthenticationError', 'User not found in DB')
     return User(user_obj.id, user_obj.role)
 
