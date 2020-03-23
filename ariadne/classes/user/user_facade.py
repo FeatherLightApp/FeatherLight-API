@@ -41,8 +41,8 @@ class User(LoggerMixin):
         return await self(GetBalance())
 
 
-    async def invoices(self, *_, paid: bool = False, start: int = 0, end: int = -1):
-        method = GetUserInvoices(only_paid=paid, start=start, end=end)
+    async def invoices(self, *_, paid: bool = False, limit: int = 0):
+        method = GetUserInvoices(only_paid=paid, limit=limit)
         return await self(method)
 
 

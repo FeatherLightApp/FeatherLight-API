@@ -1,7 +1,4 @@
 ariadne
-databases[sqlite]
-orm
-sqlalchemy
 httpx
 mypy
 requests
@@ -16,4 +13,4 @@ grpcio
 grpcio-tools
 googleapis-common-protos
 argon2-cffi
-
+gino

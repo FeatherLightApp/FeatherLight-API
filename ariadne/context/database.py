@@ -1,18 +1,18 @@
 import os
-import databases
-import sqlalchemy
-from helpers.mixins import LoggerMixin
+import Gino
 
-class DBConnection(LoggerMixin):
+class GinoInstance:
 
     def __init__(self):
-        self.db = databases.Database(os.environ.get('DB_HOST'))
-        self.metadata = sqlalchemy.MetaData()
-        self._username = os.environ.get('DB_USERNAME')
-        self._password = os.environ.get('DB_PASSWORD')
-        self.engine = None
+        self._host = os.environ.get('POSTGRES_HOST')
+        self._user = os.environ.get('POSTGRES_USER')
+        self._password = os.environ.get('POSTGRES_PASSWORD')
+        self._db_name = os.environ.get('POSTGRES_DB')
+        self.db = Gino()
 
-    def create(self):
-        self.logger.info('initializing SQL database')
-        self.engine = sqlalchemy.create_engine(str(self.db.url))
-        self.metadata.create_all(self.engine)
+    async def initialize(self):
+        await self.db.set_bind(f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}")
+        await self.db.gino.create_all()
+
+    async def destroy(self):
+        await self.db.pop_bind.close()

@@ -7,7 +7,7 @@ type User {
     tokens: TokenPayload!
     balance: Int!
     btcAddress: String!
-    invoices(paid: Boolean start: Int end: Int): [UserInvoice]!
+    invoices(paid: Boolean limit: Int): [UserInvoice]!
     payments(start: Int end: Int): [PaidInvoice]!
     deposits: [Deposit]!
     role: Role!

@@ -1,7 +1,8 @@
 from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
 from helpers.async_future import make_async
-from context import BITCOIND, REDIS, LND
+from context import BITCOIND, LND
+import models
 import rpc_pb2 as ln
 
 class GetBTCAddress(AbstractMethod, LoggerMixin):
@@ -18,20 +19,24 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         for more info
 
         """
-        assert user.userid
-        if not (address := await REDIS.conn.get('bitcoin_address_for_' + user.userid)):
-            request = ln.NewAddressRequest(type=0)
-            response = await make_async(LND.stub.NewAddress.future(request, timeout=5000))
-            address = response.address
-            await REDIS.conn.set('bitcoin_address_for_' + user.userid, address)
-            self.logger.info(f"Created address: {address} for user: {user.userid}")
-            import_response = await BITCOIND.req(
-                'importaddress',
-                params={
-                    'address': address, 
-                    'label': user.userid,
-                    'rescan': False
-                }
-            )
+        user_obj = await models.User.objects.get(id=user.userid)
+        assert user_obj
+        # return address if it exists
+        if (address := user_obj.bitcoin_address):
             return address
-        return address.decode('utf-8')
+
+        #  create a new address
+        request = ln.NewAddressRequest(type=0)
+        response = await make_async(LND.stub.NewAddress.future(request, timeout=5000))
+        address = response.address
+        await user_obj.update(address=address)
+        self.logger.info(f"Created address: {address} for user: {user.userid}")
+        import_response = await BITCOIND.req(
+            'importaddress',
+            params={
+                'address': address, 
+                'label': user.userid,
+                'rescan': False
+            }
+        )
+        return address

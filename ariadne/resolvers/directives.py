@@ -24,7 +24,7 @@ class AuthDirective(SchemaDirectiveVisitor):
             if isinstance(decode_response, Error):
                 return decode_response
             if self.args.get('requires') == 'ADMIN' and decode_response['role'] != 'ADMIN':
-                return Error('AuthenticaionError', 'You do not have permission to do this')
+                return Error('AuthenticationError', 'You do not have permission to do this')
             # User is authenticated. Inject into obj if not defined
             new_obj = obj or User(decode_response['id'], decode_response['role'])
             if iscoroutinefunction(orig_resolver):
