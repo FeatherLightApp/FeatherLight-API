@@ -58,5 +58,5 @@ services:
             - /mnt/volume_tor1_01/postgres:/var/lib/postgresql/data
         restart: unless-stopped
         env_file: 
-            - global.env:q
+            - global.env
 
