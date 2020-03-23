@@ -23,7 +23,7 @@ class GetBalance(AbstractMethod, LoggerMixin):
             # Valid onchain btc transactions sent to this user's address
             # Debit user's account balance
             balance += transaction['amount']
-                
+
         offchain_txfer_method = GetOffchainTxs()
         for invoice in await user(offchain_txfer_method):
             # for each dict in list of invoices paid by this user
