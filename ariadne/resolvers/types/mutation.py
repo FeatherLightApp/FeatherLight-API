@@ -18,7 +18,7 @@ from helpers.hexify import HexEncoder
 from helpers.attach_fees import attach_fees
 from context import LND, REDIS, ARGON
 from argon2.exceptions import VerificationError
-import models
+from models import User as DB_User
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
@@ -31,25 +31,26 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
     """create a new user and save to db"""
     #create userid hex
     userid = token_hex(10)
+    # create api object
     user = User(userid=userid, role=role)
 
     user.username = token_hex(10)
 
     user.password = token_hex(10)
-
-    await models.User.objects.create(
+    # save to db
+    await DB_User.create(
         id=userid,
         username=user.username,
         password=ARGON.hash(user.password),
         role=role
     )
-
+    # return api object to resolver
     return user
 
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if not (user_obj := await models.User.objects.get(useranme=username)):
+    if not (user_obj := await DB_User.query.where(DB_User.username == username).gino.first()):
         return Error('Authentication Error', 'User not found')
     #verify pw hash
     try:
@@ -58,7 +59,7 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
         return Error('AuthenticationError', 'Incorrect password')
 
     if ARGON.check_needs_rehash(user_obj.password):
-        await user_obj.update(password=ARGON.hash(password))
+        await user_obj.update(password=ARGON.hash(password).apply())
     
     return User(
         userid = user_obj.id,
@@ -71,7 +72,7 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
 #TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
 async def r_force_user(_, info, user: str) -> str:
-    if not (user_obj := await models.User.objects.get(id=user)):
+    if not (user_obj := await DB_User.query.where(id == user).gino.first()):
         return Error('AuthenticationError', 'User not found in DB')
     return User(user_obj.id, user_obj.role)
 

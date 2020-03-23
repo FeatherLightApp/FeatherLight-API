@@ -27,6 +27,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - ~~fix zmqpubhashblock port binding~~
 - ~~restructure context object~~
 - add alembic for db migrations
+- consolidate DB_User and UserAPI
 - create 'invoice' class for handling payments
 - add support for lnurl
 - add hold invoices
