@@ -1,5 +1,5 @@
 import os
-import Gino
+from gino import Gino
 
 class GinoInstance:
 
