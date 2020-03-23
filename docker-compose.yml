@@ -32,7 +32,7 @@ services:
         build: 
             context: 'ariadne/'
         volumes: 
-            - ./ariadne/:/app/
+            - ./ariadne/:/app/src
             - /mnt/volume_tor1_01/lnd:/root/.lnd
         ports:
             - '5001:5001'

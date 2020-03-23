@@ -20,3 +20,5 @@ class GinoInstance:
     async def destroy(self):
         """ close connection"""
         await self.db.pop_bind().close()
+
+GINO = GinoInstance()
