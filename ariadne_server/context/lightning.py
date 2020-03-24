@@ -45,3 +45,6 @@ class LightningStub(LoggerMixin):
         info = await make_async(self.stub.GetInfo.future(req, timeout=5000))
         self.id_pubkey = info.identity_pubkey
         assert self.id_pubkey
+
+
+LND = LightningStub()

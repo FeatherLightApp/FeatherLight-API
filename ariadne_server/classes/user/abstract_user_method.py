@@ -1,6 +1,6 @@
 """module for abstract api methods"""
 import abc
-from ...helpers.mixins import LoggerMixin
+from helpers.mixins import LoggerMixin
 
 class AbstractMethod(LoggerMixin, metaclass=abc.ABCMeta):
 

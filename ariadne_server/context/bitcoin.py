@@ -27,3 +27,6 @@ class BitcoinClient(AsyncClient, LoggerMixin):
                 headers={'Content-Type': 'application/json'}
             )
             return res.json()
+
+
+BITCOIND = BitcoinClient()

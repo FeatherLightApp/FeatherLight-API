@@ -1,11 +1,11 @@
 """module for getting balance of user"""
 import math
+from helpers.mixins import LoggerMixin
 from .abstract_user_method import AbstractMethod
 from .invoices import GetUserInvoices
 from .onchain_txs import GetOnchainTxs
 from .offchain_txs import GetOffchainTxs
 from .locked_payments import GetLockedPayments
-from ...helpers.mixins import LoggerMixin
 
 class GetBalance(AbstractMethod, LoggerMixin):
     """method to get the calculated balance for the user"""
