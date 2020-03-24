@@ -42,6 +42,4 @@ RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_
 
 EXPOSE 5000
 
-RUN echo "from src.app import APP" >> main.py && touch __init__.py
-
-CMD [ "python", "-m", "uvicorn",  "main:APP", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app/src"]
+CMD [ "python", "-m", "uvicorn",  "app:APP", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]
