@@ -29,7 +29,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         request = ln.NewAddressRequest(type=0)
         response = await make_async(LND.stub.NewAddress.future(request, timeout=5000))
         address = response.address
-        await user_obj.update(address=address).apply()
+        await user_obj.update(bitcoin_address=address).apply()
         self.logger.info(f"Created address: {address} for user: {user.userid}")
         import_response = await BITCOIND.req(
             'importaddress',
