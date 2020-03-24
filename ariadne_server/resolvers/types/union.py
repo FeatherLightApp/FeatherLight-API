@@ -20,7 +20,7 @@ def r_user_response(obj, *_):
         return 'Error'
     if isinstance(obj, User):
         return 'User'
-        
+
 
 _add_invoice_response = UnionType('AddInvoiceResponse')
 _pay_invoice_response = UnionType('PayInvoiceResponse')

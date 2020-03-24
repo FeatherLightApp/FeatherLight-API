@@ -87,10 +87,10 @@ async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
 
 # TODO remove temp query for generic rpc
 @QUERY.field('genericRPC')
-async def r_rpc_call(_: None, info, command: str, params: str='') -> str:
+async def r_rpc_call(*_, command: str, params: str='') -> str:
     param_dict = None if not params else ast.literal_eval(params)
     res = await BITCOIND.req(command, params=param_dict)
-    return json.dumps(res)  
+    return json.dumps(res)
 
 # @query.field('checkRouteInvoice')
 # @authenticate

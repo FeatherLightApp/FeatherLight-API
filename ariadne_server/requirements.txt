@@ -1,14 +1,11 @@
 ariadne
 httpx
-mypy
 requests
 pytest
-pylint
 pyjwt
 protobuf3-to-dict
 uvicorn
 aioredis
-jsonrpc-async
 grpcio
 grpcio-tools
 googleapis-common-protos
