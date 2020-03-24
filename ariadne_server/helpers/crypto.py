@@ -4,7 +4,7 @@ from typing import Union
 from jwt import encode as encode_jwt
 from jwt import decode as decode_jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-from classes.error import Error
+from ..classes.error import Error
 
 KEYS = json.loads(open('keys.json').read())
 
