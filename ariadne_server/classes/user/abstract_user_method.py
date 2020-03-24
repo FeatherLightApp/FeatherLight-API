@@ -1,7 +1,6 @@
 """module for abstract api methods"""
 import abc
 from ...helpers.mixins import LoggerMixin
-from .user_api import User
 
 class AbstractMethod(LoggerMixin, metaclass=abc.ABCMeta):
 
@@ -10,5 +9,5 @@ class AbstractMethod(LoggerMixin, metaclass=abc.ABCMeta):
     #     pass
 
     @abc.abstractmethod
-    async def run(self, user: User):
+    async def run(self, user):
         """abstract method for defining api methods"""

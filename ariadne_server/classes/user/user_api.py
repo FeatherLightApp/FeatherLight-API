@@ -1,5 +1,6 @@
 """facade class for exposing methods on User GQL Object"""
 from asyncio import iscoroutinefunction
+from typing import Any
 from .abstract_user_method import AbstractMethod
 from .btc_address import GetBTCAddress
 from .invoices import GetUserInvoices
@@ -8,8 +9,7 @@ from .onchain_txs import GetOnchainTxs
 from .offchain_txs import GetOffchainTxs
 from .lock_funds import LockFunds
 from .unlock_funds import UnlockFunds
-from helpers.mixins import LoggerMixin
-from typing import Any
+from ...helpers.mixins import LoggerMixin
 
 #TODO create a deafult resolver/ schema directive to abstract away need for this class
 
