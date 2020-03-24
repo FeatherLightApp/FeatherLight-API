@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from .abstract_user_method import AbstractMethod
-from context import REDIS
+from ...context import REDIS
 
 class LockFunds(AbstractMethod):
 

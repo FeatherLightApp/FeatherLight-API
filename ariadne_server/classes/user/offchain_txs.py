@@ -1,8 +1,8 @@
 """File to define method for retriving offchain txs"""
 import json
 from .abstract_user_method import AbstractMethod
-from helpers.mixins import LoggerMixin
-from context import REDIS
+from ...helpers.mixins import LoggerMixin
+from ...context import REDIS
 
 class GetOffchainTxs(AbstractMethod, LoggerMixin):
     """Method for retrieving offchain txs of a user"""

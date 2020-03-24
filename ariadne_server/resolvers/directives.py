@@ -1,13 +1,13 @@
+import inspect
 from typing import Union, Dict
 from asyncio import iscoroutinefunction
 from ariadne import SchemaDirectiveVisitor
 from graphql import default_field_resolver
-from helpers.crypto import decode
-from classes.user import User
-from classes.error import Error
-from helpers.mixins import LoggerMixin
-from context import REDIS
-import inspect
+from ..helpers.crypto import decode
+from ..classes.user import User
+from ..lasses.error import Error
+from ..helpers.mixins import LoggerMixin
+from ..context import REDIS
 
 class AuthDirective(SchemaDirectiveVisitor):
 

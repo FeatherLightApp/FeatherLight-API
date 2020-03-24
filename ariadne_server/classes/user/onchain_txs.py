@@ -1,6 +1,6 @@
 from .abstract_user_method import AbstractMethod
 from .btc_address import GetBTCAddress
-from context import BITCOIND
+from ...context import BITCOIND
 
 
 class GetOnchainTxs(AbstractMethod):
