@@ -19,7 +19,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         for more info
 
         """
-        user_obj = await DB_User.query.get(user.userid)
+        user_obj = await DB_User.get(user.userid)
         assert user_obj
         # return address if it exists
         if (address := user_obj.bitcoin_address):
