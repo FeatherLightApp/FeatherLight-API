@@ -4,7 +4,6 @@ import ast
 from ariadne import QueryType
 from protobuf_to_dict import protobuf_to_dict
 from ... import rpc_pb2 as ln
-from ...classes.user import User
 from ...helpers.async_future import make_async
 from ...context import LND, BITCOIND
 
@@ -68,7 +67,7 @@ async def r_info(*_) -> dict:
 
 # @authenticate
 @QUERY.field('decodeInvoice')
-async def r_decode_invoice(_: None, info, *, invoice: str, user: User) -> dict:
+async def r_decode_invoice(*_, invoice: str) -> dict:
     request = ln.PayReqString(pay_req=invoice)
     res = await make_async(LND.stub.DecodePayReq.future(request, timeout=5000))
     return {

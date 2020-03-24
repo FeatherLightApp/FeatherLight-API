@@ -1,5 +1,5 @@
 from ariadne import SubscriptionType
-from classes.user import User
+from ...classes.user import User
 
 subs = SubscriptionType()
 
