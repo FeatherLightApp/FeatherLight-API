@@ -1,8 +1,7 @@
 """define app entry point"""
 from starlette.applications import Starlette
 from ariadne.asgi import GraphQL
-from context.lightning import LND
-from context.bitcoin import B
+from context import LND, REDIS, GINO
 from resolvers.schema import SCHEMA
 
 
