@@ -8,7 +8,7 @@ from ariadne import (
 from .types import TYPES as resolvers
 from .directives import AuthDirective, DatetimeDirective, RatelimitDirective
 
-TYPE_DEFS = load_schema_from_path(os.environ.get('./src/schema'))
+TYPE_DEFS = load_schema_from_path('./src/schema')
 
 SCHEMA = make_executable_schema(
     TYPE_DEFS,
