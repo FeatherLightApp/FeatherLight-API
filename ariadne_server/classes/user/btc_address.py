@@ -1,8 +1,7 @@
 from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
 from helpers.async_future import make_async
-from context.bitcoin import BITCOIND
-from context.lightning import LND
+from context import BITCOIND, LND
 from models import User as DB_User
 import rpc_pb2 as ln
 

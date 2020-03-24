@@ -1,7 +1,7 @@
 """Class for locking Redis instance"""
 from datetime import datetime
 from helpers.mixins import LoggerMixin
-from context.redis import REDIS
+from context import REDIS
 
 class Lock(LoggerMixin):
     """Class for locking redis db"""
