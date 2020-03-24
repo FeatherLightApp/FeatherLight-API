@@ -59,4 +59,7 @@ services:
         restart: unless-stopped
         env_file: 
             - global.env
+        ports: 
+            - '5432:5432'
+            
 
