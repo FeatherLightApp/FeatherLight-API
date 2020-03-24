@@ -30,7 +30,7 @@ services:
     ariadne:
         image: graphlnd
         build: 
-            context: 'ariadne/'
+            context: 'ariadne_server/'
         volumes: 
             - ./ariadne_server/:/app
             - /mnt/volume_tor1_01/lnd:/root/.lnd
