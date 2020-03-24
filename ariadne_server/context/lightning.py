@@ -2,10 +2,10 @@
 import codecs
 import os
 import grpc
-from .. import rpc_pb2 as ln
-from .. import rpc_pb2_grpc as lnrpc
-from ..helpers.async_future import make_async
-from ..helpers.mixins import LoggerMixin
+import rpc_pb2 as ln
+import rpc_pb2_grpc as lnrpc
+from helpers.async_future import make_async
+from helpers.mixins import LoggerMixin
 
 class LightningStub(LoggerMixin):
     """lightning stub manager"""
@@ -45,6 +45,3 @@ class LightningStub(LoggerMixin):
         info = await make_async(self.stub.GetInfo.future(req, timeout=5000))
         self.id_pubkey = info.identity_pubkey
         assert self.id_pubkey
-
-
-LND = LightningStub()

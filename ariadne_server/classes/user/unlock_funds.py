@@ -1,7 +1,7 @@
 import json
+from context import REDIS
 from .abstract_user_method import AbstractMethod
 from .locked_payments import GetLockedPayments
-from ...context import REDIS
 
 class UnlockFunds(AbstractMethod):
 

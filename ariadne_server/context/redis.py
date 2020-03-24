@@ -1,6 +1,6 @@
 import os
 import aioredis
-from ..helpers.mixins import LoggerMixin
+from helpers.mixins import LoggerMixin
 
 class RedisConnection(LoggerMixin):
 
@@ -19,6 +19,3 @@ class RedisConnection(LoggerMixin):
         self.logger.info('destroying redis')
         self.conn.close()
         await self.conn.wait_closed()
-
-
-REDIS = RedisConnection()

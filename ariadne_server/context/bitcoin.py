@@ -1,7 +1,7 @@
 import os
 from secrets import token_hex
 from httpx import AsyncClient
-from ..helpers.mixins import LoggerMixin
+from helpers.mixins import LoggerMixin
 
 class BitcoinClient(AsyncClient, LoggerMixin):
     """Subclass for making btcd rpc requests"""
@@ -27,6 +27,3 @@ class BitcoinClient(AsyncClient, LoggerMixin):
                 headers={'Content-Type': 'application/json'}
             )
             return res.json()
-
-
-BITCOIND = BitcoinClient()

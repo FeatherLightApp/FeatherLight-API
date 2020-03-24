@@ -3,9 +3,9 @@ import json
 import ast
 from ariadne import QueryType
 from protobuf_to_dict import protobuf_to_dict
-from ... import rpc_pb2 as ln
-from ...helpers.async_future import make_async
-from ...context import LND, BITCOIND
+import rpc_pb2 as ln
+from helpers.async_future import make_async
+from context import LND, BITCOIND
 
 
 

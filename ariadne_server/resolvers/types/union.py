@@ -1,6 +1,6 @@
 from ariadne import UnionType
-from ...classes.user import User
-from ...classes.error import Error
+from classes.user import User
+from classes.error import Error
 
 _TOKEN_RESPONSE = UnionType('TokenResponse')
 

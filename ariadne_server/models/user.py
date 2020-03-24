@@ -1,5 +1,5 @@
 """module to define user orm of database"""
-from ..context import GINO
+from context import GINO
 
 db = GINO.db
 

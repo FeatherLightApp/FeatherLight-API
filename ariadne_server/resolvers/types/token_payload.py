@@ -1,7 +1,7 @@
 from datetime import (datetime, timedelta)
 from ariadne import ObjectType
-from ...classes.user import User
-from ...helpers.crypto import encode
+from classes.user import User
+from helpers.crypto import encode
 
 TOKEN_PAYLOAD = ObjectType('TokenPayload')
 

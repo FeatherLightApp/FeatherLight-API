@@ -9,17 +9,17 @@ from datetime import (
 from protobuf_to_dict import protobuf_to_dict
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
-from ...classes.user import User
-from ...classes.lock import Lock
-from ...classes.error import Error
-from ...helpers.async_future import make_async
-from ...helpers.mixins import LoggerMixin
-from ...helpers.crypto import decode, hash_string
-from ...helpers.hexify import HexEncoder
-from ...helpers.attach_fees import attach_fees
-from ...context import LND, REDIS, ARGON
-from ...models import User as DB_User
-from ... import rpc_pb2 as ln
+from classes.user import User
+from classes.lock import Lock
+from classes.error import Error
+from helpers.async_future import make_async
+from helpers.mixins import LoggerMixin
+from helpers.crypto import decode, hash_string
+from helpers.hexify import HexEncoder
+from helpers.attach_fees import attach_fees
+from context import LND, REDIS, ARGON
+from models import User as DB_User
+import rpc_pb2 as ln
 
 MUTATION = MutationType()
 

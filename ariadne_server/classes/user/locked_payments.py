@@ -1,6 +1,7 @@
+"""method to retrive list of payments currently being processed for user"""
 import json
 from .abstract_user_method import AbstractMethod
-from ...context import REDIS
+from context import REDIS
 
 class GetLockedPayments(AbstractMethod):
 

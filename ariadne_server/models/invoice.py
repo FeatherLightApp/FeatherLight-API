@@ -1,5 +1,5 @@
 """Module to define the orm for an invoice"""
-from ..context import GINO
+from context import GINO
 
 db = GINO.db
 

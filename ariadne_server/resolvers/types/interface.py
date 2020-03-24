@@ -3,9 +3,9 @@ resolver for specific fields of invoice payload
 remainder of field are resolved with the default resolvers
 """
 from ariadne import InterfaceType
-from ...context import LND
-from ...helpers.async_future import make_async
-from ... import rpc_pb2 as ln
+from context import LND
+from helpers.async_future import make_async
+import rpc_pb2 as ln
 
 _invoice = InterfaceType('Invoice')
 
