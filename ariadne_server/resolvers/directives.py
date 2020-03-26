@@ -10,7 +10,7 @@ from helpers.mixins import LoggerMixin
 from context import REDIS
 
 
-class AuthDirective(SchemaDirectiveVisitor):
+class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
 
     def visit_field_definition(self, field, *_):
         # req_role = self.args.get('requires') TODO Implement roles later
@@ -28,11 +28,12 @@ class AuthDirective(SchemaDirectiveVisitor):
             if self.args.get('requires') == 'ADMIN' and decode_response['role'] != 'ADMIN':
                 return Error('AuthenticationError', 'You do not have permission to do this')
             # User is authenticated. Inject into obj if not defined
-            new_obj = obj or await User.get(decode_response['id'])
+            db_user = await User.get(decode_response['id'])
+            self.logger.critical(db_user)
+            new_obj = obj or db_user
             if iscoroutinefunction(orig_resolver):
                 return await orig_resolver(new_obj, info, **kwargs)
-            else:
-                return orig_resolver(new_obj, info, **kwargs)
+            return orig_resolver(new_obj, info, **kwargs)
 
         field.resolve = check_auth
         return field

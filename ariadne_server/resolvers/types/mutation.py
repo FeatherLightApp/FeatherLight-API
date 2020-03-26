@@ -100,9 +100,10 @@ async def r_add_invoice(user: User, info, *, memo: str, amt: int, invoiceFor: Op
     # change the bytes object to hex string for json serialization
     await REDIS.conn.rpush(f"userinvoices_for_{user.id}", json.dumps(output, cls=HexEncoder))
     # add hex encoded bytes hash to redis
+    hash_hex = output['r_hash'].hex()
     _mutation_logger.logger.critical(
-        f"setting key: payment_hash_{output['r_hash']} to {user.id}")
-    await REDIS.conn.set(f"payment_hash_{output['r_hash'].hex()}", user.id)
+        f"setting key: payment_hash_{hash_hex} to {user.id}")
+    await REDIS.conn.set(f"payment_hash_{hash_hex}", user.id)
     # decode response and return GraphQL invoice type
     pay_req_string = ln.PayReqString(pay_req=response.payment_request)
     decoded_invoice = await make_async(LND.stub.DecodePayReq.future(pay_req_string, timeout=5000))
