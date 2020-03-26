@@ -87,7 +87,7 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
 # TODO add more flexiblilty in invoice creation
 # TODO invoiceFor allows creating invoices for other users on their behalf
 # FIXME doesnt work
-async def r_add_invoice(user: User, info, *, memo: str, amt: int, invoiceFor: Optional[str] = None) -> dict:
+async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optional[str] = None) -> dict:
     """Authenticated route"""
     expiry_time = 3600*24
     request = ln.Invoice(
@@ -102,7 +102,8 @@ async def r_add_invoice(user: User, info, *, memo: str, amt: int, invoiceFor: Op
     # add hex encoded bytes hash to redis
     hash_hex = output['r_hash'].hex()
     _mutation_logger.logger.critical(
-        f"setting key: payment_hash_{hash_hex} to {user.id}")
+        f"setting key: payment_hash_{hash_hex} to {user.id}"
+    )
     await REDIS.conn.set(f"payment_hash_{hash_hex}", user.id)
     # decode response and return GraphQL invoice type
     pay_req_string = ln.PayReqString(pay_req=response.payment_request)

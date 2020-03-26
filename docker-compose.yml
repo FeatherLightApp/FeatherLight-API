@@ -26,6 +26,8 @@ services:
             - global.env
         depends_on: 
             - btcd
+        ports:
+            - '9735:9735'
 
     ariadne:
         image: graphlnd
