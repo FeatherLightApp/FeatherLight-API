@@ -21,7 +21,7 @@ RUN cd /go/src/github.com/lightningnetwork/lnd \
 &&  make install tags="signrpc walletrpc chainrpc invoicesrpc routerrpc"
 
 # Start a new, final image to reduce size.
-FROM alpine as final
+FROM golang:1.13-alpine as final
 
 # Expose lnd ports (server, rpc).
 EXPOSE 9735 10009
