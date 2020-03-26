@@ -33,8 +33,11 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             new_obj = obj or db_user
             self.logger.critical(new_obj)
             if iscoroutinefunction(orig_resolver):
-                return await orig_resolver(new_obj, info, **kwargs)
-            return orig_resolver(new_obj, info, **kwargs)
+                result = await orig_resolver(new_obj, info, **kwargs)
+            else:
+                result = orig_resolver(new_obj, info, **kwargs)
+            self.logger.critical(f"result {result}")
+            return result
 
         field.resolve = check_auth
         return field
