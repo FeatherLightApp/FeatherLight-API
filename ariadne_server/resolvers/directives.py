@@ -14,7 +14,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
 
     def visit_field_definition(self, field, *_):
         # req_role = self.args.get('requires') TODO Implement roles later
-        orig_resolver = field.resolve or default_field_resolver
+        orig_resolver = default_field_resolver
 
         # define wrapper
         async def check_auth(obj, info, **kwargs):
