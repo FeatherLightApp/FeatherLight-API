@@ -19,7 +19,7 @@ def r_invoice_type(obj, *_):
 
 @_invoice.field('paymentPreimage')
 async def resolve_preimage(obj, *_):
-    if (preimage: = obj.get('payment_preimage')):
+    if (preimage:= obj.get('payment_preimage')):
         return preimage
     payment_hash = obj.get('payment_hash')
     # type cast the payment hash to bytes

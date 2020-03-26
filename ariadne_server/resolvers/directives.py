@@ -18,7 +18,7 @@ class AuthDirective(SchemaDirectiveVisitor):
 
         # define wrapper
         async def check_auth(obj, info, **kwargs):
-            if not (auth_header: = info.context['request'].headers.get('Authorization')):
+            if not (auth_header:= info.context['request'].headers.get('Authorization')):
                 return Error('AuthenticationError', 'No access token sent. You are not logged in')
             decode_response: Union[Dict, Error] = decode(
                 auth_header.replace('Bearer ', ''), kind='access')

@@ -51,7 +51,7 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if not (user_obj: = await DB_User.query.where(DB_User.username == username).gino.first()):
+    if not (user_obj:= await DB_User.query.where(DB_User.username == username).gino.first()):
         return Error('Authentication Error', 'User not found')
     # verify pw hash
     try:
@@ -71,7 +71,7 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
 # TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
 async def r_force_user(_, info, user: str) -> str:
-    if not (user_obj: = await DB_User.get(user)):
+    if not (user_obj:= await DB_User.get(user)):
         return Error('AuthenticationError', 'User not found in DB')
     return User(user_obj.id, user_obj.role)
 
@@ -79,7 +79,7 @@ async def r_force_user(_, info, user: str) -> str:
 @MUTATION.field('refreshAccessToken')
 async def r_get_token(_: None, info) -> Union[User, Error]:
     # catch scenario of no refresh cookie
-    if not (cookie: = info.context['request'].cookies.get('refresh')):
+    if not (cookie:= info.context['request'].cookies.get('refresh')):
         return Error(error_type='AuthenticationError', message='No refresh token sent')
     decode_response: Union[dict, Error] = decode(token=cookie, kind='refresh')
     # pass either error or user instance to union resolver
@@ -161,7 +161,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
         # this is internal invoice now, receiver add balance
         _mutation_logger.logger.info(decoded_invoice.payment_hash)
 
-        if not (userid_payee: = await REDIS.conn.get(f"payment_hash_{decoded_invoice.payment_hash}")):
+        if not (userid_payee:= await REDIS.conn.get(f"payment_hash_{decoded_invoice.payment_hash}")):
             await lock.release_lock()
             return Error('PaymentError', 'Could not get user by payment hash')
         if await REDIS.conn.get(f"is_paid_{decoded_invoice.payment_hash}"):
