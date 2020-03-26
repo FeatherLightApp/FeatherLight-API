@@ -12,7 +12,7 @@ QUERY = QueryType()
 
 
 @QUERY.field('me')
-def r_me(obj):
+def r_me(obj, *_):
     #pass object into union resolver
     return obj
 
