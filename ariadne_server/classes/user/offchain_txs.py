@@ -18,7 +18,7 @@ class GetOffchainTxs(AbstractMethod, LoggerMixin):
         Return offchain invoices that were paid by this user and stored in redis via save_paid_invoice
         """
         result = []
-        ranges = await REDIS.conn.lrange(f"paid_invoices_for_{user.userid}", self.start, self.end)
+        ranges = await REDIS.conn.lrange(f"paid_invoices_for_{user.id}", self.start, self.end)
         # item is a byte encoded json representation of processSendPaymentResponse
         for item in ranges:
             invoice = json.loads(item.decode('utf-8'))

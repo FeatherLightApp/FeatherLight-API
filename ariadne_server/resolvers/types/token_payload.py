@@ -9,7 +9,7 @@ TOKEN_PAYLOAD = ObjectType('TokenPayload')
 @TOKEN_PAYLOAD.field('accessToken')
 def r_access_token(user: User, _) -> str:
     access_json = {
-        'id': user.userid,
+        'id': user.id,
         'role': user.role,
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(minutes=15)
@@ -20,7 +20,7 @@ def r_access_token(user: User, _) -> str:
 @TOKEN_PAYLOAD.field('refreshToken')
 def r_refresh_token(user: User, _) -> str:
     refresh_json = {
-        'id': user.userid,
+        'id': user.id,
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(days=7)
     }

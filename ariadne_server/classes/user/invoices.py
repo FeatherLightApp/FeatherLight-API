@@ -25,7 +25,7 @@ class GetUserInvoices(AbstractMethod):
         invoices = []
         async with GINO.db.transaction():
             async for invoice in DB_Invoice.query \
-                .where(DB_Invoice.payee == user.userid) \
+                .where(DB_Invoice.payee == user.id) \
                 .limit(self._limit) \
                 .offset(self._offset) \
                     .gino.iterate():

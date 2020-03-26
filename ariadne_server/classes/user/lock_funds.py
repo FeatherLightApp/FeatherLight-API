@@ -16,7 +16,7 @@ class LockFunds(AbstractMethod):
         Used to calculate balance till the lock is lifted
         (payment is in determined state - success or fail)
         """
-        assert user.userid
+        assert user.id
         utc_seconds = (datetime.utcnow() -
                        datetime(1970, 1, 1)).total_seconds()
         doc = {
@@ -24,4 +24,4 @@ class LockFunds(AbstractMethod):
             'amount': self.invoice.num_satoshis,
             'timestamp': utc_seconds
         }
-        return REDIS.conn.rpush('locked_payments_for_' + user.userid, json.dumps(doc))
+        return REDIS.conn.rpush('locked_payments_for_' + user.id, json.dumps(doc))

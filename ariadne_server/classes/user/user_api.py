@@ -1,7 +1,8 @@
-"""facade class for exposing methods on User GQL Object"""
+"""facade class for exposing methods on User GQL Object and subclassing the gino model"""
 from asyncio import iscoroutinefunction
 from typing import Any
 from helpers.mixins import LoggerMixin
+from models import User as UserModel
 from .abstract_user_method import AbstractMethod
 from .btc_address import GetBTCAddress
 from .invoices import GetUserInvoices
@@ -14,15 +15,10 @@ from .unlock_funds import UnlockFunds
 # TODO create a deafult resolver/ schema directive to abstract away need for this class
 
 
-class User(LoggerMixin):
+class User(LoggerMixin, UserModel):
     # These are none unless expicitly set by a create function
     username = None
     password = None
-
-    def __init__(self, userid, role):
-        assert userid and role
-        self.userid = userid
-        self.role = role
 
     async def __call__(self, api_method: AbstractMethod) -> Any:
         if iscoroutinefunction(api_method.run):
@@ -34,6 +30,9 @@ class User(LoggerMixin):
         return self
 
     async def btc_address(self, *_):
+        """returns btc address if its stored in db else generate btc address"""
+        if self.bitcoin_address:
+            return self.bitcoin_address
         return await self(GetBTCAddress())
 
     async def balance(self, *_):

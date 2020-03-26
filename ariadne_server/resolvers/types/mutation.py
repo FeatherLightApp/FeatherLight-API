@@ -18,7 +18,6 @@ from helpers.crypto import decode, hash_string
 from helpers.hexify import HexEncoder
 from helpers.attach_fees import attach_fees
 from context import LND, REDIS, ARGON
-from models import User as DB_User
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
@@ -33,13 +32,12 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
     # create userid hex
     userid = token_hex(10)
     # create api object
-    user = User(userid=userid, role=role)
 
     user.username = token_hex(10)
 
     user.password = token_hex(10)
     # save to db
-    await DB_User.create(
+    await User.create(
         id=userid,
         username=user.username,
         password=ARGON.hash(user.password),
@@ -51,7 +49,7 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if not (user_obj:= await DB_User.query.where(DB_User.username == username).gino.first()):
+    if not (user_obj:= await User.query.where(User.username == username).gino.first()):
         return Error('Authentication Error', 'User not found')
     # verify pw hash
     try:
@@ -62,18 +60,15 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
     if ARGON.check_needs_rehash(user_obj.password):
         await user_obj.update(password=ARGON.hash(password).apply())
 
-    return User(
-        userid=user_obj.id,
-        role=user_obj.role
-    )
+    return user_obj
 
 
 # TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
 async def r_force_user(_, info, user: str) -> str:
-    if not (user_obj:= await DB_User.get(user)):
+    if not (user_obj:= await User.get(user)):
         return Error('AuthenticationError', 'User not found in DB')
-    return User(user_obj.id, user_obj.role)
+    return user_obj
 
 
 @MUTATION.field('refreshAccessToken')
@@ -87,7 +82,7 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
     if isinstance(decode_response, Error):
         return decode_response
     if isinstance(decode_response, dict):
-        return User(decode_response['id'], decode_response['role'])
+        return User.get(decode_response['id'])
 
 
 @MUTATION.field('addInvoice')
@@ -105,11 +100,11 @@ async def r_add_invoice(user: User, info, *, memo: str, amt: int, invoiceFor: Op
     response = await make_async(LND.stub.AddInvoice.future(request, timeout=5000))
     output = protobuf_to_dict(response)
     # change the bytes object to hex string for json serialization
-    await REDIS.conn.rpush(f"userinvoices_for_{user.userid}", json.dumps(output, cls=HexEncoder))
+    await REDIS.conn.rpush(f"userinvoices_for_{user.id}", json.dumps(output, cls=HexEncoder))
     # add hex encoded bytes hash to redis
     _mutation_logger.logger.critical(
-        f"setting key: payment_hash_{output['r_hash']} to {user.userid}")
-    await REDIS.conn.set(f"payment_hash_{output['r_hash'].hex()}", user.userid)
+        f"setting key: payment_hash_{output['r_hash']} to {user.id}")
+    await REDIS.conn.set(f"payment_hash_{output['r_hash'].hex()}", user.id)
     # decode response and return GraphQL invoice type
     pay_req_string = ln.PayReqString(pay_req=response.payment_request)
     decoded_invoice = await make_async(LND.stub.DecodePayReq.future(pay_req_string, timeout=5000))
@@ -132,11 +127,11 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
     # obtain a db lock
     lock = Lock(
         REDIS.conn,
-        'invoice_paying_for_' + user.userid
+        'invoice_paying_for_' + user.id
     )
     if not await lock.obtain_lock():
         _mutation_logger.logger.warning(
-            'Failed to acquire lock for user {}'.format(user.userid))
+            'Failed to acquire lock for user {}'.format(user.id))
         return Error('PaymentError', 'DB is locked try again later')
     user_balance = await user.balance(info)
     request = ln.PayReqString(pay_req=invoice)
@@ -144,11 +139,11 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
     real_amount = decoded_invoice.num_satoshis if decoded_invoice.num_satoshis > 0 else amt
     decoded_invoice.num_satoshis = real_amount
     _mutation_logger.logger.info(
-        f"paying invoice user:{user.userid} with balance {user_balance}, for {real_amount}")
+        f"paying invoice user:{user.id} with balance {user_balance}, for {real_amount}")
 
     if not real_amount:
         _mutation_logger.logger.warning(
-            f"Invalid amount when paying invoice for user {user.userid}")
+            f"Invalid amount when paying invoice for user {user.id}")
         await lock.release_lock()
         return Error(error_type='PaymentError', message='Invalid invoice amount')
     # check if user has enough balance including possible fees
@@ -173,7 +168,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
 
         # initialize internal user payee
         # TODO FIXME change to sql db
-        payee = User(userid_payee)
+        payee = await User.get(userid_payee)
 
         doc_to_save = {
             # paid is implied by storage key
@@ -190,7 +185,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
 
         # sender spent his balance
         await REDIS.conn.rpush(
-            f"paid_invoices_for_{user.userid}",
+            f"paid_invoices_for_{user.id}",
             json.dumps(doc_to_save, cls=HexEncoder)
         )
         await REDIS.conn.set(f"is_paid_{decoded_invoice.payment_hash}", 1)
@@ -229,7 +224,7 @@ async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = Non
                 pay_json = json.dumps(pay_dict, cls=HexEncoder)
                 _mutation_logger.logger.info(pay_json)
 
-                await REDIS.conn.rpush(f"paid_invoices_for_{user.userid}", pay_json)
+                await REDIS.conn.rpush(f"paid_invoices_for_{user.id}", pay_json)
                 await lock.release_lock()
                 return pay_dict
             else:
