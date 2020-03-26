@@ -22,7 +22,7 @@ class GetOnchainTxs(AbstractMethod):
         """
 
         get_address_method = GetBTCAddress()
-        address = await user(get_address_method)
+        address = await user.exec(get_address_method)
         assert address, f"Cannot get btc address for {user.id}"
         txs = (await BITCOIND.req('listtransactions', params={
             'label': user.id,

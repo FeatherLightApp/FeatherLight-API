@@ -19,7 +19,7 @@ class User(LoggerMixin, UserModel):
     # These are none unless expicitly set by a create function
     password = None
 
-    async def __call__(self, api_method: AbstractMethod) -> Any:
+    async def exec(self, api_method: AbstractMethod) -> Any:
         if iscoroutinefunction(api_method.run):
             return await api_method.run(self)
         return api_method.run(self)
@@ -32,27 +32,27 @@ class User(LoggerMixin, UserModel):
         """returns btc address if its stored in db else generate btc address"""
         if self.bitcoin_address:
             return self.bitcoin_address
-        return await self(GetBTCAddress())
+        return await self.exec(GetBTCAddress())
 
     async def balance(self, *_):
-        return await self(GetBalance())
+        return await self.exec(GetBalance())
 
     async def invoices(self, *_, paid: bool = False, limit: int = 0):
         method = GetUserInvoices(only_paid=paid, limit=limit)
-        return await self(method)
+        return await self.exec(method)
 
     async def payments(self, *_, start: int = 0, end: int = -1):
         method = GetOffchainTxs(start, end)
-        return await self(method)
+        return await self.exec(method)
 
     async def deposits(self, *_):
         method = GetOnchainTxs(min_confirmations=3)
-        return await self(method)
+        return await self.exec(method)
 
     async def lock_funds(self, *_, pay_req, invoice):
         method = LockFunds(pay_req, invoice)
-        return await self(method)
+        return await self.exec(method)
 
     async def unlock_funds(self, *_, pay_req):
         method = UnlockFunds(pay_req)
-        return await self(method)
+        return await self.exec(method)

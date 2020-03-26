@@ -16,23 +16,23 @@ class GetBalance(AbstractMethod, LoggerMixin):
 
         # asking for 0 invoices returns all invoices
         invoice_method = GetUserInvoices(only_paid=True)
-        for paid_invoice in await user(invoice_method):
+        for paid_invoice in await user.exec(invoice_method):
             balance += paid_invoice['amount']
 
         onchain_txfer_method = GetOnchainTxs(min_confirmations=3)
-        for transaction in await user(onchain_txfer_method):
+        for transaction in await user.exec(onchain_txfer_method):
             # Valid onchain btc transactions sent to this user's address
             # Debit user's account balance
             balance += transaction['amount']
 
         offchain_txfer_method = GetOffchainTxs()
-        for invoice in await user(offchain_txfer_method):
+        for invoice in await user.exec(offchain_txfer_method):
             # for each dict in list of invoices paid by this user
             # Credit user's account balance for full value including fees
             balance -= invoice['value']
 
         locked_payments_method = GetLockedPayments()
-        for invoice in await user(locked_payments_method):
+        for invoice in await user.exec(locked_payments_method):
             # for each locked payment (invoice that has been sent but not validated)
             # Credit user's account balance
             balance -= invoice['amount'] + \
