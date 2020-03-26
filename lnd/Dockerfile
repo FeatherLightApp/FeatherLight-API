@@ -32,7 +32,7 @@ COPY --from=builder /go/bin/lnd /bin/
 
 # Add bash.
 RUN apk add --no-cache \
-    bash
+    bash git
 
 # Copy the entrypoint script.
 COPY "start-lnd.sh" .
