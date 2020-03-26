@@ -39,4 +39,6 @@ COPY "start-lnd.sh" .
 
 RUN chmod +x start-lnd.sh
 
+RUN go get -v -u github.com/btcsuite/btcwallet/cmd/dropwtxmgr
+
 CMD [ "./start-lnd.sh" ]
