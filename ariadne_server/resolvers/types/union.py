@@ -4,6 +4,7 @@ from classes.error import Error
 
 _TOKEN_RESPONSE = UnionType('TokenResponse')
 
+
 @_TOKEN_RESPONSE.type_resolver
 def r_token_response(obj, *_) -> str:
     if isinstance(obj, Error):
@@ -13,6 +14,7 @@ def r_token_response(obj, *_) -> str:
 
 
 _USER_RESPONSE = UnionType('UserResponse')
+
 
 @_USER_RESPONSE.type_resolver
 def r_user_response(obj, *_):
@@ -39,6 +41,7 @@ def r_add_invoice_response(obj, _, resolve_type):
 
 
 _wallet_response = UnionType('WalletResponse')
+
 
 @_wallet_response.type_resolver
 def r_wallet_response(obj, *_):

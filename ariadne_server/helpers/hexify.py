@@ -1,5 +1,6 @@
 import json
 
+
 class HexEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):

@@ -5,6 +5,7 @@ from context import BITCOIND, LND
 from models import User as DB_User
 import rpc_pb2 as ln
 
+
 class GetBTCAddress(AbstractMethod, LoggerMixin):
 
     def __init__(self):
@@ -22,7 +23,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         user_obj = await DB_User.get(user.userid)
         assert user_obj
         # return address if it exists
-        if (address := user_obj.bitcoin_address):
+        if (address: = user_obj.bitcoin_address):
             return address
 
         #  create a new address
@@ -34,7 +35,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         import_response = await BITCOIND.req(
             'importaddress',
             params={
-                'address': address, 
+                'address': address,
                 'label': user.userid,
                 'rescan': False
             }

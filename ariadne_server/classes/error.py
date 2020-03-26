@@ -3,6 +3,7 @@ Generic error class for unexpected GraphQL response
 """
 from typing import Optional
 
+
 class Error:
     """Generic Error type for unexpected response"""
 

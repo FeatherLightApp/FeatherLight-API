@@ -3,6 +3,7 @@ from context import REDIS
 from .abstract_user_method import AbstractMethod
 from .locked_payments import GetLockedPayments
 
+
 class UnlockFunds(AbstractMethod):
 
     def __init__(self, pay_req):

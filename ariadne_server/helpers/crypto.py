@@ -8,6 +8,7 @@ from classes.error import Error
 
 KEYS = json.loads(open('keys.json').read())
 
+
 def encode(jsn: dict, kind: str) -> str:
     """encodes valid json as a jwt"""
     return encode_jwt(
@@ -29,6 +30,7 @@ def decode(token: str, kind: str) -> Union[dict, Error]:
         return Error('AuthenticationError', 'Token has expired')
     except InvalidTokenError:
         return Error('AuthenticationError', 'Invalid token')
+
 
 def hash_string(string):
     """returns hex digest of string"""

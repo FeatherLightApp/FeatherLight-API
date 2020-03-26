@@ -2,6 +2,7 @@ import os
 import aioredis
 from helpers.mixins import LoggerMixin
 
+
 class RedisConnection(LoggerMixin):
 
     def __init__(self):

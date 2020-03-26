@@ -3,8 +3,10 @@ from secrets import token_hex
 from httpx import AsyncClient
 from helpers.mixins import LoggerMixin
 
+
 class BitcoinClient(AsyncClient, LoggerMixin):
     """Subclass for making btcd rpc requests"""
+
     def __init__(self):
         self._host = os.environ.get('BITCOIND_HOST')
         self._port = os.environ.get('BITCOIND_PORT')

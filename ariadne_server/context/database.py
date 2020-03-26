@@ -1,8 +1,10 @@
 import os
 from gino import Gino
 
+
 class GinoInstance:
     """Gino connection manager"""
+
     def __init__(self):
         self._host = os.environ.get('POSTGRES_HOST')
         self._user = os.environ.get('POSTGRES_USER')

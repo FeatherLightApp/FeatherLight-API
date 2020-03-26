@@ -4,21 +4,23 @@ this allows for awaiting grpc calls asynchronously
 """
 import asyncio
 
+
 def _fwrap(f, gf):
     try:
         f.set_result(gf.result())
     except Exception as e:
         f.set_exception(e)
 
+
 def make_async(gf, loop=None):
     '''
         Wraps a GRPC result in a future that can be yielded by asyncio
-        
+
         Usage::
-        
+
             async def my_fn(param):
                 result = await fwrap(stub.function_name.future(param, timeout))
-        
+
     '''
     f = asyncio.Future()
 

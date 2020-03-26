@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/Users/timaye/Desktop/GraphLightning/ariadne_server/venv/bin/python3",
+    "python.pythonPath": "/Users/timaye/.pyenv/versions/graphlightning/bin/python",
     "python.linting.pylintEnabled": true,
     "python.linting.mypyEnabled": false,
     "python.linting.enabled": true

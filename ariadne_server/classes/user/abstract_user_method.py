@@ -2,6 +2,7 @@
 import abc
 from helpers.mixins import LoggerMixin
 
+
 class AbstractMethod(LoggerMixin, metaclass=abc.ABCMeta):
 
     # @abc.abstractmethod

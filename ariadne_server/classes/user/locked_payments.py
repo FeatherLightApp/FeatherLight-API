@@ -3,6 +3,7 @@ import json
 from .abstract_user_method import AbstractMethod
 from context import REDIS
 
+
 class GetLockedPayments(AbstractMethod):
 
     def __init__(self, start: int = 0, end: int = -1):

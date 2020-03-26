@@ -8,8 +8,8 @@ from helpers.async_future import make_async
 from context import LND, BITCOIND
 
 
-
 QUERY = QueryType()
+
 
 @QUERY.field('walletBalance')
 async def r_wallet_balance(*_) -> dict:
@@ -17,7 +17,7 @@ async def r_wallet_balance(*_) -> dict:
 
 
 @QUERY.field('info')
-#@authenticate
+# @authenticate
 async def r_info(*_) -> dict:
     request = ln.GetInfoRequest()
     response = await make_async(LND.stub.GetInfo.future(request, timeout=5000))
@@ -27,7 +27,7 @@ async def r_info(*_) -> dict:
     if 'uris' in d:
         del d['uris']
     if 'features' in d:
-        del d['features'] #TODO remove these and add the types in gql schema
+        del d['features']  # TODO remove these and add the types in gql schema
     return {
         'ok': True,
         **d
@@ -86,7 +86,7 @@ async def r_decode_invoice(*_, invoice: str) -> dict:
 
 # TODO remove temp query for generic rpc
 @QUERY.field('genericRPC')
-async def r_rpc_call(*_, command: str, params: str='') -> str:
+async def r_rpc_call(*_, command: str, params: str = '') -> str:
     param_dict = None if not params else ast.literal_eval(params)
     res = await BITCOIND.req(command, params=param_dict)
     return json.dumps(res)
@@ -95,5 +95,3 @@ async def r_rpc_call(*_, command: str, params: str='') -> str:
 # @authenticate
 # async def r_check_route(obj, info, invoice):
 # TODO
-
-

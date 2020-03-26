@@ -5,6 +5,7 @@ from models import Invoice as DB_Invoice
 import rpc_pb2 as ln
 from .abstract_user_method import AbstractMethod
 
+
 class GetUserInvoices(AbstractMethod):
     """Method for retriving a user's invoices, either paid or unpaid"""
 
@@ -12,7 +13,6 @@ class GetUserInvoices(AbstractMethod):
         self._only_paid = only_paid
         self._limit = limit
         self._offset = offset
-
 
     async def run(self, user):
         """
@@ -25,10 +25,10 @@ class GetUserInvoices(AbstractMethod):
         invoices = []
         async with GINO.db.transaction():
             async for invoice in DB_Invoice.query \
-            .where(DB_Invoice.payee == user.userid) \
-            .limit(self._limit) \
-            .offset(self._offset) \
-            .gino.iterate():
+                .where(DB_Invoice.payee == user.userid) \
+                .limit(self._limit) \
+                .offset(self._offset) \
+                    .gino.iterate():
 
                 # req = ln.PayReqString(pay_req=invoice.payment_request)
                 # decoded = await make_async(
@@ -41,7 +41,8 @@ class GetUserInvoices(AbstractMethod):
                     # if not paid check lnd to see if its paid in lnd db
                     # convert hex serialized payment hash to bytes
 
-                    req = ln.PaymentHash(r_hash=bytes.fromhex(invoice.payment_hash))
+                    req = ln.PaymentHash(
+                        r_hash=bytes.fromhex(invoice.payment_hash))
                     lookup_info = await make_async(LND.stub.LookupInvoice.future(req, timeout=5000))
 
                     if lookup_info.state == 1:

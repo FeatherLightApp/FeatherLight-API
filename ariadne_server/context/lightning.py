@@ -7,8 +7,10 @@ import rpc_pb2_grpc as lnrpc
 from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 
+
 class LightningStub(LoggerMixin):
     """lightning stub manager"""
+
     def __init__(self):
         self._host = os.environ.get('LND_HOST_PORT')
         self._network = os.environ.get('NETWORK')
@@ -31,7 +33,8 @@ class LightningStub(LoggerMixin):
 
         cert_creds = grpc.ssl_channel_credentials(cert)
         auth_creds = grpc.metadata_call_credentials(metadata_callback)
-        combined_creds = grpc.composite_channel_credentials(cert_creds, auth_creds)
+        combined_creds = grpc.composite_channel_credentials(
+            cert_creds, auth_creds)
 
         # TODO add wallet unlocking stub for wallet unlock
         # TODO max receive message length? = 1024^3

@@ -5,6 +5,7 @@ from helpers.crypto import encode
 
 TOKEN_PAYLOAD = ObjectType('TokenPayload')
 
+
 @TOKEN_PAYLOAD.field('accessToken')
 def r_access_token(user: User, _) -> str:
     access_json = {
@@ -14,6 +15,7 @@ def r_access_token(user: User, _) -> str:
         'exp': datetime.utcnow() + timedelta(minutes=15)
     }
     return encode(access_json, kind='access')
+
 
 @TOKEN_PAYLOAD.field('refreshToken')
 def r_refresh_token(user: User, _) -> str:

@@ -7,13 +7,14 @@ from .onchain_txs import GetOnchainTxs
 from .offchain_txs import GetOffchainTxs
 from .locked_payments import GetLockedPayments
 
+
 class GetBalance(AbstractMethod, LoggerMixin):
     """method to get the calculated balance for the user"""
 
     async def run(self, user):
         balance = 0
 
-        #asking for 0 invoices returns all invoices
+        # asking for 0 invoices returns all invoices
         invoice_method = GetUserInvoices(only_paid=True)
         for paid_invoice in await user(invoice_method):
             balance += paid_invoice['amount']
@@ -34,6 +35,7 @@ class GetBalance(AbstractMethod, LoggerMixin):
         for invoice in await user(locked_payments_method):
             # for each locked payment (invoice that has been sent but not validated)
             # Credit user's account balance
-            balance -= invoice['amount'] + math.floor(invoice['amount'] * 0.01) #fee limit
+            balance -= invoice['amount'] + \
+                math.floor(invoice['amount'] * 0.01)  # fee limit
 
         return balance

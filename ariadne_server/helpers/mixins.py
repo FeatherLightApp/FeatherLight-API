@@ -1,6 +1,7 @@
 """module for defining helpful mixins"""
 import logging
 
+
 class LoggerMixin:
     """Mixin for adding logger to a class"""
     @property
@@ -16,7 +17,8 @@ class LoggerMixin:
         if logger.hasHandlers():
             logger.handlers.clear()
         handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)-15s %(name)-12s: %(levelname)-8s %(message)s')
+        formatter = logging.Formatter(
+            '%(asctime)-15s %(name)-12s: %(levelname)-8s %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 

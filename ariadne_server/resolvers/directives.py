@@ -9,29 +9,32 @@ from classes.error import Error
 from helpers.mixins import LoggerMixin
 from context import REDIS
 
+
 class AuthDirective(SchemaDirectiveVisitor):
 
     def visit_field_definition(self, field, *_):
-        #req_role = self.args.get('requires') TODO Implement roles later
+        # req_role = self.args.get('requires') TODO Implement roles later
         orig_resolver = field.resolve or default_field_resolver
 
-        #define wrapper
+        # define wrapper
         async def check_auth(obj, info, **kwargs):
-            if not (auth_header := info.context['request'].headers.get('Authorization')):
+            if not (auth_header: = info.context['request'].headers.get('Authorization')):
                 return Error('AuthenticationError', 'No access token sent. You are not logged in')
-            decode_response: Union[Dict, Error] = decode(auth_header.replace('Bearer ', ''), kind='access')
+            decode_response: Union[Dict, Error] = decode(
+                auth_header.replace('Bearer ', ''), kind='access')
             # if decode fails return the error
             if isinstance(decode_response, Error):
                 return decode_response
             if self.args.get('requires') == 'ADMIN' and decode_response['role'] != 'ADMIN':
                 return Error('AuthenticationError', 'You do not have permission to do this')
             # User is authenticated. Inject into obj if not defined
-            new_obj = obj or User(decode_response['id'], decode_response['role'])
+            new_obj = obj or User(
+                decode_response['id'], decode_response['role'])
             if iscoroutinefunction(orig_resolver):
                 return await orig_resolver(new_obj, info, **kwargs)
             else:
                 return orig_resolver(new_obj, info, **kwargs)
-        
+
         field.resolve = check_auth
         return field
 
@@ -54,7 +57,6 @@ class DatetimeDirective(SchemaDirectiveVisitor):
 
 class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
 
-    
     def visit_field_definition(self, field, *_):
         orig_resolver = field.resolve or default_field_resolver
         operations = self.args.get('operations')
@@ -68,14 +70,14 @@ class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
                 await REDIS.conn.incr(redis_key)
                 if not num_requests:
                     await REDIS.conn.expire(redis_key, seconds)
-                
-                #resolve function
+
+                # resolve function
                 if iscoroutinefunction(orig_resolver):
                     return await orig_resolver(obj, info, **kwargs)
                 else:
                     return orig_resolver(obj, info, **kwargs)
-            
+
             return Error('RateLimited', f"You have exceeded rate limit of {operations} requests per {seconds} seconds")
-            
+
         field.resolve = check_rate_limit
         return field
