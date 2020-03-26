@@ -11,6 +11,12 @@ from context import LND, BITCOIND
 QUERY = QueryType()
 
 
+@QUERY.field('me')
+def r_me(obj):
+    #pass object into union resolver
+    return obj
+
+
 @QUERY.field('walletBalance')
 async def r_wallet_balance(*_) -> dict:
     return await make_async(LND.stub.WalletBalance.future(ln.WalletBalanceRequest()))
