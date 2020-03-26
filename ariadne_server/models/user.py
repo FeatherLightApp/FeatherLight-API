@@ -10,7 +10,7 @@ class User(db.Model):
 
     id = db.Column(db.String(20), primary_key=True, nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password_hash = db.Column(db.String(100), nullable=False)
     # address can be null if user doesnt request an address
     bitcoin_address = db.Column(db.String(64))
     role = db.Column(db.String(10), default='user', nullable=False)

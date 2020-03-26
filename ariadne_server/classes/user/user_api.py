@@ -17,7 +17,6 @@ from .unlock_funds import UnlockFunds
 
 class User(LoggerMixin, UserModel):
     # These are none unless expicitly set by a create function
-    username = None
     password = None
 
     async def __call__(self, api_method: AbstractMethod) -> Any:

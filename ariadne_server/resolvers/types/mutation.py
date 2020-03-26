@@ -29,36 +29,34 @@ _mutation_logger = LoggerMixin()
 # TODO add post limiter?
 async def r_create_user(_: None, info, role: str = 'USER') -> User:
     """create a new user and save to db"""
-    # create userid hex
-    userid = token_hex(10)
     # create api object
-
-    user.username = token_hex(10)
-
-    user.password = token_hex(10)
+    password = token_hex(10)
     # save to db
-    await User.create(
-        id=userid,
-        username=user.username,
-        password=ARGON.hash(user.password),
+    user = await User.create(
+        id=token_hex(10),
+        username=token_hex(10),
+        password_hash=ARGON.hash(password),
         role=role
     )
+    #set password field on user to pass them their password 1 time
+    user.password = password
     # return api object to resolver
     return user
 
 
 @MUTATION.field('login')
 async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
-    if not (user_obj:= await User.query.where(User.username == username).gino.first()):
-        return Error('Authentication Error', 'User not found')
+    if not (user_obj := await User.query.where(User.username == username).gino.first()):
+        _mutation_logger.logger.critical(user_obj)
+        return Error('AuthenticationError', 'User not found')
     # verify pw hash
     try:
-        ARGON.verify(user_obj.password,  password)
+        ARGON.verify(user_obj.password_hash, password)
     except VerificationError:
         return Error('AuthenticationError', 'Incorrect password')
 
-    if ARGON.check_needs_rehash(user_obj.password):
-        await user_obj.update(password=ARGON.hash(password).apply())
+    if ARGON.check_needs_rehash(user_obj.password_hash):
+        await user_obj.update(password_hash=ARGON.hash(password).apply())
 
     return user_obj
 
