@@ -9,7 +9,7 @@ _TOKEN_RESPONSE = UnionType('TokenResponse')
 def r_token_response(obj, *_) -> str:
     if isinstance(obj, Error):
         return 'Error'
-    if isinstance(obj, str):
+    if isinstance(obj, User):
         return 'TokenPayload'
 
 
