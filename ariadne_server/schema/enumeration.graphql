@@ -3,6 +3,7 @@ enum ErrorType {
     AuthenticationError
     PaymentError
     RateLimited
+    InsufficientFunds
 }
 
 enum Permission {

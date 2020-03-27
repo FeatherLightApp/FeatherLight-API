@@ -1,4 +1,5 @@
 """Class for locking Redis instance"""
+# TODO DEPRECATED REMOVE
 from datetime import datetime
 from helpers.mixins import LoggerMixin
 from context import REDIS

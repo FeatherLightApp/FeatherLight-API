@@ -1,6 +1,7 @@
 """Module for adding routing fees to a remote invoice response
 DEPRECATED Remove this file in the futuremax 
 """
+# TODO remove this file
 
 
 def attach_fees(invoice):

@@ -1,8 +1,9 @@
 import json
-from datetime import datetime
+from time import time
 from .abstract_user_method import AbstractMethod
 from context import REDIS
 
+#TODO determine if should be switched in to sql db
 
 class LockFunds(AbstractMethod):
 
@@ -15,13 +16,12 @@ class LockFunds(AbstractMethod):
         Adds invoice to a list of user's locked payments.
         Used to calculate balance till the lock is lifted
         (payment is in determined state - success or fail)
+        This only applied to external payments, internal ones are atomic
         """
         assert user.id
-        utc_seconds = (datetime.utcnow() -
-                       datetime(1970, 1, 1)).total_seconds()
         doc = {
             'pay_req': self.pay_req,
             'amount': self.invoice.num_satoshis,
-            'timestamp': utc_seconds
+            'timestamp': time()
         }
         return REDIS.conn.rpush('locked_payments_for_' + user.id, json.dumps(doc))

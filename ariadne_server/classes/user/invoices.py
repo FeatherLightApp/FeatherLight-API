@@ -30,13 +30,6 @@ class GetUserInvoices(AbstractMethod):
                 .offset(self._offset) \
                     .gino.iterate():
 
-                # req = ln.PayReqString(pay_req=invoice.payment_request)
-                # decoded = await make_async(
-                #         LND.stub.DecodePayReq.future(req, timeout=5000)
-                # )
-
-                # Determine if invoice has actually been paid
-
                 if not invoice.paid:
                     # if not paid check lnd to see if its paid in lnd db
                     # convert hex serialized payment hash to bytes
@@ -49,13 +42,6 @@ class GetUserInvoices(AbstractMethod):
                         # invoice is paid update state in db
                         await invoice.update(paid=True).apply()
 
-                # invoice_json['amount'] = decoded.num_satoshis
-                # invoice_json['expiry'] = decoded.expiry
-                # invoice_json['timestamp'] = decoded.timestamp
-                # invoice_json['kind'] = 'user_invoice'
-                # invoice_json['memo'] = decoded.description
-                # # TODO find fix for this
-                # invoice_json['payment_hash'] = invoice_json['r_hash']
                 invoices.append(invoice)
         # if only paid is false return all results else return only settled ammounts
         return [invoice for invoice in invoices if not self._only_paid or invoice.paid]

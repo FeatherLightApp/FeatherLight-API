@@ -1,23 +1,18 @@
+from time import time
 from math import floor
 import json
 from secrets import token_hex
 from typing import Union, Optional
-from datetime import (
-    datetime,
-    timedelta
-)
-from protobuf_to_dict import protobuf_to_dict
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
 from classes.user import User
-from classes.lock import Lock
 from classes.error import Error
 from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
-from helpers.crypto import decode, hash_string
+from helpers.crypto import decode
 from helpers.hexify import HexEncoder
-from helpers.attach_fees import attach_fees
-from context import LND, REDIS, ARGON
+from context import LND, REDIS, ARGON, GINO
+from models import Invoice
 import rpc_pb2 as ln
 
 MUTATION = MutationType()
@@ -56,14 +51,14 @@ async def r_auth(_: None, info, username: str, password: str) -> Union[User, Err
         return Error('AuthenticationError', 'Incorrect password')
 
     if ARGON.check_needs_rehash(user_obj.password_hash):
-        await user_obj.update(password_hash=ARGON.hash(password).apply())
+        await user_obj.update(password_hash=ARGON.hash(password)).apply()
 
     return user_obj
 
 
 # TODO GET RID OF THIS ITS FOR DEBUG
 @MUTATION.field('forceUser')
-async def r_force_user(_, info, user: str) -> str:
+async def r_force_user(*_, user: str) -> str:
     if not (user_obj:= await User.get(user)):
         return Error('AuthenticationError', 'User not found in DB')
     return user_obj
@@ -92,142 +87,106 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
     expiry_time = 3600*24
     request = ln.Invoice(
         memo=memo,
-        value=amt,
+        value_msat=amt,
         expiry=expiry_time
     )
-    response = await make_async(LND.stub.AddInvoice.future(request, timeout=5000))
-    output = protobuf_to_dict(response)
-    # change the bytes object to hex string for json serialization
-    await REDIS.conn.rpush(f"userinvoices_for_{user.id}", json.dumps(output, cls=HexEncoder))
-    # add hex encoded bytes hash to redis
-    hash_hex = output['r_hash'].hex()
-    _mutation_logger.logger.critical(
-        f"setting key: payment_hash_{hash_hex} to {user.id}"
+    inv = await make_async(LND.stub.AddInvoice.future(request, timeout=5000))
+
+    # lookup invoice to get preimage
+    pay_hash = ln.PaymentHash(r_hash=inv.r_hash)
+    inv_lookup = await make_async(LND.stub.LookupInvoice.future(pay_hash, timeout=5000))
+    
+    return await Invoice.create(
+        payment_hash=inv.r_hash.hex(),
+        payment_request=inv.payment_request,
+        payment_preimage=inv_lookup.r_preimage.hex(),
+        timestamp=inv_lookup.creation_date,
+        expiry=inv_lookup.expiry,
+        memo=inv_lookup.memo,
+        paid=False,
+        msat_amount=inv_lookup.value_msat,
+        # do not set a fee since this invoice has not been paid
+        payee=user.id
+        # do not set a payer since we dont know to whom to invoice is being sent
     )
-    await REDIS.conn.set(f"payment_hash_{hash_hex}", user.id)
-    # decode response and return GraphQL invoice type
-    pay_req_string = ln.PayReqString(pay_req=response.payment_request)
-    decoded_invoice = await make_async(LND.stub.DecodePayReq.future(pay_req_string, timeout=5000))
-    return {
-        #payment_preimage is resolved in invoice_resolver
-        'amount': decoded_invoice.num_satoshis,
-        'memo': decoded_invoice.description,
-        'payment_hash': decoded_invoice.payment_hash,
-        'paid': False,
-        'expiry': decoded_invoice.expiry,
-        'timestamp': decoded_invoice.timestamp,
-        'payment_request': response.payment_request,
-    }
 
 
 @MUTATION.field('payInvoice')
-async def r_pay_invoice(user: User, info, invoice: str, amt: Optional[int] = None) -> dict:
-    """Authenticated Route"""
-    assert not amt or amt >= 0
-    # obtain a db lock
-    lock = Lock(
-        REDIS.conn,
-        'invoice_paying_for_' + user.id
-    )
-    if not await lock.obtain_lock():
-        _mutation_logger.logger.warning(
-            'Failed to acquire lock for user {}'.format(user.id))
-        return Error('PaymentError', 'DB is locked try again later')
-    user_balance = await user.balance(info)
-    request = ln.PayReqString(pay_req=invoice)
-    decoded_invoice = await make_async(LND.stub.DecodePayReq.future(request, timeout=5000))
-    real_amount = decoded_invoice.num_satoshis if decoded_invoice.num_satoshis > 0 else amt
-    decoded_invoice.num_satoshis = real_amount
-    _mutation_logger.logger.info(
-        f"paying invoice user:{user.id} with balance {user_balance}, for {real_amount}")
+async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
+    #determine true invoice amount
+    pay_string = ln.PayReqString(pay_req=invoice)
+    decoded = await make_async(LND.stub.DecodePayReq.future(request, timeout=5000))
 
-    if not real_amount:
-        _mutation_logger.logger.warning(
-            f"Invalid amount when paying invoice for user {user.id}")
-        await lock.release_lock()
-        return Error(error_type='PaymentError', message='Invalid invoice amount')
-    # check if user has enough balance including possible fees
-    if not user_balance >= real_amount + floor(real_amount * 0.01):
-        await lock.release_lock()
-        return Error('PaymentError', 'Not enough balance to pay invoice')
+    if amt is not None and decoded.num_msat != amt and decoded.num_msat > 0:
+        return Error('PaymentError', 'Payment amount does not match invoice amount')
 
-    # determine destination of funds
-    if LND.id_pubkey == decoded_invoice.destination:
-        # this is internal invoice now, receiver add balance
-        _mutation_logger.logger.info(decoded_invoice.payment_hash)
+    if decoded.num_msat == 0 and not amt:
+        return Error('PaymentError', 'You must specify an amount for this tip invoice')
 
-        if not (userid_payee:= await REDIS.conn.get(f"payment_hash_{decoded_invoice.payment_hash}")):
-            await lock.release_lock()
-            return Error('PaymentError', 'Could not get user by payment hash')
-        if await REDIS.conn.get(f"is_paid_{decoded_invoice.payment_hash}"):
-            # invoice has already been paid
-            await lock.release_lock()
-            _mutation_logger.logger.warning(
-                'Attempted to pay invoice that was already paid')
-            return Error('PaymentError', 'Invoice has already been paid')
+    payment_amt = amt or decoded.num_msat
 
-        # initialize internal user payee
-        # TODO FIXME change to sql db
-        payee = await User.get(userid_payee)
+    # attempt to load invoice obj
+    invoice_obj = await Invoice.get(decoded.payment_hash)
+    if invoice_obj and invoice_obj.paid:
+        return Error('PaymentError', 'This invoice has already been paid')
 
-        doc_to_save = {
-            # paid is implied by storage key
-            #payment_preimage is resolved in invoice_resolver
-            'amount': real_amount,
-            'value': real_amount + floor(real_amount * 0.003),
-            'fee': floor(real_amount * 0.003),
-            'pay_req': invoice,
-            'timestamp': decoded_invoice.timestamp,
-            'memo': decoded_invoice.description,
-            'type': 'local_invoice',
-            'payment_hash': decoded_invoice.payment_hash
-        }
+    #lock payer's db row before determining balance
+    async with GINO.db.transaction():
+        # potentially user.query.with_for..
+        user.query.with_for_update().gino.status() #obtain lock
 
-        # sender spent his balance
-        await REDIS.conn.rpush(
-            f"paid_invoices_for_{user.id}",
-            json.dumps(doc_to_save, cls=HexEncoder)
-        )
-        await REDIS.conn.set(f"is_paid_{decoded_invoice.payment_hash}", 1)
-        await lock.release_lock()
-        return doc_to_save
+        if payment_amt > await user.balance():
+            return Error(
+                'InsufficientFunds',
+                f'Attempting to pay {payment_amt} with only {user_balance}'
+            )
+  
+        if LND.id_pubkey == decoded.payment_hash and invoice_obj:
+            #internal invoice, get payee from db
+            if not (payee := await User.get(invoice_obj.payee)):
+                # could not find the invoice creator in the db
+                return Error('PaymentError', 'This invoice is invalid')
 
-    else:
-        # this is a standard lightning network payment
-        fee_limit = floor(real_amount * 0.005) + 1
+            invoice_obj.update(
+                paid=True,
+                payer=user.id,
+                msat_fee=floor(payment_amt * 0.03),
+                paid_at=time()
+            ).apply()
 
-        def req_gen():
-            # define a request generator that yields a single payment request
-            yield ln.SendRequest(
+            return invoice_obj
+        
+        # proceed with external payment if invoice does not exist in db already
+        elif not invoice_obj:
+            fee_limit = floor(payment_amt * 0.005) + 1000) #add 1 satoshi
+
+            def req_gen():
+                yield ln.SendRequest(
+                    payment_request=invoice,
+                    amt_msat=payment_amt,
+                    fee_limit=ln.FeeLimit(fixed=fee_limit)
+                )
+
+            invoice_obj = Invoice(
+                payment_hash=decoded.payment_hash,
                 payment_request=invoice,
-                amt=real_amount,  # amount is only used for tip invoices,
-                fee_limit=ln.FeeLimit(fixed=fee_limit)
+                timestamp=decoded.timestamp,
+                expiry=decoded.expiry,
+                memo=decoded.description,
+                paid=False, # not yet paid
+                msat_amount=decoded.num_msat or decoded.num_satoshis * 1000,
+                payer=user.id
             )
 
-        await user.lock_funds(invoice, decoded_invoice)
-        for pay_res in LND.stub.SendPayment(req_gen()):
-            # stream response synchronously FIXME
-            _mutation_logger.logger.critical(f"pay res {pay_res}")
-            await user.unlock_funds(invoice)
-            if not pay_res.payment_error and pay_res.payment_preimage:
-                # payment success
-                pay_dict = protobuf_to_dict(pay_res)
-                pay_dict['pay_req'] = invoice
-                pay_dict['timestamp'] = decoded_invoice.timestamp
-                pay_dict['memo'] = decoded_invoice.description
-                pay_dict['amount'] = decoded_invoice.num_satoshis
-                pay_dict['fee'] = max(
-                    fee_limit, pay_res.payment_route.total_fees)
-                pay_dict['value'] = pay_dict['amount'] + pay_dict['fee']
-                pay_dict['type'] = 'remote_invoice'
-                pay_dict.pop('payment_error', None)
-                pay_json = json.dumps(pay_dict, cls=HexEncoder)
-                _mutation_logger.logger.info(pay_json)
+            # TODO find native async way to execute
+            for payment_res in LND.stub.SendPayment(req_gen()):
+                _mutation_logger.logger.info(f"payment response: {payment_res}")
+                if payment_res.payment_error or not payment_res.payment_preimage:
+                    return Error('PaymentError', f"received error {payment_res.payment_error}")
 
-                await REDIS.conn.rpush(f"paid_invoices_for_{user.id}", pay_json)
-                await lock.release_lock()
-                return pay_dict
-            else:
-                # payment failed
-                await lock.release_lock()
-                return Error('PaymentError', pay_res.payment_error)
+                invoice_obj.payment_preimage = payment_res.payment_preimage.hex()
+                invoice_obj.msat_fee = max(fee_limit, payment_res.payment_route.total_fees)
+                invoice_obj.paid = True
+                invoice_obj.paid_at = time()
+                invoice_obj.create()
+                return invoice_obj

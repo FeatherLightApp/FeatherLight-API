@@ -1,4 +1,4 @@
-from datetime import (datetime, timedelta)
+from time import time
 from ariadne import ObjectType
 from classes.user import User
 from helpers.crypto import encode
@@ -11,8 +11,8 @@ def r_access_token(user: User, _) -> str:
     access_json = {
         'id': user.id,
         'role': user.role,
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(minutes=15)
+        'iat': time(),
+        'exp': time() + 900 # 15 minutes in seconds
     }
     return encode(access_json, kind='access')
 
@@ -21,7 +21,7 @@ def r_access_token(user: User, _) -> str:
 def r_refresh_token(user: User, _) -> str:
     refresh_json = {
         'id': user.id,
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(days=7)
+        'iat': time(),
+        'exp': time() + 604800 # 1 week in seconds
     }
     return encode(refresh_json, kind='refresh')

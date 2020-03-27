@@ -9,12 +9,16 @@ class Invoice(db.Model):
     __tablename__ = 'invoices'
 
     payment_hash = db.Column(db.String(64), primary_key=True, nullable=False)
-    payment_preimage = db.Column(db.String(64), nullable=False)
+    #null before external invoice is paid
+    payment_preimage = db.Column(db.String(64))
     payment_request = db.Column(db.String(1024), nullable=False)
     timestamp = db.Column(db.Integer, nullable=False)
-    expiry = db.Column(db.Integer, nullable=False)
-    memo = db.Column(db.String(128), nullable=False)
+    expiry = db.Column(db.Integer, nullable=False),
+    # null if paying external invoice with no memo
+    memo = db.Column(db.String(128))
     paid = db.Column(db.Boolean, nullable=False)
+    # null if not yet paid
+    paid_at = db.Column(db.Integer)
     msat_amount = db.Column(db.Integer, nullable=False)
     # fee null for receivers of invoice
     msat_fee = db.Column(db.Integer)
