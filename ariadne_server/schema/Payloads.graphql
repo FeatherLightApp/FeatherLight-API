@@ -4,7 +4,6 @@ type TokenPayload {
 }
 
 type DecodeInvoicePayload {
-    ok: Boolean!
     error: String
     destination: String
     paymentHash: String
@@ -27,7 +26,6 @@ type DecodeInvoicePayload {
 # }
 
 type InfoPayload {
-    ok: Boolean!
     version: String
     identityPubkey: String
     alias: String

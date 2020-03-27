@@ -18,7 +18,7 @@ RUN git clone https://github.com/lightningnetwork/lnd.git .
 
 RUN cd /go/src/github.com/lightningnetwork/lnd \
 &&  make \
-&&  make install tags="signrpc walletrpc chainrpc invoicesrpc routerrpc"
+&&  make install tags="signrpc walletrpc chainrpc invoicesrpc routerrpc monitoring"
 
 # Start a new, final image to reduce size.
 FROM golang:1.13-alpine as final
