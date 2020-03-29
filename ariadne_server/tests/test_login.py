@@ -1,3 +1,4 @@
+from secrets import token_hex
 import pytest
 from ariadne import graphql
 
@@ -27,14 +28,14 @@ async def test_login(schema):
             {
                 'query': query,
                 'variables': {
-                    'username' user['username'],
+                    'username': user['username'],
                     'password': user['password']
                 }
             }
         ))['data']['login']
         assert response['role'] == user['role']
-        assert btcAddress == user['btcAddress']
-        assert balance == 0
+        assert response['btcAddress'] == user['btcAddress']
+        assert response['balance'] == 0
 
     response = (await graphql(
         schema,

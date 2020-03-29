@@ -43,6 +43,6 @@ async def test_create_user(role, schema):
     assert response['password']
     assert response['role'] == role
     assert len(response['invoices']) == 0
-    assert balance == 0
+    assert response['balance'] == 0
     assert response['btcAddress']
     pytest.users.append(response)
