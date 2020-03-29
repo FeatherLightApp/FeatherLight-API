@@ -6,7 +6,7 @@ from helpers.crypto import decode as decode_jwt
 
 @pytest.mark.asyncio()
 @pytest.mark.dependency()
-@pytest.mark.parametrize('role', ['ADMIN', 'USER'])
+@pytest.mark.parametrize('role', [('ADMIN'), ('USER')])
 @pytest.mark.usefixtures('schema')
 async def test_create_user(role, schema):
     query = '''
