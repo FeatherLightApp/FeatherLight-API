@@ -4,6 +4,7 @@ requests
 pytest
 pytest-asyncio
 pytest-env
+pytest-dependency
 pyjwt
 protobuf3-to-dict
 uvicorn
