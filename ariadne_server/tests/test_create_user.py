@@ -37,7 +37,8 @@ async def test_create_user(role, schema, context):
                 'role': role
             }
         },
-        context_value=context
+        context_value=context,
+        debug=True
     )
     print(response)
     r = response[1]['data']['createUser']

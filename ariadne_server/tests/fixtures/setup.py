@@ -4,6 +4,7 @@ from resolvers.schema import SCHEMA
 
 @pytest.fixture(scope='session')
 async def setup_db():
+    print('initializing connections for testing')
     await GINO.initialize()
     await REDIS.initialize()
     await LND.initialize()

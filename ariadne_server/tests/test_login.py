@@ -32,7 +32,8 @@ async def test_login(schema, context):
                     'password': user['password']
                 }
             },
-            context_value=context
+            context_value=context,
+            debug=True
         )
         r = response[1]['data']['login']
         assert r['role'] == user['role']
@@ -48,7 +49,8 @@ async def test_login(schema, context):
                 'password': token_hex(10)
             }
         },
-        context_value=context
+        context_value=context,
+        debug=True
     )
     r = response[1]['data']['login']
 
@@ -64,7 +66,8 @@ async def test_login(schema, context):
                 'password': pytest.users[0]['password']
             }
         },
-        context_value=context
+        context_value=context,
+        debug=True
     )
     r = response[1]['data']['login']
     assert r['errorType'] == 'AuthenticationError'
