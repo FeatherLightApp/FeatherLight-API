@@ -2,7 +2,6 @@
 import pytest
 from tests.fixtures.info import info
 
-def pytest_namespace():
-    return {
-        'users': [],
-    }
+#inject users list to use created users in multiple tests
+def pytest_configure():
+    pytest.users = []

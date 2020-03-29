@@ -2,7 +2,6 @@ ariadne
 httpx
 requests
 pytest
-pluggy #pytest dependency
 pytest-asyncio
 pytest-env
 pyjwt
