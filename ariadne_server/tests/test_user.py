@@ -13,7 +13,7 @@ from resolvers.types.token_payload import (
 from helpers.crypto import decode as decode_jwt
 
 @pytest.mark.asyncio
-@pytest.mark.parameterize('role', ['ADMIN', 'USER'])
+@pytest.mark.parametrize('role', ['ADMIN', 'USER'])
 async def test_create_user(role):
     user_obj = await r_create_user(role=role)
     assert user_obj.id
