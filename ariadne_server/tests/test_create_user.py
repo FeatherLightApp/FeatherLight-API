@@ -7,8 +7,7 @@ from helpers.crypto import decode as decode_jwt
 @pytest.mark.asyncio()
 @pytest.mark.dependency()
 @pytest.mark.parametrize('role', ['ADMIN', 'USER'])
-@pytest.mark.usefixtures('schema')
-async def test_create_user(role, schema):
+async def test_create_user(role, schema, context):
     query = '''
         mutation createUser($role: Role){
             createUser(role: $role) {
@@ -37,7 +36,8 @@ async def test_create_user(role, schema):
             'variables': {
                 'role': role
             }
-        }
+        },
+        context_value=context
     )
     print(response)
     r = response[1]['data']['createUser']

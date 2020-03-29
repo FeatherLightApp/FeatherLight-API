@@ -5,7 +5,7 @@ from ariadne import graphql
 
 @pytest.mark.asyncio
 @pytest.mark.dependency(depends=['test_create_user'])
-async def test_login(schema):
+async def test_login(schema, context):
     query = '''
         mutation login($username: String! password: String!) {
             login(username: $username password: $password) {
@@ -31,7 +31,8 @@ async def test_login(schema):
                     'username': user['username'],
                     'password': user['password']
                 }
-            }
+            },
+            context_value=context
         )
         r = response[1]['data']['login']
         assert r['role'] == user['role']
@@ -46,7 +47,8 @@ async def test_login(schema):
                 'username': pytest.users[0]['username'],
                 'password': token_hex(10)
             }
-        }
+        },
+        context_value=context
     )
     r = response[1]['data']['login']
 
@@ -61,7 +63,8 @@ async def test_login(schema):
                 'username': token_hex(10),
                 'password': pytest.users[0]['password']
             }
-        }
+        },
+        context_value=context
     )
     r = response[1]['data']['login']
     assert r['errorType'] == 'AuthenticationError'
