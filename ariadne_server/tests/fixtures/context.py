@@ -16,6 +16,6 @@ class FakeContext(dict):
         self['request'] = req_obj
 
 
-@pytest.fixture.scope(autouse=True)
+@pytest.fixture(autouse=True)
 def context():
     return FakeContext()
