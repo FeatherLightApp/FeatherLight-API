@@ -33,7 +33,7 @@ async def test_login(schema):
                 }
             }
         )
-        r = response['data']['login']
+        r = response[1]['data']['login']
         assert r['role'] == user['role']
         assert r['btcAddress'] == user['btcAddress']
         assert r['balance'] == 0
@@ -48,7 +48,7 @@ async def test_login(schema):
             }
         }
     )
-    r = response['data']['login']
+    r = response[1]['data']['login']
 
     assert r['errorType'] == 'AuthenticationError'
     assert r['message'] == 'Incorrect password'
@@ -63,6 +63,6 @@ async def test_login(schema):
             }
         }
     )
-    r = response['data']['login']
+    r = response[1]['data']['login']
     assert r['errorType'] == 'AuthenticationError'
     assert r['message'] == 'User not found'
