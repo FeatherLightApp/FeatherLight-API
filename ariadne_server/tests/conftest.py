@@ -1,6 +1,6 @@
 """configuration file for pytest"""
 import pytest
-from fixtures.info import info
+from tests.fixtures.info import info
 
 def pytest_namespace():
     return {
