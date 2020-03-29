@@ -6,7 +6,7 @@ from ariadne import graphql
 @pytest.mark.asyncio
 @pytest.mark.dependency(depends=['test_create_user'])
 async def test_login(schema):
-    query='''
+    query = '''
         mutation login($username: String! password: String!) {
             login(username: $username password: $password) {
                 __typename
@@ -23,7 +23,7 @@ async def test_login(schema):
         }
     '''
     for user in pytest.users:
-        response = (await graphql(
+        response = await graphql(
             schema,
             {
                 'query': query,
@@ -32,12 +32,13 @@ async def test_login(schema):
                     'password': user['password']
                 }
             }
-        ))['data']['login']
-        assert response['role'] == user['role']
-        assert response['btcAddress'] == user['btcAddress']
-        assert response['balance'] == 0
+        )
+        r = response['data']['login']
+        assert r['role'] == user['role']
+        assert r['btcAddress'] == user['btcAddress']
+        assert r['balance'] == 0
 
-    response = (await graphql(
+    response = await graphql(
         schema,
         {
             'query': query,
@@ -46,12 +47,13 @@ async def test_login(schema):
                 'password': token_hex(10)
             }
         }
-    ))['data']['login']
+    )
+    r = response['data']['login']
 
-    assert response['errorType'] == 'AuthenticationError'
-    assert response['message'] == 'Incorrect password'
+    assert r['errorType'] == 'AuthenticationError'
+    assert r['message'] == 'Incorrect password'
 
-    response = (await graphql(
+    response = await graphql(
         schema,
         {
             'query': query,
@@ -60,6 +62,7 @@ async def test_login(schema):
                 'password': pytest.users[0]['password']
             }
         }
-    ))['data']['login']
-    assert response['errorType'] == 'AuthenticationError'
-    assert response['message'] == 'User not found'
+    )
+    r = response['data']['login']
+    assert r['errorType'] == 'AuthenticationError'
+    assert r['message'] == 'User not found'

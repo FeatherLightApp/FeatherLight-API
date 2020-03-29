@@ -10,7 +10,7 @@ from helpers.crypto import decode as decode_jwt
 @pytest.mark.usefixtures('schema')
 async def test_create_user(role, schema):
     query = '''
-        mutation createUser($role: String){
+        mutation createUser($role: Role){
             createUser(role: $role) {
                 __typename
                 ... on User {
@@ -30,7 +30,7 @@ async def test_create_user(role, schema):
             }
         }
     '''
-    response = (await graphql(
+    response = await graphql(
         schema,
         {
             'query': query,
@@ -38,11 +38,13 @@ async def test_create_user(role, schema):
                 'role': role
             }
         }
-    ))['data']['createUser']
-    assert response['username']
-    assert response['password']
-    assert response['role'] == role
-    assert len(response['invoices']) == 0
-    assert response['balance'] == 0
-    assert response['btcAddress']
-    pytest.users.append(response)
+    )
+    print(response)
+    r = response['data']['createUser']
+    assert r['username']
+    assert r['password']
+    assert r['role'] == role
+    assert len(r['invoices']) == 0
+    assert r['balance'] == 0
+    assert r['btcAddress']
+    pytest.users.append(r)
