@@ -29,16 +29,11 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                 return Error('AuthenticationError', 'You do not have permission to do this')
             # User is authenticated. Inject into obj if not defined
             db_user = await User.get(decode_response['id'])
-            self.logger.critical(db_user)
             new_obj = obj or db_user
-            self.logger.critical(new_obj)
             if iscoroutinefunction(orig_resolver):
                 result = await orig_resolver(new_obj, info, **kwargs)
             else:
                 result = orig_resolver(new_obj, info, **kwargs)
-            self.logger.critical(f"resolved with {orig_resolver}")
-            self.logger.critical(f"deafult resolver {default_field_resolver}")
-            self.logger.critical(f"result {result}")
             return result
 
         field.resolve = check_auth

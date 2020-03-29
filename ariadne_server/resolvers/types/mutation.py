@@ -22,7 +22,7 @@ _mutation_logger = LoggerMixin()
 
 @MUTATION.field('createUser')
 # TODO add post limiter?
-async def r_create_user(_: None, info, role: str = 'USER') -> User:
+async def r_create_user(*_, role: str = 'USER') -> User:
     """create a new user and save to db"""
     # create api object
     password = token_hex(10)
@@ -40,7 +40,7 @@ async def r_create_user(_: None, info, role: str = 'USER') -> User:
 
 
 @MUTATION.field('login')
-async def r_auth(_: None, info, username: str, password: str) -> Union[User, Error]:
+async def r_auth(*_, username: str, password: str) -> Union[User, Error]:
     if not (user_obj := await User.query.where(User.username == username).gino.first()):
         _mutation_logger.logger.critical(user_obj)
         return Error('AuthenticationError', 'User not found')
@@ -75,7 +75,8 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
     if isinstance(decode_response, Error):
         return decode_response
     if isinstance(decode_response, dict):
-        return User.get(decode_response['id'])
+        # lookup userid from db and return
+        return await User.get(decode_response['id'])
 
 
 @MUTATION.field('addInvoice')

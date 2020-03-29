@@ -2,6 +2,8 @@ ariadne
 httpx
 requests
 pytest
+pytest-asyncio
+pytest-env
 pyjwt
 protobuf3-to-dict
 uvicorn
@@ -11,4 +13,3 @@ grpcio-tools
 googleapis-common-protos
 argon2-cffi
 gino
-pylint-sqlalchemy
