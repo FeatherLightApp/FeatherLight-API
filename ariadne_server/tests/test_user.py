@@ -1,6 +1,5 @@
 from secrets import token_hex
 import pytest
-from classes.user import User
 from classes.error import Error
 from resolvers.types.mutation import (
     r_create_user,
@@ -9,7 +8,7 @@ from resolvers.types.mutation import (
 )
 from resolvers.types.token_payload import (
     r_access_token,
-    r_refresh_token   
+    r_refresh_token
 )
 from helpers.crypto import decode as decode_jwt
 
@@ -44,10 +43,10 @@ def test_get_tokens():
         u = user.get('obj')
         access_token = r_access_token(u)
         assert access_token
-        assert decode_jwt(access_token)
+        assert decode_jwt(access_token, kind='access')
         refresh_token = r_refresh_token(u)
         assert refresh_token
-        assert decode_jwt(refresh_token)
+        assert decode_jwt(refresh_token, kind='refresh')
         user['access'] = access_token
         user['refresh'] = refresh_token
 
@@ -65,5 +64,3 @@ def test_refresh_access_token(info):
         info.context['request'].cookies['refresh'] = user.get('access')
         user_obj = r_get_token(None, info)
         assert isinstance(user_obj, Error)
-
-

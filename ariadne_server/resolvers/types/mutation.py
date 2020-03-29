@@ -11,7 +11,7 @@ from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 from helpers.crypto import decode
 from helpers.hexify import HexEncoder
-from context import LND, REDIS, ARGON, GINO
+from context import LND, ARGON, GINO
 from models import Invoice
 import rpc_pb2 as ln
 
@@ -116,7 +116,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
 async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
     #determine true invoice amount
     pay_string = ln.PayReqString(pay_req=invoice)
-    decoded = await make_async(LND.stub.DecodePayReq.future(request, timeout=5000))
+    decoded = await make_async(LND.stub.DecodePayReq.future(pay_string, timeout=5000))
 
     if amt is not None and decoded.num_msat != amt and decoded.num_msat > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')
@@ -135,8 +135,8 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     async with GINO.db.transaction():
         # potentially user.query.with_for..
         user.query.with_for_update().gino.status() #obtain lock
-
-        if payment_amt > await user.balance():
+        user_balance = await user.balance()
+        if payment_amt > await user_balance:
             return Error(
                 'InsufficientFunds',
                 f'Attempting to pay {payment_amt} with only {user_balance}'
@@ -159,7 +159,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         
         # proceed with external payment if invoice does not exist in db already
         elif not invoice_obj:
-            fee_limit = floor(payment_amt * 0.005) + 1000) #add 1 satoshi
+            fee_limit = floor(payment_amt * 0.005) + 1000 #add 1 satoshi
 
             def req_gen():
                 yield ln.SendRequest(

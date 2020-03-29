@@ -78,7 +78,10 @@ class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
                 else:
                     return orig_resolver(obj, info, **kwargs)
 
-            return Error('RateLimited', f"You have exceeded rate limit of {operations} requests per {seconds} seconds")
+            return Error(
+                'RateLimited',
+                f"You have exceeded rate limit of {operations} requests per {seconds} seconds"
+            )
 
         field.resolve = check_rate_limit
         return field
