@@ -1,6 +1,6 @@
 type TokenPayload {
-    accessToken: String!
-    refreshToken: String!
+    access: String!
+    refresh: String!
 }
 
 type DecodeInvoicePayload {

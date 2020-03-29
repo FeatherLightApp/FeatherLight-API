@@ -6,7 +6,7 @@ from helpers.crypto import encode
 TOKEN_PAYLOAD = ObjectType('TokenPayload')
 
 
-@TOKEN_PAYLOAD.field('accessToken')
+@TOKEN_PAYLOAD.field('access')
 def r_access_token(user: User, *_) -> str:
     access_json = {
         'id': user.id,
@@ -17,7 +17,7 @@ def r_access_token(user: User, *_) -> str:
     return encode(access_json, kind='access')
 
 
-@TOKEN_PAYLOAD.field('refreshToken')
+@TOKEN_PAYLOAD.field('refresh')
 def r_refresh_token(user: User, *_) -> str:
     refresh_json = {
         'id': user.id,
