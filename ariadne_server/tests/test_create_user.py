@@ -40,8 +40,9 @@ async def test_create_user(role, schema, context):
         context_value=context,
         debug=True
     )
-    print(response)
     r = response[1]['data']['createUser']
+    print(response)
+    print(r)
     assert r['username']
     assert r['password']
     assert r['role'] == role
