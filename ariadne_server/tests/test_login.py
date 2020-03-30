@@ -27,8 +27,8 @@ async def user_login(schema, context, user):
         {
             'query': login_query,
             'variables': {
-                'username': dummy_user.username,
-                'password': dummy_user.password
+                'username': user.username,
+                'password': user.password
             }
         },
         context_value=context.rand_client(),

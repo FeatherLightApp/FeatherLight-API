@@ -1,5 +1,6 @@
 import pytest
 from classes.user import User
+from context import ARGON
 
 @pytest.fixture(scope='session')
 async def dummy_user():
