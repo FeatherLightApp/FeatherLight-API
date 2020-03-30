@@ -35,7 +35,7 @@ async def user_login(schema, context, user):
         debug=True
     )
     r = response[1]['data']['login']
-    assert decode_jwt(r['access'], kind='access')['role'] == user['role']
+    assert decode_jwt(r['access'], kind='access')['role'] == user.role
     assert decode_jwt(r['refresh'], kind='refresh')
     return True
 
