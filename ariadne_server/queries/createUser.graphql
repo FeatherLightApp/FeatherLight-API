@@ -1,0 +1,26 @@
+mutation createUser($role: Role) {
+    createUser(role: $role) {
+        createUser(role: $role) {
+            __typename
+            ... on User {
+                username
+                password
+                role
+                btcAddress
+                created
+                tokens {
+                    access
+                    refresh
+                }
+                balance
+                invoices {
+                    paymentHash
+                }
+            }
+            ... on Error {
+                errorType
+                message
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+mutation login($username: String! $password: String!) {
+    login(username: $username password: $password) {
+        __typename
+        ... on TokenPayload {
+            access
+            refresh
+        }
+        ... on Error {
+            errorType
+            message
+        }
+    }
+}

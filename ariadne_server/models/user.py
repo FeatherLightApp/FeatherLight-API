@@ -14,3 +14,4 @@ class User(db.Model):
     # address can be null if user doesnt request an address
     bitcoin_address = db.Column(db.String(64))
     role = db.Column(db.String(10), default='user', nullable=False)
+    created = db.Column(db.Integer, nullable=False)

@@ -31,7 +31,8 @@ async def r_create_user(*_, role: str = 'USER') -> User:
         id=token_hex(10),
         username=token_hex(10),
         password_hash=ARGON.hash(password),
-        role=role
+        role=role,
+        created=time()
     )
     #set password field on user to pass them their password 1 time
     user.password = password
@@ -42,7 +43,6 @@ async def r_create_user(*_, role: str = 'USER') -> User:
 @MUTATION.field('login')
 async def r_auth(*_, username: str, password: str) -> Union[User, Error]:
     if not (user_obj := await User.query.where(User.username == username).gino.first()):
-        _mutation_logger.logger.critical(user_obj)
         return Error('AuthenticationError', 'User not found')
     # verify pw hash
     try:

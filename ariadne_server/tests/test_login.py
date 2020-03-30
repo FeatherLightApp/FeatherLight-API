@@ -5,21 +5,7 @@ from helpers.crypto import decode as decode_jwt
 
 pytestmark = pytest.mark.asyncio
 
-login_query = '''
-    mutation login($username: String! $password: String!) {
-        login(username: $username password: $password) {
-            __typename
-            ... on TokenPayload {
-                access
-                refresh
-            }
-            ... on Error {
-                errorType
-                message
-            }
-        }
-    }
-'''
+login_query = open('queries/login.graphl').read()
 
 async def user_login(schema, context, user):
     response = await graphql(
@@ -31,7 +17,7 @@ async def user_login(schema, context, user):
                 'password': user.password
             }
         },
-        context_value=context.rand_client(),
+        context_value=context,
         debug=True
     )
     r = response[1]['data']['login']
@@ -62,7 +48,7 @@ async def test_invalid_password(schema, context, dummy_user):
                 'password': token_hex(10)
             }
         },
-        context_value=context.rand_client(),
+        context_value=context,
         debug=True
     )
     r = response[1]['data']['login']
@@ -82,7 +68,7 @@ async def test_invalid_username(schema, context, dummy_user):
                 'password': dummy_user.password
             }
         },
-        context_value=context.rand_client(),
+        context_value=context,
         debug=True
     )
     r = response[1]['data']['login']

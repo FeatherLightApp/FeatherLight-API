@@ -11,6 +11,7 @@ type User {
     payments(start: Int end: Int): [PaidInvoice]!
     deposits: [Deposit]!
     role: Role!
+    created: Datetime! @date
 }
 
 
@@ -32,37 +33,14 @@ type Deposit {
     confirmations: Int!
     blockhash: String!
     blockindex: Int!
-    blocktime: Int!
+    blocktime: Datetime! @date
     txid: String!
-    time: Int!
+    time: Datetime! @date
     timereceived: Int!
     comment: String
 }
 
-# union Invoice = LocalInvoice | RemoteInvoice
-
-# type LocalInvoice {
-#     destination: String
-#     paymentHash: String
-#     numSatoshis: Int
-#     timestamp: Int
-#     expiry: Int
-#     description: String
-#     fallbackAddress: String
-#     cltvExpiry: Int
-#     routeHints: [RouteHint]
-#     paymentAddress: String
-#     features: [FeaturesEntry]
-# }
-
-# type RemoteInvoice {
-#     error: String
-#     preimage: String
-#     route: Route
-#     hash: String
-#     decoded: LocalInvoice
-#     payReq: String!
-# }
+# UNIMPLEMENTED
 
 type RouteHint {
     hopHints: [HopHint]
