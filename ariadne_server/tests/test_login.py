@@ -7,7 +7,7 @@ from ariadne import graphql
 @pytest.mark.last
 async def test_login(schema, context):
     query = '''
-        mutation login($username: String! password: String!) {
+        mutation login($username: String! $password: String!) {
             login(username: $username password: $password) {
                 __typename
                 ... on User {
