@@ -27,7 +27,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - ~~fix zmqpubhashblock port binding~~
 - ~~restructure context object~~
 - add alembic for db migrations
-- consolidate DB_User and UserAPI
+- ~~consolidate DB_User and UserAPI~~
 - remove protobuf to dict
 - create 'invoice' class for handling payments
 - add support for lnurl
@@ -36,8 +36,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - write subscriptions
 - ~~consolidate configs into global config~~
 - mypy type checking
-- write function level tests
-- write app level tests
+- write more app level tests
 - ~~switch to argon2 cffi password hashing~~
 - ~~restructure code directory~~
 - create simple frontend for api

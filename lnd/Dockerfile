@@ -1,6 +1,6 @@
 FROM golang:1.13-alpine as builder
 
-LABEL maintainer="Olaoluwa Osuntokun <laolu@lightning.engineering>"
+LABEL maintainer="Sean Aye <hello@seanaye.ca>"
 
 # Force Go to use the cgo based DNS resolver. This is required to ensure DNS
 # queries required to connect to linked containers succeed.

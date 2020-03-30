@@ -1,7 +1,7 @@
 version: '3'
 services: 
     btcd:
-        image: btcd
+        image: btcd:latest
         build: 
             context: 'btcd/'
         volumes:
@@ -13,7 +13,7 @@ services:
             - global.env
     
     lnd:
-        image: lnd
+        image: lnd:latest
         build:
             context: 'lnd/'
         volumes: 
@@ -30,7 +30,7 @@ services:
             - '9735:9735'
 
     ariadne:
-        image: graphlnd
+        image: graphlnd:latest
         build: 
             context: 'ariadne_server/'
         volumes: 
