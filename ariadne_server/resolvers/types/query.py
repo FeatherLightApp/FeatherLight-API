@@ -2,24 +2,27 @@
 import json
 import ast
 from ariadne import QueryType
+from typing import Union
 import rpc_pb2 as ln
 from helpers.async_future import make_async
 from context import LND, BITCOIND
+from classes.error import Error
+from classes.user import User
 
 
 QUERY = QueryType()
 
 
 @QUERY.field('me')
-def r_me(obj, *_):
+def r_me(obj: Union[User, Error], *_):
     #pass object into union resolver
     return obj
 
 
-@QUERY.field('walletBalance')
-async def r_wallet_balance(*_) -> dict:
-    return await make_async(LND.stub.WalletBalance.future(ln.WalletBalanceRequest()))
-
+# @QUERY.field('nodeBalance')
+# def r_node_balance(obj: Union[User, Error], *_):
+#     #pass object into union resolver
+#     return obj
 
 @QUERY.field('info')
 # @authenticate

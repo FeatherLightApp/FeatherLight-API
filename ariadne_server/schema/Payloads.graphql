@@ -3,6 +3,12 @@ type TokenPayload {
     refresh: String!
 }
 
+type NodeBalance {
+    wallet: WalletBalance!
+    channel: ChannelBalance!
+    liquidity: NodeLiqidity
+}
+
 type DecodeInvoicePayload {
     error: String
     destination: String

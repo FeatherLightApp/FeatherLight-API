@@ -20,12 +20,6 @@ type Error {
     message: String
 }
 
-type WalletBalance {
-    totalBalance: Int!
-    confirmedBalance: Int!
-    unconfirmedBalance: Int!
-}
-
 
 type Deposit {
     address: String!
@@ -39,6 +33,24 @@ type Deposit {
     timereceived: Int!
     comment: String
 }
+
+type WalletBalance {
+    totalBalance: Int!
+    confirmedBalance: Int!
+    unconfirmedBalance: Int!
+}
+
+type ChannelBalance {
+    balance: Int!
+    pendingBalance: Int!
+}
+
+type NodeLiquidity {
+    inbound: Int!
+    outbound: Int!
+}
+
+
 
 # UNIMPLEMENTED
 

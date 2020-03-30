@@ -40,14 +40,14 @@ def r_add_invoice_response(obj, _, resolve_type):
             return 'UserInvoice'
 
 
-_wallet_response = UnionType('WalletResponse')
+_wallet_response = UnionType('BalanceResponse')
 
 
 @_wallet_response.type_resolver
 def r_wallet_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
-    return 'WalletBalance'
+    return 'BalancePayload'
 
 
 UNION = [
