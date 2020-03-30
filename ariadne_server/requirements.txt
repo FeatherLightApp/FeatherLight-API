@@ -2,7 +2,6 @@ ariadne
 httpx
 requests
 pytest-asyncio
-pytest-ordering
 pyjwt
 protobuf3-to-dict
 uvicorn

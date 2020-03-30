@@ -21,7 +21,7 @@ login_query = '''
     }
 '''
 
-async user_login(schema, context, user):
+async def user_login(schema, context, user):
     response = await graphql(
         schema,
         {
