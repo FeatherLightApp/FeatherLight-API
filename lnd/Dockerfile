@@ -14,7 +14,7 @@ RUN apk add --no-cache --update alpine-sdk \
 WORKDIR /go/src/github.com/lightningnetwork/lnd
 
 # Copy in the local repository to build from.
-RUN git clone https://github.com/lightningnetwork/lnd.git .
+RUN git clone --branch v0.9.2-beta --depth 1 https://github.com/lightningnetwork/lnd.git .
 
 RUN cd /go/src/github.com/lightningnetwork/lnd \
 &&  make \
