@@ -1,0 +1,11 @@
+mutation refreshAccessToken{
+   __typename
+   ... on TokenPayload {
+       access
+       refresh
+   }
+   ... on Error {
+       errorType
+       message
+   }
+}

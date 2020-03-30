@@ -13,15 +13,15 @@ async def user_login(schema, context, user):
         {
             'query': login_query,
             'variables': {
-                'username': user.username,
-                'password': user.password
+                'username': user['username'],
+                'password': user['password']
             }
         },
         context_value=context,
         debug=True
     )
     r = response[1]['data']['login']
-    assert decode_jwt(r['access'], kind='access')['role'] == user.role
+    assert decode_jwt(r['access'], kind='access')['role'] == user['role']
     assert decode_jwt(r['refresh'], kind='refresh')
     return True
 
@@ -44,7 +44,7 @@ async def test_invalid_password(schema, context, dummy_user):
         {
             'query': login_query,
             'variables': {
-                'username': dummy_user.username,
+                'username': dummy_user['username'],
                 'password': token_hex(10)
             }
         },
@@ -65,7 +65,7 @@ async def test_invalid_username(schema, context, dummy_user):
             'query': login_query,
             'variables': {
                 'username': token_hex(10),
-                'password': dummy_user.password
+                'password': dummy_user['password']
             }
         },
         context_value=context,

@@ -20,3 +20,7 @@ async def test_rate_limit(schema, context):
             assert r['password']
 
 
+
+@pytest.mark.usefixtures('dummy_user')
+async def test_datetime_formatting(schema, context, dummy_user):
+    

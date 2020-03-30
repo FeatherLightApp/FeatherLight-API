@@ -1,0 +1,11 @@
+query me {
+    me {
+        balance
+        btcAddress
+        tokens {
+            refresh
+            access
+        }
+        created
+    }
+}
