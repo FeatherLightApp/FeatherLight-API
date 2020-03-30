@@ -36,7 +36,7 @@ async def test_login(schema, context):
         )
         r = response[1]['data']['login']
         assert decode_jwt(r['access'])['role'] == user['role']
-        assert decode_jwt(r['refresh'])['role'] = user['role']
+        assert decode_jwt(r['refresh'])['role'] == user['role']
 
     response = await graphql(
         schema,
