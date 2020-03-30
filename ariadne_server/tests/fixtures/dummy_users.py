@@ -7,7 +7,7 @@ async def dummy_user(schema):
     response = await graphql(
         schema,
         {
-            'query': open('queries/createUser.graphql'),
+            'query': open('queries/createUser.graphql').read(),
             'variables': {
                 'role': 'USER'
             }
@@ -22,7 +22,7 @@ async def dummy_admin(schema):
     response = await graphql(
         schema,
         {
-            'query': open('queries/createUser.graphql'),
+            'query': open('queries/createUser.graphql').read(),
             'variables': {
                 'role': 'ADMIN'
             }
