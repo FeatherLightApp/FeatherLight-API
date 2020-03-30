@@ -12,7 +12,7 @@ interface Invoice {
 type UserInvoice implements Invoice {
     amount: Int!
     paid: Boolean!
-    paidAt: Datetime
+    paidAt: Int
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
