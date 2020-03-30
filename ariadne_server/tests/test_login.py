@@ -45,8 +45,9 @@ async def test_user_login(schema, context, dummy_user):
     assert user_login(schema, context, dummy_user)
 
 
-async def test_admin_login(schema, context, admin_user):
-    assert user_login(schema, context, admin_user)
+@pytest.mark.usefixtures('dummy_admin')
+async def test_admin_login(schema, context, dummy_admin):
+    assert user_login(schema, context, dummy_admin)
 
 
 

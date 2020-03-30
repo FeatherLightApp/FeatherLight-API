@@ -1,8 +1,9 @@
 import os
 from gino import Gino
+from helpers.mixins import LoggerMixin
 
 
-class GinoInstance:
+class GinoInstance(LoggerMixin):
     """Gino connection manager"""
 
     def __init__(self):
@@ -14,9 +15,9 @@ class GinoInstance:
 
     async def initialize(self):
         """init db connection"""
-        await self.db.set_bind(
-            f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
-        )
+        bind_str = f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
+        self.logger.warning(f'connecting to: {bind_str}')
+        await self.db.set_bind(bind_str)
         await self.db.gino.create_all()
 
     async def destroy(self):
