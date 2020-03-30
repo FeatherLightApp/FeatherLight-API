@@ -5,7 +5,7 @@ from helpers.crypto import decode as decode_jwt
 
 pytestmark = pytest.mark.asyncio
 
-login_query = open('queries/login.graphl').read()
+login_query = open('queries/login.graphql').read()
 
 async def user_login(schema, context, user):
     response = await graphql(
