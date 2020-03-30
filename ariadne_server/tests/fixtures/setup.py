@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from context import GINO, REDIS, LND
 from resolvers.schema import SCHEMA
