@@ -5,7 +5,6 @@ from classes.error import Error
 from helpers.crypto import decode as decode_jwt
 
 @pytest.mark.asyncio()
-@pytest.mark.dependency()
 @pytest.mark.parametrize('role', ['ADMIN', 'USER'])
 async def test_create_user(role, schema, context):
     query = '''
@@ -49,4 +48,3 @@ async def test_create_user(role, schema, context):
     assert len(r['invoices']) == 0
     assert r['balance'] == 0
     assert r['btcAddress']
-    pytest.users.append(r)
