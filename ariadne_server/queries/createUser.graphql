@@ -1,26 +1,25 @@
 mutation createUser($role: Role) {
     createUser(role: $role) {
-        createUser(role: $role) {
-            __typename
-            ... on User {
-                username
-                password
-                role
-                btcAddress
-                created
-                tokens {
-                    access
-                    refresh
-                }
-                balance
-                invoices {
-                    paymentHash
-                }
+        __typename
+        ... on User {
+            username
+            password
+            role
+            btcAddress
+            created
+            tokens {
+                access
+                refresh
             }
-            ... on Error {
-                errorType
-                message
+            balance
+            invoices {
+                paymentHash
             }
         }
+        ... on Error {
+            errorType
+            message
+        }
+        
     }
 }
