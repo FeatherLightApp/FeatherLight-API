@@ -1,10 +1,9 @@
 ariadne
 httpx
 requests
-pytest
 pytest-asyncio
 pytest-env
-pytest-dependency
+pytest-ordering
 pyjwt
 protobuf3-to-dict
 uvicorn

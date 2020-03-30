@@ -4,7 +4,7 @@ from ariadne import graphql
 
 
 @pytest.mark.asyncio
-@pytest.mark.dependency(depends=['test_create_user'])
+@pytest.mark.last
 async def test_login(schema, context):
     query = '''
         mutation login($username: String! password: String!) {
