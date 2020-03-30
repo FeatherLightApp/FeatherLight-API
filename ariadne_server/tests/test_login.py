@@ -51,7 +51,7 @@ async def test_admin_login(schema, context, admin_user):
 
 
 @pytest.mark.usefixtures('dummy_user')
-async def test_invalid_password(schema, context, dummy_user)
+async def test_invalid_password(schema, context, dummy_user):
     response = await graphql(
         schema,
         {
@@ -71,7 +71,7 @@ async def test_invalid_password(schema, context, dummy_user)
 
 
 @pytest.mark.usefixtures('dummy_user')
-async def test_invalid_username(schema, context, dummy_user)
+async def test_invalid_username(schema, context, dummy_user):
     response = await graphql(
         schema,
         {
