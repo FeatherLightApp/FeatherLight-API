@@ -16,7 +16,7 @@ class Lock(LoggerMixin):
         utc_seconds = (datetime.utcnow() -
                        datetime(1970, 1, 1)).total_seconds()
         set_result = await REDIS.conn.setnx(self._lock_key, utc_seconds)
-        self.logger.critical(f"set result {set_result}")
+        self.logger.critical("set result %s", set_result)
         # fail if value already exists
         if not set_result:
             return False

@@ -1,6 +1,5 @@
 from time import time
 from math import floor
-import json
 from secrets import token_hex
 from typing import Union, Optional
 from ariadne import MutationType
@@ -10,7 +9,6 @@ from classes.error import Error
 from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 from helpers.crypto import decode
-from helpers.hexify import HexEncoder
 from context import LND, ARGON, GINO
 from models import Invoice
 import rpc_pb2 as ln
@@ -144,8 +142,8 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
   
         if LND.id_pubkey == decoded.payment_hash and invoice_obj:
             #internal invoice, get payee from db
-            if not (payee := await User.get(invoice_obj.payee)):
-                # could not find the invoice creator in the db
+            if not await User.get(invoice_obj.payee):
+                # could not find the invoice payee in the db
                 return Error('PaymentError', 'This invoice is invalid')
 
             invoice_obj.update(

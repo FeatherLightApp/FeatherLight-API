@@ -1,4 +1,3 @@
-from math import floor
 from typing import Union, Dict
 from asyncio import iscoroutinefunction
 from ariadne import SchemaDirectiveVisitor

@@ -1,4 +1,3 @@
-from datetime import datetime
 from ariadne import ScalarType
 
 _HEX_SCALAR = ScalarType('Hex')

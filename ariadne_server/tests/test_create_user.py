@@ -1,8 +1,5 @@
-from secrets import token_hex
 import pytest
 from ariadne import graphql
-from classes.error import Error
-from helpers.crypto import decode as decode_jwt
 
 @pytest.mark.asyncio()
 @pytest.mark.parametrize('role', ['ADMIN', 'USER'])

@@ -1,5 +1,4 @@
 """import and define schem execution"""
-import os
 from ariadne import (
     load_schema_from_path,
     make_executable_schema,

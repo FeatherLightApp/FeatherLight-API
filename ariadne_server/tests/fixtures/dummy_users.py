@@ -1,4 +1,3 @@
-from time import time
 import pytest
 from ariadne import graphql
 from .context import FakeContext

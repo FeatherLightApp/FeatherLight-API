@@ -23,5 +23,5 @@ class GetLockedPayments(AbstractMethod):
                 data = json.loads(paym.decode('utf-8'))
                 result.append(data)
             except json.decoder.JSONDecodeError as error:
-                self.logger.critical(f'Error decoding json {error}')
+                self.logger.critical('Error decoding json %s', error)
         return result
