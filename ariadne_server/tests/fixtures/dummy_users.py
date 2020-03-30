@@ -21,5 +21,5 @@ async def dummy_admin():
         password_hash=ARGON.hash('530b095674764823ace8'),
         role='ADMIN'
     )
-    u.password('530b095674764823ace8')
+    u.password = '530b095674764823ace8'
     return u
