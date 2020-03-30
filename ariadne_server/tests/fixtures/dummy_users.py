@@ -8,7 +8,7 @@ async def dummy_user(schema, context):
         schema,
         {
             'query': open('queries/createUser.graphql'),
-            'variables' {
+            'variables': {
                 'role': 'USER'
             }
         }
@@ -17,12 +17,12 @@ async def dummy_user(schema, context):
 
 
 @pytest.fixture(scope='session')
-async def dummy_user(schema, context):
+async def dummy_admin(schema, context):
     response = await graphql(
         schema,
         {
             'query': open('queries/createUser.graphql'),
-            'variables' {
+            'variables': {
                 'role': 'ADMIN'
             }
         }

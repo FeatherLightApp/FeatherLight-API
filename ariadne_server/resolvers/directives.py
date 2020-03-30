@@ -1,4 +1,4 @@
-import inspect
+from math import floor
 from typing import Union, Dict
 from asyncio import iscoroutinefunction
 from ariadne import SchemaDirectiveVisitor
@@ -50,7 +50,8 @@ class DatetimeDirective(SchemaDirectiveVisitor):
             result = orig_resolver(obj, info, **kwargs)
             if result is None:
                 return None
-
+            if date_format == 'EPOCH':
+                return floor(result.timestamp())
             return result.strftime(date_format)
         field.resolve = resolve_formatted_date
         return field
