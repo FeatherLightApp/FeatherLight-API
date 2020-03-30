@@ -9,7 +9,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.yield_fixture(autouse=True, scope='session')
 async def schema(event_loop):
     await GINO.initialize()
     await REDIS.initialize()
