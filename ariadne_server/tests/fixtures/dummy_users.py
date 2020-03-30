@@ -1,9 +1,10 @@
 from time import time
 import pytest
 from ariadne import graphql
+from .context import FakeContext
 
 @pytest.fixture(scope='session')
-async def dummy_user(schema, context):
+async def dummy_user(schema):
     response = await graphql(
         schema,
         {
@@ -11,13 +12,14 @@ async def dummy_user(schema, context):
             'variables': {
                 'role': 'USER'
             }
-        }
+        },
+        context_value=FakeContext()
     )
     return response[1]['data']['createUser']
 
 
 @pytest.fixture(scope='session')
-async def dummy_admin(schema, context):
+async def dummy_admin(schema):
     response = await graphql(
         schema,
         {
@@ -25,7 +27,8 @@ async def dummy_admin(schema, context):
             'variables': {
                 'role': 'ADMIN'
             }
-        }
+        },
+        context_value=FakeContext()
     )
     return response[1]['data']['createUser']
 
