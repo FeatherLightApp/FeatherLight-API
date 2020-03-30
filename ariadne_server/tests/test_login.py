@@ -10,10 +10,9 @@ async def test_login(schema, context):
         mutation login($username: String! $password: String!) {
             login(username: $username password: $password) {
                 __typename
-                ... on User {
-                    role
-                    btcAddress
-                    balance
+                ... on TokenPayload {
+                    access
+                    refresh
                 }
                 ... on Error {
                     errorType
@@ -36,9 +35,8 @@ async def test_login(schema, context):
             debug=True
         )
         r = response[1]['data']['login']
-        assert r['role'] == user['role']
-        assert r['btcAddress'] == user['btcAddress']
-        assert r['balance'] == 0
+        assert decode_jwt(r['access'])['role'] == user['role']
+        assert decode_jwt(r['refresh'])['role'] = user['role']
 
     response = await graphql(
         schema,
