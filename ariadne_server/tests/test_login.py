@@ -1,6 +1,7 @@
 from secrets import token_hex
 import pytest
 from ariadne import graphql
+from helpers.crypto import decode as decode_jwt
 
 
 @pytest.mark.asyncio
@@ -35,8 +36,8 @@ async def test_login(schema, context):
             debug=True
         )
         r = response[1]['data']['login']
-        assert decode_jwt(r['access'])['role'] == user['role']
-        assert decode_jwt(r['refresh'])['role'] == user['role']
+        assert decode_jwt(r['access'], kind='access')['role'] == user['role']
+        assert decode_jwt(r['refresh'], kind='refresh')['role'] == user['role']
 
     response = await graphql(
         schema,
