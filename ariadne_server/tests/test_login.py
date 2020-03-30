@@ -32,7 +32,7 @@ async def test_login(schema, context):
                     'password': user['password']
                 }
             },
-            context_value=context,
+            context_value=context.rand_client(),
             debug=True
         )
         r = response[1]['data']['login']
@@ -49,7 +49,7 @@ async def test_login(schema, context):
                 'password': token_hex(10)
             }
         },
-        context_value=context,
+        context_value=context.rand_client(),
         debug=True
     )
     r = response[1]['data']['login']
@@ -66,7 +66,7 @@ async def test_login(schema, context):
                 'password': pytest.users[0]['password']
             }
         },
-        context_value=context,
+        context_value=context.rand_client(),
         debug=True
     )
     r = response[1]['data']['login']

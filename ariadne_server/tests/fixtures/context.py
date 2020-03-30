@@ -1,4 +1,6 @@
+from secrets import token_hex
 import pytest
+
 
 class Object:
     pass
@@ -14,6 +16,10 @@ class FakeContext(dict):
         req_obj.headers = {}
 
         self['request'] = req_obj
+
+    def rand_client(self):
+        self['request'].client.host = token_hex(5)
+        return self
 
 
 @pytest.fixture(autouse=True)
