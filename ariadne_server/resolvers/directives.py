@@ -40,23 +40,6 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
         return field
 
 
-class DatetimeDirective(SchemaDirectiveVisitor):
-
-    def visit_field_definition(self, field, *_):
-        orig_resolver = field.resolve or default_field_resolver
-        date_format = self.args.get('format') or self.args.get('defaultFormat')
-
-        def resolve_formatted_date(obj, info, **kwargs):
-            result = orig_resolver(obj, info, **kwargs)
-            if result is None:
-                return None
-            if date_format == 'EPOCH':
-                return floor(result.timestamp())
-            return result.strftime(date_format)
-        field.resolve = resolve_formatted_date
-        return field
-
-
 class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
 
     def visit_field_definition(self, field, *_):

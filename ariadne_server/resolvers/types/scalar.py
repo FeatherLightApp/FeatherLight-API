@@ -14,12 +14,6 @@ def r_hex_scalar(val, *_):
         return val
 
 
-_DATETIME_SCALAR = ScalarType('Datetime')
-def r_datetime_scalar(val, *_):
-    assert isinstance(val, int)
-    return datetime.fromtimestamp(val)
-
 SCALAR = [
     _HEX_SCALAR,
-    _DATETIME_SCALAR
 ]

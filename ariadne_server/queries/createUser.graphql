@@ -6,7 +6,7 @@ mutation createUser($role: Role) {
             password
             role
             btcAddress
-            created @date(format: "EPOCH")
+            created
             tokens {
                 access
                 refresh

@@ -2,11 +2,6 @@ directive @auth(requires: Role = USER) on FIELD_DEFINITION
 
 directive @allowsFor(permission: Permission) on OBJECT
 
-directive @date(
-    defaultFormat: String = "%Y-%m-%d %I:%M:%S"
-    format: String
-) on FIELD_DEFINITION
-
 directive @limit(
     operations: Int!
     seconds: Int!

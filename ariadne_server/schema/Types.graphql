@@ -11,7 +11,7 @@ type User {
     payments(start: Int end: Int): [PaidInvoice]!
     deposits: [Deposit]!
     role: Role!
-    created: Datetime! @date
+    created: Int!
 }
 
 
@@ -33,9 +33,9 @@ type Deposit {
     confirmations: Int!
     blockhash: String!
     blockindex: Int!
-    blocktime: Datetime! @date
+    blocktime: Int!
     txid: String!
-    time: Datetime! @date
+    time: Int!
     timereceived: Int!
     comment: String
 }

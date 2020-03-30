@@ -1,7 +1,7 @@
 interface Invoice {
     amount: Int!
-    expiry: Datetime! @date
-    timestamp: Datetime! @date
+    expiry: Int!
+    timestamp: Int!
     paymentRequest: String!
     paymentHash: Hex!
     paymentPreimage: Hex!
@@ -12,9 +12,9 @@ interface Invoice {
 type UserInvoice implements Invoice {
     amount: Int!
     paid: Boolean!
-    paidAt: Datetime @date
-    expiry: Datetime! @date
-    timestamp: Datetime! @date
+    paidAt: Datetime
+    expiry: Int!
+    timestamp: Int!
     paymentRequest: String!
     paymentHash: Hex!
     paymentPreimage: Hex!
@@ -26,8 +26,8 @@ type PaidInvoice implements Invoice {
     amount: Int!
     fee: Int!
     value: Int!
-    expiry: Datetime! @date
-    timestamp: Datetime! @date
+    expiry: Int!
+    timestamp: Int!
     paymentRequest: String!
     paymentHash: Hex!
     paymentPreimage: Hex!
