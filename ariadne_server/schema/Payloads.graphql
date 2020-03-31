@@ -6,7 +6,7 @@ type TokenPayload {
 type NodeBalance {
     wallet: WalletBalance!
     channel: ChannelBalance!
-    liquidity: NodeLiqidity
+    liquidity: NodeLiquidity
 }
 
 type DecodeInvoicePayload {
