@@ -14,7 +14,7 @@ class LightningStub(LoggerMixin):
 
     def __init__(self):
         self._host = os.environ.get('LND_HOST')
-        self._port = os.environ.get('LND_PORT')
+        self._port = int(os.environ.get('LND_PORT'))
         self._network = os.environ.get('NETWORK')
         self.id_pubkey = None
         self.stub = None
