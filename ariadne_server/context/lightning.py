@@ -34,9 +34,9 @@ class LightningStub(LoggerMixin):
         with open('/root/.lnd/tls.cert', 'rb') as cert_bytes:
             cert = cert_bytes.read()
 
-        cert_creds = grpc.ssl_channel_credentials(cert)
-        auth_creds = grpc.metadata_call_credentials(metadata_callback)
-        self._combined_creds = grpc.composite_channel_credentials(cert_creds, auth_creds)
+        cert_creds = purerpc.ssl_channel_credentials(cert)
+        auth_creds = purerpc.metadata_call_credentials(metadata_callback)
+        self._combined_creds = purerpc.composite_channel_credentials(cert_creds, auth_creds)
 
 
     async def initialize(self):
