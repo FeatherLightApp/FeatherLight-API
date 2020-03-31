@@ -5,7 +5,7 @@ type PendingChannelsResponse {
     totalLimboBalance: Int!
     pendingOpenChannels: [PendingOpenChannel]!
     pendingClosingChannels: [ClosedChannel]!
-    pendingForceClosingChannels: [PendingForceClosingChannel]!
+    pendingForceClosingChannels: [ForceClosedChannel]!
     waitingCloseChannels: [WaitingCloseChannel]
 }
 
