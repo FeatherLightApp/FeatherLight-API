@@ -1,0 +1,6 @@
+union TokenResponse = TokenPayload | Error
+
+type TokenPayload {
+    access: String!
+    refresh: String!
+}

@@ -1,0 +1,12 @@
+type Error {
+    errorType: ErrorType!
+    message: String
+}
+
+
+enum ErrorType {
+    AuthenticationError
+    PaymentError
+    RateLimited
+    InsufficientFunds
+}

@@ -1,0 +1,57 @@
+"""
+[Pending Channels](https://api.lightning.community/?python#pendingchannels)
+"""
+type PendingChannelsResponse {
+    totalLimboBalance: Int!
+    pendingOpenChannels: [PendingOpenChannel]!
+    pendingClosingChannels: [ClosedChannel]!
+    pendingForceClosingChannels: [PendingForceClosingChannel]!
+    waitingCloseChannels: [WaitingCloseChannel]
+}
+
+type PendingChannel {
+    remoteNodePub: String!
+    channelPoint: String!
+    capacity: Int!
+    localBalance: Int!
+    remoteBalance: Int!
+    localChanReserveSat: Int!
+    remoteChanReserveSat: Int!
+}
+
+"""
+partially implemented [Pending Open Channel](https://api.lightning.community/?python#pendingopenchannel)
+"""
+type PendingOpenChannel {
+    channel: PendingChannel!
+    confirmationHeight: Int!
+    commitFee: Int!
+}
+
+"""
+partial implementation of [GRPC closed channel](https://api.lightning.community/?python#closedchannel)
+"""
+type ClosedChannel {
+    channel: PendingChannel!
+    closingTxid: String!
+}
+
+"""
+partial implementation of [Force closed channel](https://api.lightning.community/?python#forceclosedchannel)
+"""
+type ForcedClosedChannel {
+    channel: PendingChannel!
+    closingTxid: String!
+    limboBalance: Int!
+    maturityHeight: Int!
+    blocksTilMaturity: Int!
+    recoveredBalance: Int!
+}
+
+"""
+partial implementation [Waiting Close Channel](https://api.lightning.community/?python#waitingclosechannel)
+"""
+type WaitingCloseChannel {
+    channel: PendingChannel!
+    limboBalance: Int!
+}

@@ -1,0 +1,18 @@
+type Channel {
+    active: Boolean!
+    remotePubkey: String!
+    channelPoint: String!
+    chanId: Int!
+    capacity: Int!
+    localBalance: Int!
+    remoteBalance: Int!
+    commitFee: Int!
+    unsettledBalance: Int!
+    totalSatoshisSent: Int!
+    totalSatoshisReceived: Int!
+    private: Boolean!
+    initiaor: Boolean!
+    localChanReserveSat: Int!
+    remoteChanReserveSat: Int!
+    closeAddress: String!
+}

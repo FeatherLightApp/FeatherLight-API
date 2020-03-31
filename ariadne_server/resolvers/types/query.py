@@ -13,16 +13,16 @@ from classes.user import User
 QUERY = QueryType()
 
 
+
+
 @QUERY.field('me')
-def r_me(obj: Union[User, Error], *_):
-    #pass object into union resolver
-    return obj
-
-
 @QUERY.field('nodeBalance')
-def r_node_balance(obj: Union[User, Error], *_):
+@QUERY.field('channels')
+def pass_through_resolver(obj: Union[User, Error], *_):
     #pass object into union resolver
     return obj
+
+
 
 @QUERY.field('info')
 # @authenticate

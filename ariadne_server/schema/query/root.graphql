@@ -1,7 +1,7 @@
 type Query {
     me: UserResponse! @auth
     nodeBalance: BalanceResponse! @auth(requires: ADMIN)
-    
+    channels: ChannelResponse! @auth(requires: ADMIN)
     # peers: GetPeersPayload! @auth(requires: ADMIN) #@grpc
     #info: GetInfoPayload!
     decodeInvoice(invoice: String!): DecodeInvoicePayload! @auth

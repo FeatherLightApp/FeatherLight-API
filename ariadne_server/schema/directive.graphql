@@ -11,3 +11,8 @@ directive @limit(
 #directive @GRPC(
 
 #directive rest
+
+# find place to put this and implement it
+enum Permission {
+    AddInvoice
+}

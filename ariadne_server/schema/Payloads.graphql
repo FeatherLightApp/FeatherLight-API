@@ -1,25 +1,8 @@
-type TokenPayload {
-    access: String!
-    refresh: String!
-}
 
-type NodeBalance {
-    wallet: WalletBalance!
-    channel: ChannelBalance!
-    liquidity: NodeLiquidity
-}
 
-type DecodeInvoicePayload {
-    error: String
-    destination: String
-    paymentHash: String
-    numSatoshis: Int
-    timestamp: Int
-    expiry: Int
-    description: String
-    descriptionHash: String
-    fallbackAddr: String
-}
+
+
+#TODO FIle is deprecated remove
 
 # type CheckRouteInvoicePayload {
 #     ok: Boolean!

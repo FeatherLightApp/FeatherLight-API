@@ -13,6 +13,17 @@ def r_hex_scalar(val, *_):
         return val
 
 
+@_HEX_SCALAR.value_parser
+def r_hex_value(val):
+    return bytes.fromhex(val)
+
+
+@_HEX_SCALAR.literal_parser
+def r_hex_literal(ast):
+    value = str(ast.value)
+    return r_hex_value(value)
+
+
 SCALAR = [
     _HEX_SCALAR,
 ]

@@ -1,0 +1,23 @@
+union BalanceResponse = NodeBalance | Error
+
+type NodeBalance {
+    wallet: WalletBalance!
+    channel: ChannelBalance!
+    liquidity: NodeLiquidity
+}
+
+type WalletBalance {
+    totalBalance: Int!
+    confirmedBalance: Int!
+    unconfirmedBalance: Int!
+}
+
+type ChannelBalance {
+    balance: Int!
+    pendingOpenBalance: Int!
+}
+
+type NodeLiquidity {
+    inbound: Int!
+    outbound: Int!
+}
