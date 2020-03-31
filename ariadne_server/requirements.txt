@@ -11,4 +11,3 @@ grpcio-tools
 googleapis-common-protos
 argon2-cffi
 gino
-git+https://github.com/standy66/purerpc.git

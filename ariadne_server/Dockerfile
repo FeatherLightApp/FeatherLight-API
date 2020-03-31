@@ -37,6 +37,10 @@ COPY googleapis ./googleapis
 
 RUN ls -a /app
 
+#install purerpc in current enc
+
+RUN python -m pip install purerpc
+
 RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --purerpc_out=. -I. rpc.proto
 
 EXPOSE 5000
