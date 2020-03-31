@@ -1,6 +1,9 @@
 from ariadne import ObjectType
+from helpers.async_future import make_async
+from context import LND
+import rpc_pb2 as ln
 
-_balance_response = ObjectType('NodeBalance')
+_balance_payload = ObjectType('NodeBalance')
 
 @_balance_response.field('wallet')
 async def r_wallet(*_):

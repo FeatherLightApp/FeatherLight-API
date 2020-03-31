@@ -7,6 +7,7 @@ from .subscription import subs
 from .token_payload import TOKEN_PAYLOAD
 from .scalar import SCALAR
 from .interface import INTERFACE
+from .balance_payload import _balance_payload
 
 TYPES = [
     *UNION,
