@@ -26,7 +26,7 @@ RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrp
 
 RUN git clone https://github.com/googleapis/googleapis.git
 
-RUN python -m grpc_tools.protoc --python_out=./build --purerpc_out=./build/. -I. rpc.proto
+RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=./build --purerpc_out=./build/. -I. rpc.proto
 
 RUN touch build/__init__.py
 
