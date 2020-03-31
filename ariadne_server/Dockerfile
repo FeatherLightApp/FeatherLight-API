@@ -11,6 +11,8 @@ WORKDIR /temp
 
 RUN python -m venv env
 
+RUN echo "/proto" >> /env/lib/python3.8/site-packages/addpath.pth
+
 ENV PATH="/temp/env/bin:$PATH"
 
 COPY requirements.txt .
@@ -18,6 +20,17 @@ COPY requirements.txt .
 RUN pip install -U pip setuptools wheel\
     && pip install -r requirements.txt
 
+WORKDIR /proto
+
+RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrpc/rpc.proto
+
+RUN git clone https://github.com/googleapis/googleapis.git
+
+RUN python -m grpc_tools.protoc --python_out=./build --purerpc_out=./build/. -I. rpc.proto
+
+RUN touch build/__init__.py
+
+RUN ls -a /proto/build
 
 #------build image --------
 
@@ -29,23 +42,14 @@ WORKDIR /app
 
 COPY --from=compile-image /temp/env /env
 
+COPY --from=compile-image /proto/build /proto
+
 ENV PATH="/env/bin:$PATH"
 
-RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrpc/rpc.proto
 
 RUN ls -a /app
 
-#install purerpc here to correctly set env
-
-RUN python -m pip install purerpc
-
-RUN python -m grpc_tools.protoc --python_out=/proto/. --purerpc_out=/proto/. -I. rpc.proto
-
-RUN touch /proto/__init__.py
-
 RUN ls -a /proto
-
-RUN echo "/proto" >> /env/lib/python3.8/site-packages/addpath.pth
 
 EXPOSE 5000
 

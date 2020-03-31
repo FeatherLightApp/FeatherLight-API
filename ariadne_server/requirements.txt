@@ -11,3 +11,4 @@ grpcio-tools
 googleapis-common-protos
 argon2-cffi
 gino
+purerpc
