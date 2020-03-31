@@ -2,6 +2,7 @@
 import codecs
 import os
 import grpc
+import purerpc
 import rpc_pb2 as ln
 import rpc_grpc as lnrpc
 from helpers.async_future import make_async
@@ -14,7 +15,8 @@ class LightningStub(LoggerMixin):
     def __init__(self):
         self._host = os.environ.get('LND_HOST_PORT')
         self._network = os.environ.get('NETWORK')
-        self.id_pubkey = None
+        self.id_pubkey = 
+        self.stub = None
 
         os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
@@ -33,18 +35,21 @@ class LightningStub(LoggerMixin):
 
         cert_creds = grpc.ssl_channel_credentials(cert)
         auth_creds = grpc.metadata_call_credentials(metadata_callback)
-        combined_creds = grpc.composite_channel_credentials(
-            cert_creds, auth_creds)
+        self._combined_creds = grpc.composite_channel_credentials(cert_creds, auth_creds)
 
-        # TODO add wallet unlocking stub for wallet unlock
-        # TODO max receive message length? = 1024^3
-        channel = grpc.secure_channel(self._host, combined_creds)
-        self.logger.info('Initialized LND stub')
-        self.stub = lnrpc.LightningStub(channel)
 
     async def initialize(self):
         """asynchronously init class and populate pubkey"""
+
+        # TODO add wallet unlocking stub for wallet unlock
+        # TODO max receive message length? = 1024^3
+        self._channel = await purerpc.secure_channel(self._host, self._combined_creds).__aenter__()
+        self.logger.info('Initialized LND stub')
+        self.stub = lnrpc.LightningStub(channel)
         req = ln.GetInfoRequest()
         info = await self.stub.GetInfo(req)
         self.id_pubkey = info.identity_pubkey
         assert self.id_pubkey
+
+    async def destroy(self):
+        await self._channel.__aexit__()

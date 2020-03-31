@@ -8,7 +8,7 @@ from resolvers.schema import SCHEMA
 APP = Starlette(
     debug=True,
     on_startup=[LND.initialize, REDIS.initialize, GINO.initialize],
-    on_shutdown=[REDIS.destroy, GINO.destroy]
+    on_shutdown=[LND.destroy, REDIS.destroy, GINO.destroy]
 )
 
 APP.mount('/graphql', GraphQL(SCHEMA, debug=True))
