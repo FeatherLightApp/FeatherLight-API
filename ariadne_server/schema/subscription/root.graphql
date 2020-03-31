@@ -1,5 +1,5 @@
-# type Subscription {
-#     paidInvoices: PaidInvoiceResponse! @auth
-# }
+type Subscription {
+    paidInvoices: PaidInvoiceResponse! @auth
+}
 
-# union PaidInvoiceResponse = PaidInvoice | Error
+union PaidInvoiceResponse = PaidInvoice | Error
