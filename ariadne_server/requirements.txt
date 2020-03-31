@@ -11,4 +11,5 @@ grpcio-tools
 googleapis-common-protos
 argon2-cffi
 gino
-purerpc
+# TODO check to see if master branch has merged secure channel
+git+https://github.com/banana-string-theory/purerpc.git
