@@ -15,7 +15,7 @@ ENV PATH="/temp/env/bin:$PATH"
 
 COPY requirements.txt .
 
-RUN pip install -U pip setuptools wheel CPython PyPy\
+RUN pip install -U pip setuptools wheel\
     && pip install -r requirements.txt
 
 
