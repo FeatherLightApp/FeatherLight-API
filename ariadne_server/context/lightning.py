@@ -45,7 +45,7 @@ class LightningStub(LoggerMixin):
         # TODO max receive message length? = 1024^3
         self._channel = await purerpc.secure_channel(self._host, self._combined_creds).__aenter__()
         self.logger.info('Initialized LND stub')
-        self.stub = lnrpc.LightningStub(channel)
+        self.stub = lnrpc.LightningStub(self._channel)
         req = ln.GetInfoRequest()
         info = await self.stub.GetInfo(req)
         self.id_pubkey = info.identity_pubkey
