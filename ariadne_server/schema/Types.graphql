@@ -42,7 +42,7 @@ type WalletBalance {
 
 type ChannelBalance {
     balance: Int!
-    pendingBalance: Int!
+    pendingOpenBalance: Int!
 }
 
 type NodeLiquidity {
