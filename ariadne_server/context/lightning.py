@@ -13,7 +13,8 @@ class LightningStub(LoggerMixin):
     """lightning stub manager"""
 
     def __init__(self):
-        self._host = os.environ.get('LND_HOST_PORT')
+        self._host = os.environ.get('LND_HOST')
+        self._port = os.environ.get('LND_PORT')
         self._network = os.environ.get('NETWORK')
         self.id_pubkey = None
         self.stub = None
@@ -43,7 +44,11 @@ class LightningStub(LoggerMixin):
 
         # TODO add wallet unlocking stub for wallet unlock
         # TODO max receive message length? = 1024^3
-        self._channel = await purerpc.secure_channel(self._host, self._combined_creds).__aenter__()
+        self._channel = await purerpc.secure_channel(
+            self._host,
+            self._port,
+            self._combined_creds
+        ).__aenter__()
         self.logger.info('Initialized LND stub')
         self.stub = lnrpc.LightningStub(self._channel)
         req = ln.GetInfoRequest()
