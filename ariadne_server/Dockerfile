@@ -31,7 +31,7 @@ COPY --from=compile-image /temp/env /env
 
 ENV PATH="/env/bin:$PATH"
 
-RUN git archive --remote=git://github.com/lightningnetwork/lnd.git v0.9.2-beta:lnd/lnrpc rpc.proto | tar -x
+RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrpc/rpc.proto .
 
 COPY googleapis ./googleapis
 
