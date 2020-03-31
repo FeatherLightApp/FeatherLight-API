@@ -11,7 +11,7 @@ WORKDIR /temp
 
 RUN python -m venv env
 
-RUN echo "/proto" >> /env/lib/python3.8/site-packages/addpath.pth
+RUN echo "/proto" >> temp/env/lib/python3.8/site-packages/addpath.pth
 
 ENV PATH="/temp/env/bin:$PATH"
 
