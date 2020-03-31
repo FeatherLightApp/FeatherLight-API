@@ -38,7 +38,7 @@ COPY googleapis ./googleapis
 
 RUN ls -a /app
 
-RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --grpc_python_out=. rpc.proto
+RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --purerpc_out=. -I. rpc.proto
 
 EXPOSE 5000
 

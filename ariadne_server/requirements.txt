@@ -8,6 +8,7 @@ uvicorn
 aioredis
 grpcio
 grpcio-tools
+purerpc
 googleapis-common-protos
 argon2-cffi
 gino
