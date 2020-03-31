@@ -16,6 +16,7 @@ TYPES = [
     QUERY,
     MUTATION,
     TOKEN_PAYLOAD,
+    _balance_payload,
     # add_invoice_payload,
     subs,
     # local_invoice,
