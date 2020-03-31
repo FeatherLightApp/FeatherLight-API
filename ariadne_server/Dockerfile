@@ -15,8 +15,7 @@ ENV PATH="/temp/env/bin:$PATH"
 
 COPY requirements.txt .
 
-RUN pip install -U pip setuptools wheel \
-    && pip install secp256k1 \
+RUN pip install -U pip setuptools wheel CPython PyPy\
     && pip install -r requirements.txt
 
 
