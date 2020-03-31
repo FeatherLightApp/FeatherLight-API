@@ -14,3 +14,7 @@ async def r_wallet(*_):
 async def r_channel(*_):
     return await make_async(LND.stub.ChannelBalance.future(ln.ChannelBalanceRequest()))
 
+
+_channel_balance = ObjectType('ChannelBalance')
+
+_channel_balance.set_alias('pendingBalance', 'pendingOpenBalance')
