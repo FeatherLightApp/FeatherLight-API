@@ -47,7 +47,7 @@ _wallet_response = UnionType('BalanceResponse')
 def r_wallet_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
-    return 'BalancePayload'
+    return 'NodeBalance'
 
 
 UNION = [
