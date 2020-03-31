@@ -33,15 +33,19 @@ ENV PATH="/env/bin:$PATH"
 
 RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrpc/rpc.proto
 
-COPY googleapis ./googleapis
-
 RUN ls -a /app
 
 #install purerpc here to correctly set env
 
 RUN python -m pip install purerpc
 
-RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=. --purerpc_out=. -I. rpc.proto
+RUN python -m grpc_tools.protoc --python_out=/proto/. --purerpc_out=/proto/. -I. rpc.proto
+
+RUN touch /proto/__init__.py
+
+RUN ls -a /proto
+
+RUN echo "/proto" >> /env/lib/python3.8/site-packages/addpath.pth
 
 EXPOSE 5000
 
