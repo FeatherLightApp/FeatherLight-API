@@ -15,7 +15,7 @@ class LightningStub(LoggerMixin):
     def __init__(self):
         self._host = os.environ.get('LND_HOST_PORT')
         self._network = os.environ.get('NETWORK')
-        self.id_pubkey = 
+        self.id_pubkey = None
         self.stub = None
 
         os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
