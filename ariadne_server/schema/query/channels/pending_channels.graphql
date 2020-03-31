@@ -39,7 +39,7 @@ type ClosedChannel {
 """
 partial implementation of [Force closed channel](https://api.lightning.community/?python#forceclosedchannel)
 """
-type ForcedClosedChannel {
+type ForceClosedChannel {
     channel: PendingChannel!
     closingTxid: String!
     limboBalance: Int!
