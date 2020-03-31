@@ -7,9 +7,9 @@ _balance_payload = ObjectType('NodeBalance')
 
 @_balance_payload.field('wallet')
 async def r_wallet(*_):
-    return await LND.stub.WalletBalanceln.WalletBalanceRequest())
+    return await LND.stub.WalletBalance(ln.WalletBalanceRequest())
 
 
 @_balance_payload.field('channel')
 async def r_channel(*_):
-    return await LND.stub.ChannelBalanceln.ChannelBalanceRequest())
+    return await LND.stub.ChannelBalance(ln.ChannelBalanceRequest())

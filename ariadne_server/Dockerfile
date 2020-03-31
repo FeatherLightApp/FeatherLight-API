@@ -37,7 +37,7 @@ COPY googleapis ./googleapis
 
 RUN ls -a /app
 
-#install purerpc in current enc
+#install purerpc here to correctly set env
 
 RUN python -m pip install purerpc
 
