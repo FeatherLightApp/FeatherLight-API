@@ -28,7 +28,7 @@ def pass_through_resolver(obj: Union[User, Error], *_):
 # @authenticate
 async def r_info(*_) -> dict:
     request = ln.GetInfoRequest()
-    return await make_async(LND.stub.GetInfo.future(request, timeout=5000))
+    return await make_async(LND.stub.GetInfo.future(request))
 
 # @QUERY.field('txs')
 # #@authenticate
@@ -66,7 +66,7 @@ async def r_info(*_) -> dict:
 @QUERY.field('decodeInvoice')
 async def r_decode_invoice(*_, invoice: str) -> dict:
     request = ln.PayReqString(pay_req=invoice)
-    return await make_async(LND.stub.DecodePayReq.future(request, timeout=5000))
+    return await make_async(LND.stub.DecodePayReq.future(request))
 
 
 # @QUERY.field('peers')

@@ -89,11 +89,11 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
         value_msat=amt,
         expiry=expiry_time
     )
-    inv = await make_async(LND.stub.AddInvoice.future(request, timeout=5000))
+    inv = await make_async(LND.stub.AddInvoice.future(request))
 
     # lookup invoice to get preimage
     pay_hash = ln.PaymentHash(r_hash=inv.r_hash)
-    inv_lookup = await make_async(LND.stub.LookupInvoice.future(pay_hash, timeout=5000))
+    inv_lookup = await make_async(LND.stub.LookupInvoice.future(pay_hash))
     
     return await Invoice.create(
         payment_hash=inv.r_hash.hex(),
@@ -114,7 +114,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
 async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
     #determine true invoice amount
     pay_string = ln.PayReqString(pay_req=invoice)
-    decoded = await make_async(LND.stub.DecodePayReq.future(pay_string, timeout=5000))
+    decoded = await make_async(LND.stub.DecodePayReq.future(pay_string))
 
     if amt is not None and decoded.num_msat != amt and decoded.num_msat > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')

@@ -36,7 +36,7 @@ class GetUserInvoices(AbstractMethod):
 
                     req = ln.PaymentHash(
                         r_hash=bytes.fromhex(invoice.payment_hash))
-                    lookup_info = await make_async(LND.stub.LookupInvoice.future(req, timeout=5000))
+                    lookup_info = await make_async(LND.stub.LookupInvoice.future(req))
 
                     if lookup_info.state == 1:
                         # invoice is paid update state in db

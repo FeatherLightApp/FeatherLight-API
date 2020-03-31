@@ -45,6 +45,6 @@ class LightningStub(LoggerMixin):
     async def initialize(self):
         """asynchronously init class and populate pubkey"""
         req = ln.GetInfoRequest()
-        info = await self.stub.GetInfo(req, timeout=5000)
+        info = await self.stub.GetInfo(req)
         self.id_pubkey = info.identity_pubkey
         assert self.id_pubkey
