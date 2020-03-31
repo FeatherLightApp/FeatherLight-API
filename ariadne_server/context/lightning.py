@@ -3,7 +3,7 @@ import codecs
 import os
 import grpc
 import rpc_pb2 as ln
-import rpc_pb2_grpc as lnrpc
+import rpc_grpc as lnrpc
 from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 
