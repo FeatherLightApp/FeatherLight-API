@@ -19,10 +19,10 @@ def r_me(obj: Union[User, Error], *_):
     return obj
 
 
-# @QUERY.field('nodeBalance')
-# def r_node_balance(obj: Union[User, Error], *_):
-#     #pass object into union resolver
-#     return obj
+@QUERY.field('nodeBalance')
+def r_node_balance(obj: Union[User, Error], *_):
+    #pass object into union resolver
+    return obj
 
 @QUERY.field('info')
 # @authenticate
