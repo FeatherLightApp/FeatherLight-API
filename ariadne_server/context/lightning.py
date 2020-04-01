@@ -22,12 +22,15 @@ class LightningStub(LoggerMixin):
         self.stub = None
 
         os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
+        os.environ['SSL_CERT_DIR'] = '/root/.lnd'
 
         with open(
                 f'/root/.lnd/data/chain/bitcoin/{self._network}/admin.macaroon',
                 'rb'
         ) as macaroon_bytes:
             self._macaroon = codecs.encode(macaroon_bytes.read(), 'hex')
+
+        self.logger.critical(ssl.get_default_verify_paths())
 
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
         ctx.verify_mode = ssl.CERT_REQUIRED
