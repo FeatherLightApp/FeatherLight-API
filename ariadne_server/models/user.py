@@ -8,10 +8,10 @@ class User(db.Model):
     """user model"""
     __tablename__ = 'users'
 
-    id = db.Column(db.String(20), primary_key=True, nullable=False)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    password_hash = db.Column(db.String(100), nullable=False)
+    id = db.Column(db.Text, primary_key=True, nullable=False)
+    username = db.Column(db.Text, unique=True, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
     # address can be null if user doesnt request an address
-    bitcoin_address = db.Column(db.String(64))
-    role = db.Column(db.String(10), default='user', nullable=False)
+    bitcoin_address = db.Column(db.Text)
+    role = db.Column(db.Text, default='user', nullable=False)
     created = db.Column(db.Integer, nullable=False)

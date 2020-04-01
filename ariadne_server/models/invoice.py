@@ -8,14 +8,14 @@ class Invoice(db.Model):
     """invoice orm"""
     __tablename__ = 'invoices'
 
-    payment_hash = db.Column(db.String(64), primary_key=True, nullable=False)
+    payment_hash = db.Column(db.Text, primary_key=True, nullable=False)
     #null before external invoice is paid
-    payment_preimage = db.Column(db.String(64))
-    payment_request = db.Column(db.String(1024), nullable=False)
+    payment_preimage = db.Column(db.Text)
+    payment_request = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.Integer, nullable=False)
     expiry = db.Column(db.Integer, nullable=False),
     # null if paying external invoice with no memo
-    memo = db.Column(db.String(128))
+    memo = db.Column(db.Text)
     paid = db.Column(db.Boolean, nullable=False)
     # null if not yet paid
     paid_at = db.Column(db.Integer)
@@ -23,6 +23,6 @@ class Invoice(db.Model):
     # fee null for receivers of invoice
     msat_fee = db.Column(db.Integer)
     # null if invoice paid to external node
-    payee = db.Column(db.String(20), db.ForeignKey('users.id'))
+    payee = db.Column(db.Text, db.ForeignKey('users.id'))
     # null if invoice paid by external node
-    payer = db.Column(db.String(20), db.ForeignKey('users.id'))
+    payer = db.Column(db.Text, db.ForeignKey('users.id'))
