@@ -1,12 +1,14 @@
 """module to define lightning stub manager"""
+import ssl
 import codecs
 import os
-import grpc
-import purerpc
+from grpclib.client import Channel
+from grpclib.event import SendRequest, listen
 import rpc_pb2 as ln
 import rpc_grpc as lnrpc
 from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
+
 
 
 class LightningStub(LoggerMixin):
@@ -25,18 +27,25 @@ class LightningStub(LoggerMixin):
                 f'/root/.lnd/data/chain/bitcoin/{self._network}/admin.macaroon',
                 'rb'
         ) as macaroon_bytes:
-            macaroon = codecs.encode(macaroon_bytes.read(), 'hex')
+            self._macaroon = codecs.encode(macaroon_bytes.read(), 'hex')
 
-        def metadata_callback(_, callback):
-            # for more info see grpc docs
-            callback([('macaroon', macaroon)], None)
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        ctx.verify_mode = ssl.CERT_REQUIRED
+        ctx.load_cert_chain('/root/.lnd/tls.cert') # can take second arg path the private key str(client_key)
+        #ctx.load_verify_locations(str(trusted)) WE TRUST THE CERTIFICATE
+        ctx.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
+        ctx.set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20')
+        ctx.set_alpn_protocols(['h2'])
+        try:
+            ctx.set_npn_protocols(['h2'])
+        except NotImplementedError:
+            pass
+        self._channel = Channel(self._host, self._port, ssl=ctx)
 
-        with open('/root/.lnd/tls.cert', 'rb') as cert_bytes:
-            cert = cert_bytes.read()
+        async def attach_metadata(event: SendRequest):
+            event.metadata['macaroon'] = self._macaroon
 
-        cert_creds = purerpc.ssl_channel_credentials(cert)
-        auth_creds = purerpc.metadata_call_credentials(metadata_callback)
-        self._combined_creds = purerpc.composite_channel_credentials(cert_creds, auth_creds)
+        listen(self._channel, SendRequest, attach_metadata)
 
 
     async def initialize(self):
@@ -44,11 +53,6 @@ class LightningStub(LoggerMixin):
 
         # TODO add wallet unlocking stub for wallet unlock
         # TODO max receive message length? = 1024^3
-        self._channel = await purerpc.secure_channel(
-            self._host,
-            self._port,
-            self._combined_creds
-        ).__aenter__()
         self.logger.info('Initialized LND stub')
         self.stub = lnrpc.LightningStub(self._channel)
         req = ln.GetInfoRequest()
@@ -56,5 +60,5 @@ class LightningStub(LoggerMixin):
         self.id_pubkey = info.identity_pubkey
         assert self.id_pubkey
 
-    async def destroy(self):
-        await self._channel.__aexit__()
+    def destroy(self):
+        await self._channel.close()

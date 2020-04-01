@@ -29,7 +29,7 @@ RUN git clone https://github.com/googleapis/googleapis.git
 
 RUN mkdir build && ls -a
 
-RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=./build/ --purerpc_out=./build/ -I. rpc.proto
+RUN python -m grpc_tools.protoc --proto_path=googleapis:. --python_out=./build/ --python_grpc_out=./build/ -I. rpc.proto
 
 RUN touch build/__init__.py
 
