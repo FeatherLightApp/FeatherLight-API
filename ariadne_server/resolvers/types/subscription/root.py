@@ -10,7 +10,7 @@ from classes.error import Error
 _SUBSCRIPTION = SubscriptionType()
 
 
-@SUBSCRIPTION.source('invoice')
+@_SUBSCRIPTION.source('invoice')
 async def r_invoice_gen(user: Union[User, Error], *_):
     if isinstance(user, Error):
         # user wasnt authenticated from schema directive
@@ -33,14 +33,14 @@ async def r_invoice_gen(user: Union[User, Error], *_):
             await updated_invoice.apply()
 
 
-@SUBSCRIPTION.field('invoice')
+@_SUBSCRIPTION.field('invoice')
 def r_invoice_field(invoice, *_):
     return invoice
 
 
 _PAID_INVOICE_RESPONSE = UnionType('PaidInvoiceResponse')
 
-@PAID_INVOICE_RESPONSE.type_resolver
+@_PAID_INVOICE_RESPONSE.type_resolver
 def r_paid_invoice_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
