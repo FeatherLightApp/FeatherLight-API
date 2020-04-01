@@ -3,7 +3,7 @@ import ssl
 import codecs
 import os
 from grpclib.client import Channel
-from grpclib.event import SendRequest, listen
+from grpclib.events import SendRequest, listen
 import rpc_pb2 as ln
 import rpc_grpc as lnrpc
 from helpers.async_future import make_async
