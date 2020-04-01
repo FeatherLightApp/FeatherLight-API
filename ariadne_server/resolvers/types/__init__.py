@@ -7,7 +7,7 @@ from .subscription import subs
 from .token_payload import TOKEN_PAYLOAD
 from .scalar import SCALAR
 from .interface import INTERFACE
-from .balance_payload import _balance_payload
+from .balance_payload import BALANCE_PAYLOAD
 
 TYPES = [
     *UNION,
@@ -16,7 +16,7 @@ TYPES = [
     QUERY,
     MUTATION,
     TOKEN_PAYLOAD,
-    _balance_payload,
+    BALANCE_PAYLOAD,
     # add_invoice_payload,
     subs,
     # local_invoice,
