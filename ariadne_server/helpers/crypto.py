@@ -31,9 +31,3 @@ def decode(token: str, kind: str) -> Union[dict, Error]:
     except InvalidTokenError:
         return Error('AuthenticationError', 'Invalid token')
 
-
-def hash_string(string):
-    """returns hex digest of string"""
-    hasher = sha256()
-    hasher.update(string.encode('utf-8'))
-    return hasher.digest().hex()

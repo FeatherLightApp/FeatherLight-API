@@ -49,7 +49,7 @@ async def r_invoice_gen(user: Union[User, Error], *_):
                         # delegate db write to background process
                         await PUBSUB.background_tasks.put(updated.apply)
             except GeneratorExit:
-                # user closed stream, pop pubsub queue
+                # user closed stream, del pubsub queue
                 del local_stream
                 if len(PUBSUB[user.id]) == 0:
                     del PUBSUB[user.id]
