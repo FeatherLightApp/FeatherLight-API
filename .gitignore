@@ -4,3 +4,4 @@ __pycache__
 keys.json
 *.sqlite
 ariadne/.vscode
+.mypy_cache
