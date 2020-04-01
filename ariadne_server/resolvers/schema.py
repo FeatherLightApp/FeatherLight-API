@@ -7,10 +7,10 @@ from ariadne import (
 from .types import TYPES as resolvers
 from .directives import AuthDirective, RatelimitDirective
 
-TYPE_DEFS = load_schema_from_path('schema')
+_TYPE_DEFS = load_schema_from_path('schema')
 
 SCHEMA = make_executable_schema(
-    TYPE_DEFS,
+    _TYPE_DEFS,
     resolvers,
     snake_case_fallback_resolvers,
     directives={
