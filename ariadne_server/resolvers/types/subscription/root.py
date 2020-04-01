@@ -19,7 +19,7 @@ async def r_invoice_gen(user: Union[User, Error], *_):
         return
 
     req = ln.InvoiceSubscription()
-    async for invoice in stub.SubscribeInvoices(req):
+    async for invoice in LND.stub.SubscribeInvoices(req):
         invoice_obj = None
         if invoice.state == 1:
             invoice_obj = await Invoice.get(invoice.r_hash.hex())
