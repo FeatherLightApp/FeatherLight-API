@@ -28,7 +28,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - ~~restructure context object~~
 - add alembic for db migrations
 - ~~consolidate DB_User and UserAPI~~
-- remove protobuf to dict
+- ~~remove protobuf to dict~~
 - create 'invoice' class for handling payments
 - add support for lnurl
 - add hold invoices

@@ -3,7 +3,6 @@ httpx
 requests
 pytest-asyncio
 pyjwt
-protobuf3-to-dict
 uvicorn
 aioredis
 grpcio
