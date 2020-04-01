@@ -11,3 +11,4 @@ googleapis-common-protos
 argon2-cffi
 gino
 grpclib
+aiostream

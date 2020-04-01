@@ -6,10 +6,9 @@ from ariadne import MutationType
 from argon2.exceptions import VerificationError
 from classes.user import User
 from classes.error import Error
-from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 from helpers.crypto import decode
-from context import LND, ARGON, GINO
+from context import LND, ARGON, GINO, PUBSUB
 from models import Invoice
 import rpc_pb2 as ln
 
@@ -89,11 +88,11 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
         value_msat=amt,
         expiry=expiry_time
     )
-    inv = await make_async(LND.stub.AddInvoice.future(request))
+    inv = await LND.stub.AddInvoice(request)
 
     # lookup invoice to get preimage
     pay_hash = ln.PaymentHash(r_hash=inv.r_hash)
-    inv_lookup = await make_async(LND.stub.LookupInvoice.future(pay_hash))
+    inv_lookup = await LND.stub.LookupInvoice(pay_hash)
     
     return await Invoice.create(
         payment_hash=inv.r_hash.hex(),
@@ -114,7 +113,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
 async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
     #determine true invoice amount
     pay_string = ln.PayReqString(pay_req=invoice)
-    decoded = await make_async(LND.stub.DecodePayReq.future(pay_string))
+    decoded = await LND.stub.DecodePayReq.future(pay_string)
 
     if amt is not None and decoded.num_msat != amt and decoded.num_msat > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')
@@ -142,18 +141,27 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
   
         if LND.id_pubkey == decoded.payment_hash and invoice_obj:
             #internal invoice, get payee from db
-            if not await User.get(invoice_obj.payee):
+            if not (payee := await User.get(invoice_obj.payee)):
                 # could not find the invoice payee in the db
                 return Error('PaymentError', 'This invoice is invalid')
 
-            invoice_obj.update(
+            invoice_update = invoice_obj.update(
                 paid=True,
                 payer=user.id,
                 msat_fee=floor(payment_amt * 0.03),
                 paid_at=time()
-            ).apply()
+            )
 
-            return invoice_obj
+            # check if there are clients in the subscribe channel for this invoice
+            if payee.id in PUBSUB.keys():
+                # clients are listening, push to all open clients
+                for client in PUBSUB[payee.id]:
+                    await client.put(invoice_update)
+
+            #send update coroutine to background task
+            await PUBSUB.background_tasks.put(invoice_update.apply)
+
+            return invoice_update
         
         # proceed with external payment if invoice does not exist in db already
         elif not invoice_obj:
