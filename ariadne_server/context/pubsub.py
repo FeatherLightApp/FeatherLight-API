@@ -25,22 +25,13 @@ class PubSubManager(LoggerMixin, dict):
         self.background_tasks = StreamQueue()
 
     def add_client(self, userid):
-        """adds a queue to the list of queues and returns the index"""
+        """adds a queue to the list of queues and return it along with its index"""
         if userid in self.keys():
             self[userid].append(StreamQueue())
-            return len(self[userid]) - 1
+            return self[userid][-1]
         self[userid] = [StreamQueue()]
-        return 0
-        
-    def close_client(self, userid, index):
-        """
-        removes specified queue from list of queues
-        if it is the last queue in the list then the key is removed from dict
-        """
-        del self[userid][index]
-        # remove dangling userid if it is empty
-        if len(self[userid]) == 0:
-            del self[userid]
+        return self[userid][-1], 0
+
 
     async def initialize(self):
         """
@@ -48,8 +39,8 @@ class PubSubManager(LoggerMixin, dict):
         to be returned to user then written to db asynchronously in background
         """
         async with streamcontext(self.background_tasks) as stream:
-            async for fn in stream():
-                await fn()
+            async for fctn in stream():
+                await fctn()
 
 
 
