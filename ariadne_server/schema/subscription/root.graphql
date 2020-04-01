@@ -2,4 +2,4 @@ type Subscription {
     paidInvoices: PaidInvoiceResponse! @auth
 }
 
-union PaidInvoiceResponse = PaidInvoice | Error
+union PaidInvoiceResponse = UserInvoice | Error

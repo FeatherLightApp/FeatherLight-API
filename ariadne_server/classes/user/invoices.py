@@ -40,7 +40,10 @@ class GetUserInvoices(AbstractMethod):
 
                     if lookup_info.state == 1:
                         # invoice is paid update state in db
-                        await invoice.update(paid=True).apply()
+                        await invoice.update(
+                            paid=True,
+                            paid_at=lookup_info.settle_date
+                        ).apply()
 
                 invoices.append(invoice)
         # if only paid is false return all results else return only settled ammounts
