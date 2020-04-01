@@ -1,6 +1,5 @@
 """module to define lightning stub manager"""
 import ssl
-import codecs
 import os
 from grpclib.client import Channel
 from grpclib.events import SendRequest, listen
@@ -28,7 +27,7 @@ class LightningStub(LoggerMixin):
                 f'/root/.lnd/data/chain/bitcoin/{self._network}/admin.macaroon',
                 'rb'
         ) as macaroon_bytes:
-            self._macaroon = codecs.encode(macaroon_bytes.read(), 'hex')
+            self._macaroon = macaroon_bytes.read().hex()
 
         self.logger.critical(ssl.get_default_verify_paths())
 
