@@ -33,7 +33,6 @@ class LightningStub(LoggerMixin):
         self.logger.critical(ssl.get_default_verify_paths())
 
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        ctx.set_default_verify_paths('/root/.lnd')
         ctx.verify_mode = ssl.CERT_REQUIRED
         ctx.load_verify_locations(cafile='/root/.lnd/tls.cert')
         ctx.load_cert_chain('/root/.lnd/tls.cert', '/root/.lnd/tls.key') # can take second arg path the private key str(client_key)
