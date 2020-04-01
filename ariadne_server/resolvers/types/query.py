@@ -4,7 +4,6 @@ import ast
 from ariadne import QueryType
 from typing import Union
 import rpc_pb2 as ln
-from helpers.async_future import make_async
 from context import LND, BITCOIND
 from classes.error import Error
 from classes.user import User
@@ -28,7 +27,7 @@ def pass_through_resolver(obj: Union[User, Error], *_):
 # @authenticate
 async def r_info(*_) -> dict:
     request = ln.GetInfoRequest()
-    return await make_async(LND.stub.GetInfo.future(request))
+    return await LND.stub.GetInfo(request)
 
 # @QUERY.field('txs')
 # #@authenticate
@@ -66,7 +65,7 @@ async def r_info(*_) -> dict:
 @QUERY.field('decodeInvoice')
 async def r_decode_invoice(*_, invoice: str) -> dict:
     request = ln.PayReqString(pay_req=invoice)
-    return await make_async(LND.stub.DecodePayReq.future(request))
+    return await LND.stub.DecodePayReq(request)
 
 
 # @QUERY.field('peers')

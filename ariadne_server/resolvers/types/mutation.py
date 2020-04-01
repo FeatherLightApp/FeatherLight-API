@@ -113,7 +113,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
 async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
     #determine true invoice amount
     pay_string = ln.PayReqString(pay_req=invoice)
-    decoded = await LND.stub.DecodePayReq.future(pay_string)
+    decoded = await LND.stub.DecodePayReq(pay_string)
 
     if amt is not None and decoded.num_msat != amt and decoded.num_msat > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')

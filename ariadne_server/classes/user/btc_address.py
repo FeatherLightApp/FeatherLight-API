@@ -1,12 +1,11 @@
 from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
-from helpers.async_future import make_async
-from context import BITCOIND, LND
+from context import BITCOIND, LND, PUBSUB
 import rpc_pb2 as ln
 
 
 class GetBTCAddress(AbstractMethod, LoggerMixin):
-
+    """method to get btc address"""
     async def run(self, user):
         """
         return bitcoin address of user. If the address does not exist
@@ -17,16 +16,18 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
 
         """
         # return address if it exists
-        if (address:= user.bitcoin_address):
+        if (address := user.bitcoin_address):
             return address
 
         #  create a new address
         request = ln.NewAddressRequest(type=0)
-        response = await make_async(LND.stub.NewAddress.future(request))
+        response = await LND.stub.NewAddress(request)
         address = response.address
-        await user.update(bitcoin_address=address).apply()
-        self.logger.info(f"Created address: {address} for user: {user.id}")
-        import_response = await BITCOIND.req(
+        update = user.update(bitcoin_address=address)
+        # delegate db write
+        await PUBSUB.background_tasks.put(update.apply)
+        self.logger.info("Created address: %s for user: %s", address, user.id)
+        await BITCOIND.req(
             'importaddress',
             params={
                 'address': address,

@@ -5,7 +5,6 @@ from grpclib.client import Channel
 from grpclib.events import SendRequest, listen
 import rpc_pb2 as ln
 import rpc_grpc as lnrpc
-from helpers.async_future import make_async
 from helpers.mixins import LoggerMixin
 
 
