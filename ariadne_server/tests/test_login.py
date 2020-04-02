@@ -7,7 +7,7 @@ pytestmark = pytest.mark.asyncio
 
 login_query = open('queries/login.graphql').read()
 
-async def user_login(schema, context, user, event_loop):
+async def user_login(schema, context, user):
     response = await graphql(
         schema,
         {
