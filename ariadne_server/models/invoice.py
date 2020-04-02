@@ -23,6 +23,6 @@ class Invoice(db.Model):
     # fee null for receivers of invoice
     msat_fee = db.Column(db.Integer)
     # null if invoice paid to external node
-    payee = db.Column(db.LargeBinary, db.ForeignKey('users.id'))
+    payee = db.Column(db.Text, db.ForeignKey('users.id'))
     # null if invoice paid by external node
-    payer = db.Column(db.LargeBinary, db.ForeignKey('users.id'))
+    payer = db.Column(db.Text, db.ForeignKey('users.id'))

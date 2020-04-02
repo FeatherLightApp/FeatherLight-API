@@ -4,6 +4,7 @@ from .abstract_user_method import AbstractMethod
 from context import REDIS
 
 #TODO determine if should be switched in to sql db
+#TODO determine if this file is deprecated with use of postgres lock
 
 class LockFunds(AbstractMethod):
 
