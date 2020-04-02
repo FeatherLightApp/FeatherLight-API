@@ -23,6 +23,7 @@ class PubSubManager(LoggerMixin, dict):
 
     def __init__(self):
         self.background_tasks = StreamQueue()
+        self.stream= None
 
     def add_client(self, userid):
         """adds a queue to the list of queues and return it along with its index"""
@@ -38,9 +39,13 @@ class PubSubManager(LoggerMixin, dict):
         start streaming background tasks, these tasks allow for db objects
         to be returned to user then written to db asynchronously in background
         """
-        async with streamcontext(self.background_tasks) as stream:
+        async with streamcontext(self.background_tasks) as self.stream:
             async for fctn in stream():
                 await fctn()
+
+    async def destroy(self):
+        if self.stream:
+            self.stream.throw()
 
 
 
