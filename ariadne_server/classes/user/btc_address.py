@@ -34,7 +34,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
             'importaddress',
             params={
                 'address': address,
-                'label': user.id,
+                'label': user.id.hex(),
                 'rescan': False
             }
         )
