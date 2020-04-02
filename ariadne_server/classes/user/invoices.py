@@ -31,10 +31,10 @@ class GetUserInvoices(AbstractMethod):
 
                 if not invoice.paid:
                     # if not paid check lnd to see if its paid in lnd db
-                    # convert hex serialized payment hash to bytes
 
                     req = ln.PaymentHash(
-                        r_hash=bytes.fromhex(invoice.payment_hash))
+                        r_hash=invoice.payment_hash
+                    )
                     lookup_info = await LND.stub.LookupInvoice(req)
 
                     if lookup_info.state == 1:

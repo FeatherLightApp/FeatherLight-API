@@ -38,7 +38,7 @@ async def r_invoice_gen(user: Union[User, Error], *_):
                     # payment comes from lnd, check if its associated with this user
                     invoice = None
                     if response.state == 1:
-                        invoice = await Invoice.get(response.r_hash.hex())
+                        invoice = await Invoice.get(response.r_hash)
                     if invoice and invoice.payee == user.id:
                         #received a paid invoice with this user as payee
                         updated = invoice.update(

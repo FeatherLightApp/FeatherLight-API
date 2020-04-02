@@ -95,9 +95,9 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
     inv_lookup = await LND.stub.LookupInvoice(pay_hash)
     
     return await Invoice.create(
-        payment_hash=inv.r_hash.hex(),
+        payment_hash=inv.r_hash,
         payment_request=inv.payment_request,
-        payment_preimage=inv_lookup.r_preimage.hex(),
+        payment_preimage=inv_lookup.r_preimage,
         timestamp=inv_lookup.creation_date,
         expiry=inv_lookup.expiry,
         memo=inv_lookup.memo,
@@ -191,9 +191,12 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 if payment_res.payment_error or not payment_res.payment_preimage:
                     return Error('PaymentError', f"received error {payment_res.payment_error}")
 
-                invoice_obj.payment_preimage = payment_res.payment_preimage.hex()
+                invoice_obj.payment_preimage = payment_res.payment_preimage
+                # impose maximum fee
                 invoice_obj.msat_fee = max(fee_limit, payment_res.payment_route.total_fees)
                 invoice_obj.paid = True
                 invoice_obj.paid_at = time()
-                invoice_obj.create()
+                # delegate db write to background task
+                await PUBSUB.background_tasks.put(invoice_obj.create)
+
                 return invoice_obj

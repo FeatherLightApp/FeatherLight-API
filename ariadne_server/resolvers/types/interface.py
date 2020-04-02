@@ -15,18 +15,6 @@ def r_invoice_type(obj, *_):
         return 'PaidInvoice'
     return 'UserInvoice'
 
-
-@_invoice.field('paymentPreimage')
-async def resolve_preimage(obj, *_):
-    if (preimage:= obj.get('payment_preimage')):
-        return preimage
-    payment_hash = obj.get('payment_hash')
-    # type cast the payment hash to bytes
-    lookup_req = ln.PaymentHash(r_hash=payment_hash if isinstance(
-        payment_hash, bytes) else bytes.fromhex(payment_hash))
-    full_invoice = await LND.stub.LookupInvoice(lookup_req)
-    return full_invoice.r_preimage
-
 INTERFACE = [
     _invoice
 ]
