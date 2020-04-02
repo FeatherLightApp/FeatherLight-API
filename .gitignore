@@ -5,4 +5,8 @@ keys.json
 *.sqlite
 ariadne/.vscode
 .mypy_cache
+<<<<<<< HEAD
 global.env
+=======
+.env
+>>>>>>> newenv

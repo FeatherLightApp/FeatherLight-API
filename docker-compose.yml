@@ -6,7 +6,7 @@ services:
             context: 'btcd/'
         volumes:
             # - shared:/rpc
-            - /mnt/volume_tor1_01/bitcoin:/data
+            - ${BITCOIN_VOL}:/data
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
         restart: unless-stopped
         env_file: 
@@ -18,8 +18,8 @@ services:
             context: 'lnd/'
         volumes: 
             # - shared:/rpc
-            - /mnt/volume_tor1_01/lnd:/root/.lnd
-            - /mnt/volume_tor1_01/bitcoin:/bitcoindata
+            - ${LND_VOL}:/root/.lnd
+            - ${BITCOIN_VOL}:/bitcoindata
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
         restart: unless-stopped
         env_file: 
@@ -48,7 +48,7 @@ services:
     redis:
         image: redis:alpine
         volumes: 
-            - /mnt/volume_tor1_01/redis:/data
+            - ${REDIS_VOL}:/data
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
         restart: unless-stopped
         env_file: 
@@ -57,7 +57,7 @@ services:
     postgres:
         image: postgres:alpine
         volumes:
-            - /mnt/volume_tor1_01/postgres:/var/lib/postgresql/data
+            - ${POSTGRES_VOL}:/var/lib/postgresql/data
         restart: unless-stopped
         env_file: 
             - global.env
