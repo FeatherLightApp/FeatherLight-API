@@ -33,7 +33,8 @@ class LightningStub(LoggerMixin):
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
         ctx.verify_mode = ssl.CERT_REQUIRED
         ctx.load_verify_locations(cafile='/root/.lnd/tls.cert')
-        ctx.load_cert_chain('/root/.lnd/tls.cert', '/root/.lnd/tls.key') # can take second arg path the private key str(client_key)
+        # can take second arg path the private key str(client_key)
+        ctx.load_cert_chain('/root/.lnd/tls.cert', '/root/.lnd/tls.key')
         #ctx.load_verify_locations(str(trusted)) WE TRUST THE CERTIFICATE
         ctx.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
         ctx.set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20')

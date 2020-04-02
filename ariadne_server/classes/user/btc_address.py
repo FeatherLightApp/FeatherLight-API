@@ -1,8 +1,8 @@
 import asyncio
-from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
-from context import BITCOIND, LND, PUBSUB
+from context import BITCOIND, LND
 import rpc_pb2 as ln
+from .abstract_user_method import AbstractMethod
 
 
 class GetBTCAddress(AbstractMethod, LoggerMixin):
@@ -17,7 +17,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
 
         """
         # return address if it exists
-        if (address := user.bitcoin_address):
+        if address := user.bitcoin_address:
             return address
 
         #  create a new address

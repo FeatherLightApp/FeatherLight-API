@@ -123,6 +123,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         return Error('PaymentError', 'You must specify an amount for this tip invoice')
 
     payment_amt = amt or decoded.num_msat
+    fee_limit = floor(payment_amt * 0.005) + 1000 #add 1 satoshi
 
     # attempt to load invoice obj
     invoice_obj = await Invoice.get(decoded.payment_hash)
@@ -134,12 +135,14 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         # potentially user.query.with_for..
         user.query.with_for_update().gino.status() #obtain lock
         user_balance = await user.balance()
-        if payment_amt > await user_balance:
+        if payment_amt + fee_limit > await user_balance:
             return Error(
                 'InsufficientFunds',
-                f'Attempting to pay {payment_amt} with only {user_balance}'
+                f'''Attempting to pay {payment_amt} msat 
+                with fee limit {fee_limit} msat 
+                with only {user_balance} msat'''
             )
-  
+
         if LND.id_pubkey == decoded.payment_hash and invoice_obj:
             #internal invoice, get payee from db
             if not (payee := await User.get(invoice_obj.payee)):
@@ -167,7 +170,6 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         
         # proceed with external payment if invoice does not exist in db already
         elif not invoice_obj:
-            fee_limit = floor(payment_amt * 0.005) + 1000 #add 1 satoshi
 
             def req_gen():
                 yield ln.SendRequest(
@@ -189,9 +191,9 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
 
             # TODO find native async way to execute
             for payment_res in LND.stub.SendPayment(req_gen()):
-                _mutation_logger.logger.info(f"payment response: {payment_res}")
+                _mutation_logger.logger.info("payment response: %s", payment_res)
                 if payment_res.payment_error or not payment_res.payment_preimage:
-                    return Error('PaymentError', f"received error {payment_res.payment_error}")
+                    return Error('PaymentError', "received error %s", payment_res.payment_error)
 
                 invoice_obj.payment_preimage = payment_res.payment_preimage
                 # impose maximum fee

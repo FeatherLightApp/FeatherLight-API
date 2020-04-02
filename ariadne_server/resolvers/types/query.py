@@ -82,8 +82,3 @@ async def r_rpc_call(*_, command: str, params: str = '') -> str:
     param_dict = None if not params else ast.literal_eval(params)
     res = await BITCOIND.req(command, params=param_dict)
     return json.dumps(res)
-
-# @query.field('checkRouteInvoice')
-# @authenticate
-# async def r_check_route(obj, info, invoice):
-# TODO
