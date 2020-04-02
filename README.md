@@ -25,15 +25,16 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 ### TODOs
 
 - ~~fix zmqpubhashblock port binding~~
+- change from jwt to macaroons
+- switch from hex data to bytea in postgres
 - ~~restructure context object~~
 - add alembic for db migrations
 - ~~consolidate DB_User and UserAPI~~
 - ~~remove protobuf to dict~~
-- create 'invoice' class for handling payments
 - add support for lnurl
 - add hold invoices
 - ~~restructure schema~~
-- write subscriptions
+- ~~write subscriptions~~
 - ~~consolidate configs into global config~~
 - mypy type checking
 - write more app level tests

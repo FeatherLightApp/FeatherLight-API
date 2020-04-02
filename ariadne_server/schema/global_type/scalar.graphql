@@ -1,4 +1,4 @@
 """
-Hex scalar type is a hex encoded representation of bytes
+B64 scalar type is a b64 encoded representation of bytes
 """
-scalar Hex
+scalar B64

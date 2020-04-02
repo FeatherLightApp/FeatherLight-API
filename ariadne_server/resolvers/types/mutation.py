@@ -1,6 +1,6 @@
 from time import time
 from math import floor
-from secrets import token_hex
+from secrets import token_bytes
 from typing import Union, Optional
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
@@ -22,11 +22,11 @@ _mutation_logger = LoggerMixin()
 async def r_create_user(*_, role: str = 'USER') -> User:
     """create a new user and save to db"""
     # create api object
-    password = token_hex(10)
+    password = token_bytes(10)
     # save to db
     user = await User.create(
-        id=token_hex(10),
-        username=token_hex(10),
+        id=token_bytes(10),
+        username=token_bytes(10),
         password_hash=ARGON.hash(password),
         role=role,
         created=time()

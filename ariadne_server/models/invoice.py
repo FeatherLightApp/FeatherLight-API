@@ -8,9 +8,9 @@ class Invoice(db.Model):
     """invoice orm"""
     __tablename__ = 'invoices'
 
-    payment_hash = db.Column(db.Text, primary_key=True, nullable=False)
+    payment_hash = db.Column(db.LargeBinary, primary_key=True, nullable=False)
     #null before external invoice is paid
-    payment_preimage = db.Column(db.Text)
+    payment_preimage = db.Column(db.LargeBinary)
     payment_request = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.Integer, nullable=False)
     expiry = db.Column(db.Integer, nullable=False),
@@ -23,6 +23,6 @@ class Invoice(db.Model):
     # fee null for receivers of invoice
     msat_fee = db.Column(db.Integer)
     # null if invoice paid to external node
-    payee = db.Column(db.Text, db.ForeignKey('users.id'))
+    payee = db.Column(db.LargeBinary, db.ForeignKey('users.id'))
     # null if invoice paid by external node
-    payer = db.Column(db.Text, db.ForeignKey('users.id'))
+    payer = db.Column(db.LargeBinary, db.ForeignKey('users.id'))
