@@ -26,7 +26,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         address = response.address
         update = user.update(bitcoin_address=address)
         # delegate db write
-        loop = asyncio.get_running_loop
+        loop = asyncio.get_running_loop()
         loop.create_task(update.apply())
         self.logger.info("Created address: %s for user: %s", address, user.id)
         await BITCOIND.req(

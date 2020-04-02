@@ -1,7 +1,7 @@
 import asyncio
 from typing import Union
 from ariadne import SubscriptionType, UnionType
-from aiostream import streamcontext, stream
+# from aiostream import streamcontext, stream
 import rpc_pb2 as ln
 from context import LND, PUBSUB
 from models import Invoice
