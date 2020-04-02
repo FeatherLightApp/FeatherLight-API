@@ -37,21 +37,3 @@ class PubSubManager(LoggerMixin, dict):
         self[userid] = [StreamQueue()]
         return self[userid][-1], 0
 
-
-    def initialize(self):
-        """
-        start streaming background tasks, these tasks allow for db objects
-        to be returned to user then written to db asynchronously in background
-        """
-        async def run_loop():
-            async with streamcontext(self.background_tasks) as stream:
-                async for fctn in stream():
-                    await fctn()
-
-        self._task_loop = asyncio.create_task(run_loop())
-
-    async def destroy(self):
-        #mark loop for closure on completion
-        self.background_tasks.mark_closed = True
-        # await loop to close
-        await self._task_loop

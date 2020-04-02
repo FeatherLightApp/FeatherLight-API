@@ -1,3 +1,4 @@
+import asyncio
 from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
 from context import BITCOIND, LND, PUBSUB
@@ -25,7 +26,8 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         address = response.address
         update = user.update(bitcoin_address=address)
         # delegate db write
-        await PUBSUB.background_tasks.put(update.apply)
+        loop = asyncio.get_running_loop
+        loop.create_task(update.apply())
         self.logger.info("Created address: %s for user: %s", address, user.id)
         await BITCOIND.req(
             'importaddress',

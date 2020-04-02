@@ -1,3 +1,4 @@
+import asyncio
 from time import time
 from math import floor
 from secrets import token_bytes
@@ -159,7 +160,8 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                     await client.put(invoice_update)
 
             #send update coroutine to background task
-            await PUBSUB.background_tasks.put(invoice_update.apply)
+            loop = asyncio.get_running_loop()
+            loop.create_task(invoice_update.apply())
 
             return invoice_update
         
@@ -197,6 +199,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 invoice_obj.paid = True
                 invoice_obj.paid_at = time()
                 # delegate db write to background task
-                await PUBSUB.background_tasks.put(invoice_obj.create)
+                loop = asyncio.get_running_loop()
+                loop.create_task(invoice_obj.create())
 
                 return invoice_obj

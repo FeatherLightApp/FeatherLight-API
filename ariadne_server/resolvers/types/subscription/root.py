@@ -1,3 +1,4 @@
+import asyncio
 from typing import Union
 from ariadne import SubscriptionType, UnionType
 from aiostream import streamcontext, stream
@@ -47,7 +48,8 @@ async def r_invoice_gen(user: Union[User, Error], *_):
                         )
                         yield updated
                         # delegate db write to background process
-                        await PUBSUB.background_tasks.put(updated.apply)
+                        loop = asyncio.get_running_loop()
+                        loop.create_task(updated.apply())
             except GeneratorExit:
                 # user closed stream, del pubsub queue
                 del local_stream
