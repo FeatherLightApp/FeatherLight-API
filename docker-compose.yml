@@ -35,7 +35,7 @@ services:
             context: 'ariadne_server/'
         volumes: 
             - ./ariadne_server/:/app
-            - /mnt/volume_tor1_01/lnd:/root/.lnd
+            - ${LND_VOL}:/root/.lnd
         ports:
             - '5001:5001'
         depends_on: 
