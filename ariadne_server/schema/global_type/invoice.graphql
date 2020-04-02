@@ -3,8 +3,8 @@ interface Invoice {
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
-    paymentHash: Hex!
-    paymentPreimage: Hex!
+    paymentHash: B64!
+    paymentPreimage: B64!
     memo: String
 }
 
@@ -16,8 +16,8 @@ type UserInvoice implements Invoice {
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
-    paymentHash: Hex!
-    paymentPreimage: Hex!
+    paymentHash: B64!
+    paymentPreimage: B64!
     memo: String 
 }
 
@@ -29,7 +29,7 @@ type PaidInvoice implements Invoice {
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
-    paymentHash: Hex!
-    paymentPreimage: Hex!
+    paymentHash: B64!
+    paymentPreimage: B64!
     memo: String
 }

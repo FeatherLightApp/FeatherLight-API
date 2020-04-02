@@ -6,7 +6,7 @@ type ChannelPayload {
         inactive: Boolean
         public: Boolean
         private: Boolean
-        peer: Hex
+        peer: B64
     ): [Channel]!
     pending: PendingChannelsResponse!
     
