@@ -15,7 +15,7 @@ async def schema(event_loop):
     await GINO.initialize()
     await REDIS.initialize()
     await LND.initialize()
-    await PUBSUB.initialize()
+    PUBSUB.initialize()
     yield SCHEMA
     await GINO.db.gino.drop_all()
     await GINO.destroy()

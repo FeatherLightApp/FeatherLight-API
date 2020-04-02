@@ -27,7 +27,7 @@ class PubSubManager(LoggerMixin, dict):
 
     def __init__(self):
         self.background_tasks = StreamQueue()
-        self.stream= None
+        self._task_loop = None
 
     def add_client(self, userid):
         """adds a queue to the list of queues and return it along with its index"""
@@ -44,8 +44,8 @@ class PubSubManager(LoggerMixin, dict):
         to be returned to user then written to db asynchronously in background
         """
         async def run_loop():
-            async with streamcontext(self.background_tasks) as self.stream:
-                async for fctn in self.stream():
+            async with streamcontext(self.background_tasks) as stream:
+                async for fctn in stream():
                     await fctn()
 
         self._task_loop = asyncio.create_task(run_loop())
