@@ -17,5 +17,5 @@ async def schema(event_loop):
     await GINO.db.gino.drop_all()
     await GINO.destroy()
     await REDIS.destroy()
-    await LND.destroy()
+    LND.destroy()
     

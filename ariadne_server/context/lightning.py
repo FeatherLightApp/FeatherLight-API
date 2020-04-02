@@ -63,5 +63,5 @@ class LightningStub(LoggerMixin):
         self.id_pubkey = info.identity_pubkey
         assert self.id_pubkey
 
-    async def destroy(self):
-        await self._channel.close()
+    def destroy(self):
+        self._channel.close()
