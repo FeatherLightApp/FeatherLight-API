@@ -6,9 +6,13 @@ class StreamQueue(asyncio.Queue):
     """
     allow for streaming contents of queue via async generator
     """
+    mark_closed = False
+
     async def __aiter__(self):
         while True:
             yield await self.get()
+            if self.mark_closed and self.empty():
+                raise GeneratorExit
 
 
 class PubSubManager(LoggerMixin, dict):
@@ -34,23 +38,20 @@ class PubSubManager(LoggerMixin, dict):
         return self[userid][-1], 0
 
 
-    async def initialize(self):
+    def initialize(self):
         """
         start streaming background tasks, these tasks allow for db objects
         to be returned to user then written to db asynchronously in background
         """
-        async with streamcontext(self.background_tasks) as self.stream:
-            async for fctn in stream():
-                await fctn()
+        async def run_loop():
+            async with streamcontext(self.background_tasks) as self.stream:
+                async for fctn in self.stream():
+                    await fctn()
+
+        self._task_loop = asyncio.create_task(run_loop())
 
     async def destroy(self):
-        if self.stream:
-            self.stream.throw()
-
-
-
-    
-
-    
-
-
+        #mark loop for closure on completion
+        self.background_tasks.mark_closed = True
+        # await loop to close
+        await self._task_loop
