@@ -24,6 +24,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         request = ln.NewAddressRequest(type=0)
         response = await LND.stub.NewAddress(request)
         address = response.address
+        self.logger.critical(type(address))
         update = user.update(bitcoin_address=address)
         # delegate db write
         loop = asyncio.get_running_loop()
