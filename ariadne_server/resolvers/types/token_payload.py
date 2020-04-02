@@ -1,3 +1,4 @@
+import codecs
 from time import time
 from ariadne import ObjectType
 from classes.user import User
@@ -9,7 +10,7 @@ TOKEN_PAYLOAD = ObjectType('TokenPayload')
 @TOKEN_PAYLOAD.field('access')
 def r_access_token(user: User, *_) -> str:
     access_json = {
-        'id': user.id,
+        'id': codecs.encode(user.id, 'base-64'),
         'role': user.role,
         'iat': time(),
         'exp': time() + 900 # 15 minutes in seconds
@@ -20,7 +21,7 @@ def r_access_token(user: User, *_) -> str:
 @TOKEN_PAYLOAD.field('refresh')
 def r_refresh_token(user: User, *_) -> str:
     refresh_json = {
-        'id': user.id,
+        'id': codecs.encode(user.id, 'base-64'),
         'iat': time(),
         'exp': time() + 604800 # 1 week in seconds
     }
