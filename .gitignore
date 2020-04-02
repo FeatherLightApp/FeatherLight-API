@@ -5,3 +5,4 @@ keys.json
 *.sqlite
 ariadne/.vscode
 .mypy_cache
+global.env
