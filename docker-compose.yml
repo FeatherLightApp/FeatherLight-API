@@ -41,6 +41,7 @@ services:
         depends_on: 
             - lnd
             - redis
+            - postgres
         restart: unless-stopped
         env_file: 
             - global.env
