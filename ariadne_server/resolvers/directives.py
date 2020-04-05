@@ -19,15 +19,20 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
     def visit_field_definition(self, field, *_):
         orig_resolver = field.resolve or default_field_resolver
 
+        # determine scoping of directive and set token retrieval accordingly
+        if 'REFRESH' in self.args.get('actions'):
+            get_macaroon = lambda info: info.context['request'].cookies.get('refresh')
+        else:
+            get_macaroon = lambda info: info.context['request'].headers.get('Authorization').replace('Bearer ', '')
+
         # define wrapper
         async def check_auth(obj, info, **kwargs):
-            print(f'args is {self.args}')
             # check if auth header is present
-            if not (auth_header:= info.context['request'].headers.get('Authorization')):
+            if not (serial_macaroon:= get_macaroon(info)):
                 return Error('AuthenticationError', 'No access token sent. You are not logged in')
             # attempt to deserialize macaroon
             try:
-                macaroon = Macaroon.deserialize(auth_header.replace('Bearer ', ''))
+                macaroon = Macaroon.deserialize(serial_macaroon)
             except MacaroonDeserializationException:
                 return Error('AuthenticationError', 'Invalid token sent')
             
@@ -42,19 +47,13 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                     key=db_user.key,
                     roles=self.args.get('roles'),
                     actions=self.args.get('actions'),
-                    use=self.args.get('use')
                 )
                 self.logger.critical(f'verify returned {verification}')
             except MacaroonInvalidSignatureException:
                 return Error('AuthenticationError', 'You do not have the permission to do that')
 
-            # User is authenticated. Inject into obj if not defined
-            new_obj = obj or db_user
-            if iscoroutinefunction(orig_resolver):
-                result = await orig_resolver(new_obj, info, **kwargs)
-            else:
-                result = orig_resolver(new_obj, info, **kwargs)
-            return result
+            # User is authenticated. Inject into union resolver
+            return db_user
 
         field.resolve = check_auth
         return field

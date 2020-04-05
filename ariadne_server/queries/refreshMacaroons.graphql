@@ -1,0 +1,13 @@
+mutation refreshMacaroons{
+    refreshMacaroons {
+        __typename
+        ... on TokenPayload {
+            access
+            refresh
+        }
+        ... on Error {
+            errorType
+            message
+        }
+    }
+}

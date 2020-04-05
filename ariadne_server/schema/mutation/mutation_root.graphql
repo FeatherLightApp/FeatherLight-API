@@ -16,7 +16,7 @@ type Mutation {
     """
     Issues new token payload: refresh token and full token
     """
-    refreshAccessToken: TokenResponse! @auth(actions = [REFRESH])
+    refreshMacaroons: TokenResponse! @auth(actions: [REFRESH])
     
     """
     Add an invoice for the user. If hash is specified then this creates a hold invoice
@@ -27,7 +27,7 @@ type Mutation {
     and safely pass the macaroon to a third party, allowing them only to add new invoices
     on the user's behalf
     """
-    addInvoice(memo: String! amt: Int! hash: B64): UserInvoiceResponse! @auth(actions=[ADD_INVOICE])
+    addInvoice(memo: String! amt: Int! hash: B64): UserInvoiceResponse! @auth(actions: [ADD_INVOICE])
     
     """
     Resolves a previously set hold invoice, if resolution is SETTLE via should be passed the externally 
@@ -46,6 +46,8 @@ type Mutation {
 union UserInvoiceResponse = UserInvoice | Error
 """Either error . or an invoice paid by this user (payee)"""
 union PayInvoiceResponse = PaidInvoice | Error
+
+union LogoutResponse = UserInvoice | Error
 
 """Possible resolutions to resolve a hold invoice"""
 enum Resolution {

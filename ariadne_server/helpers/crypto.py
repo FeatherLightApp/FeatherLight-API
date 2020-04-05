@@ -19,8 +19,7 @@ def verify(
         macaroon: Macaroon,
         key: bytes,
         roles: List[str],
-        actions: List[str],
-        use: str
+        actions: List[str]
 ) -> bool:
     assert macaroon
     v_obj = Verifier()
@@ -31,13 +30,9 @@ def verify(
             int(x.split(' = ')[1]) > time()
     )
     for role in roles:
-        print(f'adding validation for caveat role = {role}')
         v_obj.satisfy_exact(f'role = {role}')
 
     for action in actions:
-        print(f'adding validation for caveat action = {action}')
         v_obj.satisfy_exact(f'action = {action}')
 
-    v_obj.satisfy_exact(f'use = {use}')
-    
     return v_obj.verify(macaroon, key)

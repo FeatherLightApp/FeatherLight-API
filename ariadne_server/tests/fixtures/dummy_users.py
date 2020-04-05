@@ -1,6 +1,6 @@
 import pytest
 from ariadne import graphql
-from .context import FakeContext
+from .fake_context import FakeContext
 
 @pytest.fixture(scope='session')
 async def dummy_user(schema):

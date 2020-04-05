@@ -1,7 +1,6 @@
 directive @auth(
     roles: [Role]! = [USER]
     actions: [Action]! = []
-    use: String! = "ACCESS"
 ) on FIELD_DEFINITION
 
 
@@ -18,6 +17,6 @@ enum Action {
     this means user can give attenuated macaroon to others to add invoices on their behalf
     """
     ADD_INVOICE
-    """Used to limit the scope of token to only refreshAccessToken"""
+    """Used to limit the scope of token to only refreshMacaroon"""
     REFRESH
 }

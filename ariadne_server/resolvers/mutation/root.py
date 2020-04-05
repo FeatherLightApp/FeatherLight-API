@@ -13,12 +13,12 @@ from context import LND, ARGON, GINO, PUBSUB
 from models import Invoice
 import rpc_pb2 as ln
 
-MUTATION = MutationType()
+_MUTATION = MutationType()
 
 _mutation_logger = LoggerMixin()
 
 
-@MUTATION.field('createUser')
+@_MUTATION.field('createUser')
 # TODO add post limiter?
 async def r_create_user(*_, role: str = 'USER') -> User:
     """create a new user and save to db"""
@@ -38,7 +38,7 @@ async def r_create_user(*_, role: str = 'USER') -> User:
     return user
 
 
-@MUTATION.field('login')
+@_MUTATION.field('login')
 async def r_auth(*_, username: str, password: str) -> Union[User, Error]:
     if not (user_obj := await User.query.where(User.username == username).gino.first()):
         return Error('AuthenticationError', 'User not found')
@@ -55,7 +55,7 @@ async def r_auth(*_, username: str, password: str) -> Union[User, Error]:
 
 
 # TODO GET RID OF THIS ITS FOR DEBUG
-@MUTATION.field('forceUser')
+@_MUTATION.field('forceUser')
 async def r_force_user(*_, user: str) -> str:
     if not (user_obj:= await User.get(user)):
         return Error('AuthenticationError', 'User not found in DB')
@@ -63,7 +63,7 @@ async def r_force_user(*_, user: str) -> str:
 
 
 #TODO update for macaroons
-@MUTATION.field('refreshAccessToken')
+@_MUTATION.field('refreshMacaroons')
 async def r_get_token(_: None, info) -> Union[User, Error]:
     pass
     # # catch scenario of no refresh cookie
@@ -79,7 +79,7 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
     #     return await User.get(decode_response['id'])
 
 
-@MUTATION.field('addInvoice')
+@_MUTATION.field('addInvoice')
 # TODO add more flexiblilty in invoice creation
 # TODO invoiceFor allows creating invoices for other users on their behalf
 # FIXME doesnt work
@@ -112,7 +112,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, hash: Optional[str]
     )
 
 
-@MUTATION.field('payInvoice')
+@_MUTATION.field('payInvoice')
 async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
     #determine true invoice amount
     pay_string = ln.PayReqString(pay_req=invoice)

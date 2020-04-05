@@ -12,17 +12,6 @@ from classes.user import User
 QUERY = QueryType()
 
 
-
-
-@QUERY.field('me')
-@QUERY.field('nodeBalance')
-@QUERY.field('channels')
-def pass_through_resolver(obj: Union[User, Error], *_):
-    #pass object into union resolver
-    return obj
-
-
-
 @QUERY.field('info')
 # @authenticate
 async def r_info(*_) -> dict:
