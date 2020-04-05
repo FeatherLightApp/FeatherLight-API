@@ -48,7 +48,6 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                     roles=self.args.get('roles'),
                     actions=self.args.get('actions'),
                 )
-                self.logger.critical(f'verify returned {verification}')
             except MacaroonInvalidSignatureException:
                 return Error('AuthenticationError', 'You do not have the permission to do that')
 
