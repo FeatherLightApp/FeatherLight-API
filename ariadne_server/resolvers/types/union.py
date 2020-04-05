@@ -24,11 +24,11 @@ def r_user_response(obj, *_):
         return 'User'
 
 
-_add_invoice_response = UnionType('AddInvoiceResponse')
+_user_invoice_response = UnionType('UserInvoiceResponse')
 _pay_invoice_response = UnionType('PayInvoiceResponse')
 
 
-@_add_invoice_response.type_resolver
+@_user_invoice_response.type_resolver
 @_pay_invoice_response.type_resolver
 def r_add_invoice_response(obj, _, resolve_type):
     if isinstance(obj, Error):
@@ -36,7 +36,7 @@ def r_add_invoice_response(obj, _, resolve_type):
     if getattr(obj, 'payment_hash', None) or obj.get('payment_hash'):
         if str(resolve_type) == 'PayInvoiceResponse':
             return 'PaidInvoice'
-        if str(resolve_type) == 'AddInvoiceResponse':
+        if str(resolve_type) == 'UserInvoiceResponse':
             return 'UserInvoice'
 
 
@@ -53,7 +53,7 @@ def r_wallet_response(obj, *_):
 UNION = [
     _TOKEN_RESPONSE,
     _USER_RESPONSE,
-    _add_invoice_response,
+    _user_invoice_response,
     _pay_invoice_response,
     _wallet_response
 ]

@@ -10,10 +10,9 @@ TOKEN_PAYLOAD = ObjectType('TokenPayload')
 def r_access_token(user: User, *_) -> str:
     # 900 seconds is 15 minutes
     caveats = [
-        f'expiry = {int(time()) + 900}',
+        # f'expiry = {int(time()) + 900}',
         f'user = {user.username}',
         f'role = {user.role}',
-        'use = ACCESS'
     ]
     return bake(user=user, caveats=caveats).serialize()
 
@@ -23,6 +22,6 @@ def r_refresh_token(user: User, *_) -> str:
     caveats = [
         f'expiry = {int(time()) + 604800}',
         f'user = {user.username}',
-        f'use = REFRESH'
+        'action = REFRESH'
     ]
     return bake(user=user, caveats=caveats).serialize()

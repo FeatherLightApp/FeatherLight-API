@@ -25,8 +25,9 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 ### TODOs
 
 - ~~fix zmqpubhashblock port binding~~
-- change from jwt to macaroons
-- switch from hex data to bytea in postgres
+- ~~change from jwt to macaroons~~
+- CHANGE TO DEFAULT ENUM TYPES ON ARIADNE 0.12 RELEASE
+- ~~switch from hex data to bytea in postgres~~
 - ~~restructure context object~~
 - add alembic for db migrations
 - ~~consolidate DB_User and UserAPI~~

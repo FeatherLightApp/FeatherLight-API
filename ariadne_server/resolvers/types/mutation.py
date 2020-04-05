@@ -83,7 +83,7 @@ async def r_get_token(_: None, info) -> Union[User, Error]:
 # TODO add more flexiblilty in invoice creation
 # TODO invoiceFor allows creating invoices for other users on their behalf
 # FIXME doesnt work
-async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optional[str] = None) -> dict:
+async def r_add_invoice(user: User, *_, memo: str, amt: int, hash: Optional[str] = None) -> dict:
     """Authenticated route"""
     expiry_time = 3600*24
     request = ln.Invoice(

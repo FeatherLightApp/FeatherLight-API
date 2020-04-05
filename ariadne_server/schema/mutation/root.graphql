@@ -1,8 +1,54 @@
 type Mutation {
+    """Creates a new user of type Role, rate limited mutation"""
     createUser(role: Role): UserResponse! @limit(operations: 3 seconds: 86400)
+    
+    """
+    Logs the user in issuing a full macaroon which does not expire 
+    and a limited refresh macaroon which expires in 7 days
+    """
     login(username: String! password: String!): TokenResponse!
-    refreshAccessToken: TokenResponse!
-    addInvoice(memo: String! amt: Int!): AddInvoiceResponse! @auth
+    
+    """
+    Rotates the macaroon key for the user, causing all issued macaroons to be invalidated
+    """
+    logout: LogoutResponse! @auth
+    
+    """
+    Issues new token payload: refresh token and full token
+    """
+    refreshAccessToken: TokenResponse! @auth(actions = [REFRESH])
+    
+    """
+    Add an invoice for the user. If hash is specified then this creates a hold invoice
+    hold invoices must be resolved by calling resolveInvoice
+    hash should be passed in as a B64 encoded string
+    ADD_INVOICE action allows for macaroons to be attenuated to this route
+    i.e. a user may add the 'action = ADD_INVOICE' caveat to his access macaroon
+    and safely pass the macaroon to a third party, allowing them only to add new invoices
+    on the user's behalf
+    """
+    addInvoice(memo: String! amt: Int! hash: B64): UserInvoiceResponse! @auth(actions=[ADD_INVOICE])
+    
+    """
+    Resolves a previously set hold invoice, if resolution is SETTLE via should be passed the externally 
+    derived preimage, if reject, pass the original hash used to create the invoice
+    """
+    resolveInvoice(resolution: Resolution! via: B64!): UserInvoiceResponse! @auth
+
+    """Pay an invoice with a payment string, if this is a tip invoice then"""
     payInvoice(invoice: String! amt: Int): PayInvoiceResponse! @auth
+
+    """Temporary mutation for testing"""
     forceUser(user: String!): UserResponse!
+}
+
+"""Either error or an invoice created by this user (payee)"""
+union UserInvoiceResponse = UserInvoice | Error
+"""Either error . or an invoice paid by this user (payee)"""
+union PayInvoiceResponse = PaidInvoice | Error
+
+"""Possible resolutions to resolve a hold invoice"""
+enum Resolution {
+    SETTLE
+    REJECT
 }

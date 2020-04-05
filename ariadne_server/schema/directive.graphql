@@ -1,7 +1,7 @@
 directive @auth(
     roles: [Role]! = [USER]
     actions: [Action]! = []
-    use: UseType! = ACCESS
+    use: String! = "ACCESS"
 ) on FIELD_DEFINITION
 
 
@@ -11,17 +11,13 @@ directive @limit(
     limitKey: String! = "default"
 ) on FIELD_DEFINITION
 
-#directive @GRPC(
 
-#directive rest
-
-# find place to put this and implement it
 enum Action {
+    """
+    Allows user to attenuate macaroon to only add invoices
+    this means user can give attenuated macaroon to others to add invoices on their behalf
+    """
     ADD_INVOICE
-    READ_BALANCE
-}
-
-enum UseType {
-    ACCESS
+    """Used to limit the scope of token to only refreshAccessToken"""
     REFRESH
 }
