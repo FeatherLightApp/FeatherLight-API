@@ -2,7 +2,6 @@ ariadne
 httpx
 requests
 pytest-asyncio
-pyjwt
 uvicorn
 aioredis
 grpcio
@@ -12,3 +11,4 @@ argon2-cffi
 gino
 grpclib
 aiostream
+pymacaroons

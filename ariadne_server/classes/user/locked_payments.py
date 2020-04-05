@@ -16,7 +16,7 @@ class GetLockedPayments(AbstractMethod):
         locked payments are outbound transactions that have not yet been accepted
         this is used to calculate a users balance correctly before tranctaions has been settled
         """
-        payments = await REDIS.conn.lrange('locked_payments_for_' + user.id, self.start, self.end)
+        payments = await REDIS.conn.lrange('locked_payments_for_' + user.username, self.start, self.end)
         result = []
         for paym in payments:
             try:

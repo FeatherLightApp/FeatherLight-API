@@ -1,14 +1,14 @@
 import asyncio
 from time import time
 from math import floor
-from secrets import token_hex
+from secrets import token_hex, token_bytes
 from typing import Union, Optional
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
 from classes.user import User
 from classes.error import Error
 from helpers.mixins import LoggerMixin
-from helpers.crypto import decode
+from helpers.crypto import verify
 from context import LND, ARGON, GINO, PUBSUB
 from models import Invoice
 import rpc_pb2 as ln
@@ -26,7 +26,7 @@ async def r_create_user(*_, role: str = 'USER') -> User:
     password = token_hex(10)
     # save to db
     user = await User.create(
-        id=token_hex(10),
+        key=token_bytes(32),
         username=token_hex(10),
         password_hash=ARGON.hash(password),
         role=role,
@@ -62,19 +62,21 @@ async def r_force_user(*_, user: str) -> str:
     return user_obj
 
 
+#TODO update for macaroons
 @MUTATION.field('refreshAccessToken')
 async def r_get_token(_: None, info) -> Union[User, Error]:
-    # catch scenario of no refresh cookie
-    if not (cookie:= info.context['request'].cookies.get('refresh')):
-        return Error(error_type='AuthenticationError', message='No refresh token sent')
-    decode_response: Union[dict, Error] = decode(token=cookie, kind='refresh')
-    # pass either error or user instance to union resolver
-    _mutation_logger.logger.critical(decode_response)
-    if isinstance(decode_response, Error):
-        return decode_response
-    if isinstance(decode_response, dict):
-        # lookup userid from db and return
-        return await User.get(decode_response['id'])
+    pass
+    # # catch scenario of no refresh cookie
+    # if not (cookie:= info.context['request'].cookies.get('refresh')):
+    #     return Error(error_type='AuthenticationError', message='No refresh token sent')
+    # decode_response: Union[dict, Error] = decode(token=cookie, kind='refresh')
+    # # pass either error or user instance to union resolver
+    # _mutation_logger.logger.critical(decode_response)
+    # if isinstance(decode_response, Error):
+    #     return decode_response
+    # if isinstance(decode_response, dict):
+    #     # lookup userid from db and return
+    #     return await User.get(decode_response['id'])
 
 
 @MUTATION.field('addInvoice')
@@ -105,7 +107,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, invoiceFor: Optiona
         paid=False,
         msat_amount=inv_lookup.value_msat,
         # do not set a fee since this invoice has not been paid
-        payee=user.id
+        payee=user.username
         # do not set a payer since we dont know to whom to invoice is being sent
     )
 
@@ -151,15 +153,15 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
 
             invoice_update = invoice_obj.update(
                 paid=True,
-                payer=user.id,
+                payer=user.username,
                 msat_fee=floor(payment_amt * 0.03),
                 paid_at=time()
             )
 
             # check if there are clients in the subscribe channel for this invoice
-            if payee.id in PUBSUB.keys():
+            if payee.username in PUBSUB.keys():
                 # clients are listening, push to all open clients
-                for client in PUBSUB[payee.id]:
+                for client in PUBSUB[payee.username]:
                     await client.put(invoice_update)
 
             #send update coroutine to background task
@@ -186,7 +188,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 memo=decoded.description,
                 paid=False, # not yet paid
                 msat_amount=decoded.num_msat or decoded.num_satoshis * 1000,
-                payer=user.id
+                payer=user.username
             )
 
             # TODO find native async way to execute

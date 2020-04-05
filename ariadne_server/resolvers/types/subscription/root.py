@@ -20,7 +20,7 @@ async def r_invoice_gen(user: Union[User, Error], *_):
         yield user
         return
     #create new new pub sub client for streaming locally paid invoices
-    local_stream = PUBSUB.add_client(user.id)
+    local_stream = PUBSUB.add_client(user.username)
 
     #create stream for remotely paid invoices
     remote_stream = LND.stub.SubscribeInvoices(ln.InvoiceSubscription())
@@ -40,7 +40,7 @@ async def r_invoice_gen(user: Union[User, Error], *_):
                     invoice = None
                     if response.state == 1:
                         invoice = await Invoice.get(response.r_hash)
-                    if invoice and invoice.payee == user.id:
+                    if invoice and invoice.payee == user.username:
                         #received a paid invoice with this user as payee
                         updated = invoice.update(
                             paid=True,
@@ -53,8 +53,8 @@ async def r_invoice_gen(user: Union[User, Error], *_):
             except GeneratorExit:
                 # user closed stream, del pubsub queue
                 del local_stream
-                if len(PUBSUB[user.id]) == 0:
-                    del PUBSUB[user.id]
+                if len(PUBSUB[user.username]) == 0:
+                    del PUBSUB[user.username]
 
 
 

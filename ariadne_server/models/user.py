@@ -8,8 +8,9 @@ class User(db.Model):
     """user model"""
     __tablename__ = 'users'
 
-    id = db.Column(db.Text, primary_key=True, nullable=False)
-    username = db.Column(db.Text, unique=True, nullable=False)
+    # key for baking macaroons, simply rotate key to revoke all
+    key = db.Column(db.LargeBinary, unique=True, nullable=False)
+    username = db.Column(db.Text, primary_key=True, nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
     # address can be null if user doesnt request an address
     bitcoin_address = db.Column(db.Text)

@@ -1,27 +1,28 @@
 from time import time
 from ariadne import ObjectType
 from classes.user import User
-from helpers.crypto import encode
+from helpers.crypto import bake
 
 TOKEN_PAYLOAD = ObjectType('TokenPayload')
 
 
 @TOKEN_PAYLOAD.field('access')
 def r_access_token(user: User, *_) -> str:
-    access_json = {
-        'id': user.id,
-        'role': user.role,
-        'iat': time(),
-        'exp': time() + 900 # 15 minutes in seconds
-    }
-    return encode(access_json, kind='access')
+    # 900 seconds is 15 minutes
+    caveats = [
+        f'expiry = {int(time()) + 900}',
+        f'user = {user.username}',
+        f'role = {user.role}',
+        'use = ACCESS'
+    ]
+    return bake(user=user, caveats=caveats).serialize()
 
 
 @TOKEN_PAYLOAD.field('refresh')
 def r_refresh_token(user: User, *_) -> str:
-    refresh_json = {
-        'id': user.id,
-        'iat': time(),
-        'exp': time() + 604800 # 1 week in seconds
-    }
-    return encode(refresh_json, kind='refresh')
+    caveats = [
+        f'expiry = {int(time()) + 604800}',
+        f'user = {user.username}',
+        f'use = REFRESH'
+    ]
+    return bake(user=user, caveats=caveats).serialize()

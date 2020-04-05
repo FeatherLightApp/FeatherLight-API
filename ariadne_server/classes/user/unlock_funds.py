@@ -13,7 +13,7 @@ class UnlockFunds(AbstractMethod):
         """
         Strips specific payreq from the list of locked payments
         """
-        assert user.id
+        assert user.username
         locked_payments_method = GetLockedPayments()
         payments = await user.exec(locked_payments_method)
         save_back = []
@@ -21,6 +21,6 @@ class UnlockFunds(AbstractMethod):
             if paym['pay_req'] != self.pay_req:
                 save_back.append(paym)
 
-        await REDIS.conn.delete('locked_payments_for_' + user.id)
+        await REDIS.conn.delete('locked_payments_for_' + user.username)
         for doc in save_back:
-            await REDIS.conn.rpush('locked_payments_for_' + user.id, json.dumps(doc))
+            await REDIS.conn.rpush('locked_payments_for_' + user.username, json.dumps(doc))

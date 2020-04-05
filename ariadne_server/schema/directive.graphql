@@ -1,6 +1,9 @@
-directive @auth(requires: Role = USER) on FIELD_DEFINITION
+directive @auth(
+    roles: [Role]! = [USER]
+    actions: [Action]! = []
+    use: UseType! = ACCESS
+) on FIELD_DEFINITION
 
-directive @allowsFor(permission: Permission) on OBJECT
 
 directive @limit(
     operations: Int!
@@ -13,6 +16,12 @@ directive @limit(
 #directive rest
 
 # find place to put this and implement it
-enum Permission {
-    AddInvoice
+enum Action {
+    ADD_INVOICE
+    READ_BALANCE
+}
+
+enum UseType {
+    ACCESS
+    REFRESH
 }

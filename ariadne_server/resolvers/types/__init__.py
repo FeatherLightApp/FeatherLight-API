@@ -8,6 +8,7 @@ from .scalar import SCALAR
 from .interface import INTERFACE
 from .balance_payload import BALANCE_PAYLOAD
 from .subscription.root import EXPORT as sub_export
+from .manual_enum import EXPORT as enum_export
 
 TYPES = [
     *UNION,
@@ -18,7 +19,8 @@ TYPES = [
     TOKEN_PAYLOAD,
     BALANCE_PAYLOAD,
     # add_invoice_payload,
-    *sub_export
+    *sub_export,
+    *enum_export
     # local_invoice,
     # route_hint,
     # hop_hint,

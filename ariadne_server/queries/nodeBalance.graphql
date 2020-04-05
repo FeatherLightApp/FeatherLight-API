@@ -1,0 +1,14 @@
+query nodeBalance {
+    nodeBalance {
+        __typename
+        ... on NodeBalance {
+            wallet {
+                totalBalance
+            }
+        }
+        ... on Error {
+            errorType
+            message
+        }
+    }
+}

@@ -19,10 +19,10 @@ class LockFunds(AbstractMethod):
         (payment is in determined state - success or fail)
         This only applied to external payments, internal ones are atomic
         """
-        assert user.id
+        assert user.username
         doc = {
             'pay_req': self.pay_req,
             'amount': self.invoice.num_satoshis,
             'timestamp': time()
         }
-        return REDIS.conn.rpush('locked_payments_for_' + user.id, json.dumps(doc))
+        return REDIS.conn.rpush('locked_payments_for_' + user.username, json.dumps(doc))
