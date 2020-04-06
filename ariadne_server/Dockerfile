@@ -1,11 +1,11 @@
-FROM python:3.8 as base
+FROM python:3.8-slim-buster as base
 
 #----------Compile image-------
 
 FROM base as compile-image
 
-RUN apt-get update -y \
-    && apt-get install -y build-essential libssl-dev automake pkg-config libtool libffi-dev libsecp256k1-dev
+# RUN apk update \
+#     && apk add --no-cache build-base gcc
 
 WORKDIR /temp
 
@@ -17,10 +17,11 @@ ENV PATH="/temp/env/bin:$PATH"
 
 COPY requirements.txt .
 
-RUN pip install -U pip setuptools wheel\
-    && pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 WORKDIR /proto
+
+RUN apt-get update && apt-get install -y wget git
 
 RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrpc/rpc.proto
 
@@ -55,7 +56,5 @@ RUN ls -a /app
 RUN ls -a /proto
 
 EXPOSE 5000
-
-COPY keys.json .
 
 CMD [ "python", "-m", "uvicorn",  "app:APP", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]
