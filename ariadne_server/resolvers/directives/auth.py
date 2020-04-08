@@ -1,6 +1,5 @@
-from functools import wraps
-from typing import Union, Dict, Any
-from asyncio import iscoroutinefunction
+"""Module to define directive for valiadtion user requests"""
+from typing import Union
 from ariadne import SchemaDirectiveVisitor
 from graphql import default_field_resolver
 from pymacaroons import Macaroon
@@ -8,23 +7,16 @@ from pymacaroons.exceptions import (
     MacaroonDeserializationException,
     MacaroonInvalidSignatureException
 )
-from helpers.crypto import verify
-from classes.user import User
 from classes.error import Error
+from classes.user import User
 from helpers.mixins import LoggerMixin
-from context import REDIS
-from aiostream import streamcontext
-
-
-    
+from helpers.crypto import verify
 
 
 class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
-
+    """Directive class"""
     def __init__(self, *args):
         super().__init__(*args)
-        # determine scoping of directive and set token retrieval accordingly
-        # FIXME disallow access tokens in cookies on subscriptions
         if 'REFRESH' in self.args.get('actions'):
             self.get_macaroon = lambda info: info.context['request'].cookies.get('refresh')
         else:
@@ -37,7 +29,8 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             self.get_macaroon = get_access
 
 
-    async def check_auth(self, info):
+    async def _check_auth(self, info) -> Union[User, Error]:
+        """Function to check authentication of user"""
         self.logger.critical('entering wrapper')
         self.logger.critical(info.context['request'].headers)
         # check if auth header is present
@@ -66,21 +59,18 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             return Error('AuthenticationError', 'You do not have the permission to do that')
 
         return db_user
-    
 
-
-    def visit_field_definition(self, field, *_):
+    def visit_field_definition(self, field, object_type):
         orig_resolver = field.resolve or default_field_resolver
-        is_subscription = bool(getattr(field, 'subscribe', None))
-
+        is_subscription = hasattr(field, 'subscribe')
 
         if is_subscription:
             orig_source = field.subscribe
             self.logger.critical(type(orig_source))
             #source gen
             async def gen(_, info, **kwargs):
-                
-                root = await self.check_auth(info)
+
+                root = await self._check_auth(info)
                 self.logger.critical('inside fn root is %s', root)
                 if isinstance(root, Error):
                     yield root
@@ -89,45 +79,11 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                     yield item
             field.subscribe = gen
             self.logger.critical('set field source')
-
         else:
             async def call(_, info, **kwargs):
-                root = await self.check_auth(info)
+                root = await self._check_auth(info)
                 response = await orig_resolver(root, info, **kwargs)
                 return response or root
             field.resolve = call
             
-        return field
-        
-
-
-
-class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
-
-    def visit_field_definition(self, field, *_):
-        orig_resolver = field.resolve or default_field_resolver
-        operations = self.args.get('operations')
-        seconds = self.args.get('seconds')
-        key = self.args.get('limitKey')
-
-        async def check_rate_limit(obj, info, **kwargs):
-            redis_key = f"{key}_{info.context['request'].client.host}"
-            num_requests = await REDIS.conn.get(redis_key)
-            if not num_requests or int(num_requests) < operations:
-                await REDIS.conn.incr(redis_key)
-                if not num_requests:
-                    await REDIS.conn.expire(redis_key, seconds)
-
-                # resolve function
-                if iscoroutinefunction(orig_resolver):
-                    return await orig_resolver(obj, info, **kwargs)
-                else:
-                    return orig_resolver(obj, info, **kwargs)
-
-            return Error(
-                'RateLimited',
-                f"You have exceeded rate limit of {operations} requests per {seconds} seconds"
-            )
-
-        field.resolve = check_rate_limit
         return field
