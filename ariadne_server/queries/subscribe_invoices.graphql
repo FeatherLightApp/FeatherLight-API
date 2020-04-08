@@ -1,0 +1,12 @@
+subscription invoices {
+    invoice {
+        __typename
+        ... on UserInvoice {
+            paymentHash
+        }
+        ... on Error {
+            errorType
+            message
+        }
+    }
+}

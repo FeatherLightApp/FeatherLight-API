@@ -1,11 +1,11 @@
 type Query {
     me: UserResponse! @auth
-    nodeBalance: BalanceResponse! @auth(roles: [ADMIN])
-    channels: ChannelResponse! @auth(roles: [ADMIN])
+    nodeBalance: BalanceResponse! @auth(roles: ["ADMIN"])
+    channels: ChannelResponse! @auth(roles: ["ADMIN"])
     # peers: GetPeersPayload! @auth(requires: ADMIN) #@grpc
     #info: GetInfoPayload!
     decodeInvoice(invoice: String!): DecodeInvoicePayload! @auth
     # checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
-    info: InfoPayload! @auth(roles: [ADMIN])
-    genericRPC(command: String! params: String): String @auth(roles: [ADMIN])# temp 
+    info: InfoPayload! @auth(roles: ["ADMIN"])
+    genericRPC(command: String! params: String): String @auth(roles: ["ADMIN"])# temp 
 }

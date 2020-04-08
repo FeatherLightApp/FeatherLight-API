@@ -30,6 +30,7 @@ def verify(
             int(x.split(' = ')[1]) > time()
     )
     for role in roles:
+        print(f'applying caveat for role {role}')
         v_obj.satisfy_exact(f'role = {role}')
 
     for action in actions:

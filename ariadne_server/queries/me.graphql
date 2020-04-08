@@ -1,11 +1,16 @@
 query me {
     me {
-        balance
-        btcAddress
-        tokens {
-            refresh
-            access
+        __typename
+        ... on User {
+            tokens {
+                refresh
+                access
+            }
+            created
         }
-        created
+        ... on Error {
+            errorType
+            message
+        }
     }
 }

@@ -1,6 +1,5 @@
 import asyncio
 from helpers.mixins import LoggerMixin
-# from aiostream import streamcontext
 
 class StreamQueue(asyncio.Queue):
     """
@@ -35,5 +34,4 @@ class PubSubManager(LoggerMixin, dict):
             self[userid].append(StreamQueue())
             return self[userid][-1]
         self[userid] = [StreamQueue()]
-        return self[userid][-1], 0
-
+        return self[userid][-1]

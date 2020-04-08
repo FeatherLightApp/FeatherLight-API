@@ -62,23 +62,6 @@ async def r_force_user(*_, user: str) -> str:
     return user_obj
 
 
-#TODO update for macaroons
-@_MUTATION.field('refreshMacaroons')
-async def r_get_token(_: None, info) -> Union[User, Error]:
-    pass
-    # # catch scenario of no refresh cookie
-    # if not (cookie:= info.context['request'].cookies.get('refresh')):
-    #     return Error(error_type='AuthenticationError', message='No refresh token sent')
-    # decode_response: Union[dict, Error] = decode(token=cookie, kind='refresh')
-    # # pass either error or user instance to union resolver
-    # _mutation_logger.logger.critical(decode_response)
-    # if isinstance(decode_response, Error):
-    #     return decode_response
-    # if isinstance(decode_response, dict):
-    #     # lookup userid from db and return
-    #     return await User.get(decode_response['id'])
-
-
 @_MUTATION.field('addInvoice')
 # TODO add more flexiblilty in invoice creation
 # TODO invoiceFor allows creating invoices for other users on their behalf
