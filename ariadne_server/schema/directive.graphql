@@ -1,6 +1,6 @@
 # FIX ME switch to enum type when new ariadne version is relased
 directive @auth(
-    roles: [String]! = ["USER"]
+    roles: [String]! = ["USER", "ADMIN"]
     actions: [Action]! = []
 ) on FIELD_DEFINITION
 

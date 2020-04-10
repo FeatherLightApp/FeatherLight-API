@@ -17,14 +17,11 @@ _SUBSCRIPTION = SubscriptionType()
 
 @_SUBSCRIPTION.source('invoice')
 async def r_invoice_gen(user: User, *_):
-    _sub_logger.logger.critical('entering generator with root: %s', user)
     #create new new pub sub client for streaming locally paid invoices
     local_stream = PUBSUB.add_client(user.username)
 
     #create stream for remotely paid invoices
     remote_stream = await LND.stub.SubscribeInvoices(ln.InvoiceSubscription())
-    _sub_logger.logger.critical(type(local_stream))
-    _sub_logger.logger.critical(type(remote_stream))
     global_stream = stream.merge(local_stream, remote_stream)
 
     async with global_stream.stream() as streamer:
@@ -60,7 +57,6 @@ async def r_invoice_gen(user: User, *_):
 
 @_SUBSCRIPTION.field('invoice')
 def r_invoice_field(invoice, *_):
-    _sub_logger.logger.critical('sub field %s', invoice)
     return invoice
 
 
@@ -68,7 +64,6 @@ _PAID_INVOICE_RESPONSE = UnionType('PaidInvoiceResponse')
 
 @_PAID_INVOICE_RESPONSE.type_resolver
 def r_paid_invoice_response(obj, *_):
-    _sub_logger.logger.critical('union logger %s', obj)
     if isinstance(obj, Error):
         return 'Error'
     return 'UserInvoice'

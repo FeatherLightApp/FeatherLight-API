@@ -27,6 +27,7 @@ async def _get_node_balance(schema, context):
         },
         context_value=context
     )
+    print(res)
     r = res[1]['data']['nodeBalance']
     return r
 

@@ -28,8 +28,6 @@ class LightningStub(LoggerMixin):
         ) as macaroon_bytes:
             self._macaroon = macaroon_bytes.read().hex()
 
-        self.logger.critical(ssl.get_default_verify_paths())
-
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
         ctx.verify_mode = ssl.CERT_REQUIRED
         ctx.load_verify_locations(cafile='/root/.lnd/tls.cert')
