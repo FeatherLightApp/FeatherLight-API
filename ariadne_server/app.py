@@ -1,28 +1,26 @@
 """define app entry point"""
 from starlette.applications import Starlette
-from starlette.responses import PlainTextResponse
-from starlette.routing import Route
-from starlette.endpoints import HTTPEndpoint
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from ariadne.asgi import GraphQL
-from context import LND, REDIS, GINO, PUBSUB
+from context import LND, REDIS, GINO
 from resolvers.schema import SCHEMA
 
-class CorsEndpoint(HTTPEndpoint):
-    async def _template(self, request):
-        return PlainTextResponse('Hello World')
-
-    get = _template
-    post = _template
-
-routes = [
-    Route('/cors', CorsEndpoint)
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_methods=['*'],
+        allow_headers=['*'],
+        allow_credentials=True
+    )
 ]
 
 APP = Starlette(
     debug=True,
     on_startup=[LND.initialize, REDIS.initialize, GINO.initialize],
     on_shutdown=[LND.destroy, REDIS.destroy, GINO.destroy],
-    routes=routes
+    middleware=middleware
 )
 
 APP.mount('/graphql', GraphQL(SCHEMA, debug=True))
