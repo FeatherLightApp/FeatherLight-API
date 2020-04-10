@@ -1,6 +1,6 @@
 type Error {
     errorType: ErrorType!
-    message: String
+    message: String!
 }
 
 
