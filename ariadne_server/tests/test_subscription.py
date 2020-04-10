@@ -20,7 +20,7 @@ async def test_unauthed_subscription(schema, context, dummy_user):
 
 
 #test is a successful websocket subscription so it will run indefintely
-@pytestmark.mark.skipif(True)
+@pytest.mark.skip
 @pytest.mark.usefixtures('dummy_user')
 async def test_authed_subscription(schema, context, dummy_user):
     context['request'].headers = {'Authorization': f"Bearer {dummy_user['tokens']['access']}"}
