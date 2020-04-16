@@ -1,10 +1,11 @@
 union UserResponse = User | Error
 
-type User {
+
+type NewUser {
     """Password is only ever returned once, upon user creation. It is the clients responsiblity to store the password"""
-    password: String
+    password: String!
     """Username is only ever returned once, upon user creation. It is the clients responsibility to store the username"""
-    username: String
+    username: String!
     """Access token is a jwt which must be supplied in the header for authorized requests"""
     tokens: TokenPayload!
     balance: Int!
@@ -14,6 +15,18 @@ type User {
     deposits: [Deposit]!
     role: Role!
     created: Int!
+}
+
+type User {
+    """Access token is a jwt which must be supplied in the header for authorized requests"""
+    tokens: TokenPayload!
+    balance: Int!
+    btcAddress: String!
+    invoices(paid: Boolean limit: Int): [UserInvoice]!
+    payments(start: Int end: Int): [PaidInvoice]!
+    deposits: [Deposit]!
+    role: Role!
+    created: Int! 
 }
 
 

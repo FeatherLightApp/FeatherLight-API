@@ -1,7 +1,7 @@
 mutation createUser($role: Role) {
     createUser(role: $role) {
         __typename
-        ... on User {
+        ... on NewUser {
             username
             password
             role

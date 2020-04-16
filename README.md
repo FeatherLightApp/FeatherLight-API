@@ -25,6 +25,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 ### TODOs
 
 - ~~fix zmqpubhashblock port binding~~
+- Subclass graphql to provide http only refresh macaroons on token payload responses
 - ~~change from jwt to macaroons~~
 - CHANGE TO DEFAULT ENUM TYPES ON ARIADNE 0.12 RELEASE
 - ~~switch from hex data to bytea in postgres~~

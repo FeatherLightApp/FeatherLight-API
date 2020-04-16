@@ -11,3 +11,12 @@ def r_user_response(obj, *_):
         return 'Error'
     if isinstance(obj, User):
         return 'User'
+
+
+NEW_USER_RESPONSE = UnionType('NewUserResponse')
+@NEW_USER_RESPONSE.type_resolver
+def r_new_user_response(obj, *_):
+    if isinstance(obj, Error):
+        return 'Error'
+    if isinstance(obj, User) and obj.password:
+        return 'NewUser'
