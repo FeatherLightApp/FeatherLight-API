@@ -5,8 +5,9 @@ type Mutation {
     """
     Logs the user in issuing a full macaroon which does not expire 
     and a limited refresh macaroon which expires in 7 days
+    Limited to 5 operations per day
     """
-    login(username: String! password: String!): TokenResponse!
+    login(username: String! password: String!): TokenResponse! @limit(operations: 5 seconds: 86400 key: "login")
     
     """
     Rotates the macaroon key for the user, causing all issued macaroons to be invalidated
