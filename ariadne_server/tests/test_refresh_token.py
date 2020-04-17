@@ -3,6 +3,8 @@ from ariadne import graphql
 
 pytestmark = pytest.mark.asyncio
 
+# Query is too low level to test cookies responses
+# Make actual http request to starlette to test cookies
 @pytest.mark.usefixtures('dummy_user')
 async def test_refresh_tokens(schema, context, dummy_user):
     context['request'].cookies = {'refresh': dummy_user['tokens']['refresh']}

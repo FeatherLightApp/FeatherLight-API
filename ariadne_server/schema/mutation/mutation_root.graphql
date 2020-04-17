@@ -1,6 +1,6 @@
 type Mutation {
     """Creates a new user of type Role, rate limited mutation"""
-    createUser(role: Role): NewUserResponse! #@limit(operations: 3 seconds: 86400)
+    createUser(role: Role): NewUserResponse! @limit(operations: 3 seconds: 86400)
     
     """
     Logs the user in issuing a full macaroon which does not expire 
