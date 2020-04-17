@@ -11,7 +11,7 @@ class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
         orig_resolver = field.resolve or default_field_resolver
         operations = self.args.get('operations')
         seconds = self.args.get('seconds')
-        key = self.args.get('limitKey')
+        key = self.args.get('key')
 
         async def check_rate_limit(obj, info, **kwargs):
             redis_key = f"{key}_{info.context['request'].client.host}"

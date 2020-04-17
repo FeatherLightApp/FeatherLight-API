@@ -2,7 +2,7 @@
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from ariadne.asgi import GraphQL
+from classes.CookieGraphQL import CookieGraphql
 from context import LND, REDIS, GINO
 from resolvers.schema import SCHEMA
 
@@ -23,4 +23,4 @@ APP = Starlette(
     middleware=middleware
 )
 
-APP.mount('/graphql', GraphQL(SCHEMA, debug=True))
+APP.mount('/graphql', CookieGraphql(SCHEMA, debug=True))

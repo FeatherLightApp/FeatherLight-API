@@ -8,7 +8,7 @@ directive @auth(
 directive @limit(
     operations: Int!
     seconds: Int!
-    limitKey: String! = "default"
+    key: String! = "default"
 ) on FIELD_DEFINITION
 
 
