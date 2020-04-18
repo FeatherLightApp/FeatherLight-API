@@ -13,5 +13,13 @@ class CookieGraphql(GraphQL):
             token = chop[1].split(b'"', maxsplit= 1)[0]
             _logger.logger.critical('applying cookie')
             _logger.logger.critical(token)
-            res.set_cookie('refresh', token.decode('utf-8'), expires=604800, httponly=True, secure=True, domain='https://dev.seanaye.ca')
+            res.set_cookie(
+                'refresh',
+                token.decode('utf-8'),
+                expires=604800, #1 week
+                secure=True,
+                domain='dev.seanaye.ca',
+                samesite='none',
+                httponly=True
+            ) 
         return res
