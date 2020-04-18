@@ -18,10 +18,11 @@ def r_access_token(user: User, *_) -> str:
 
 
 @TOKEN_PAYLOAD.field('refresh')
-def r_refresh_token(user: User, *_) -> str:
+def r_refresh_token(user: User, info) -> str:
     caveats = [
         f'expiry = {int(time()) + 604800}',
         f'user = {user.username}',
-        'action = REFRESH'
+        'action = REFRESH',
+        f"origin = {info.context['request'].headers['origin']}"
     ]
     return bake(user=user, caveats=caveats).serialize()

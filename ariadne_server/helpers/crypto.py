@@ -1,5 +1,6 @@
 from time import time
 from typing import List
+from starlette.requests import Request
 from pymacaroons import Macaroon, Verifier
 from classes.user import User
 
@@ -19,21 +20,25 @@ def verify(
         macaroon: Macaroon,
         key: bytes,
         roles: List[str],
-        actions: List[str]
+        actions: List[str],
+        req: Request
 ) -> bool:
     assert macaroon
     v_obj = Verifier()
 
     v_obj.satisfy_exact(f'user = {macaroon.identifier}')
-    v_obj.satisfy_general(
-        lambda x: x.split(' = ')[0] == 'expiry' and  \
-            int(x.split(' = ')[1]) > time()
-    )
     for role in roles:
         print(f'applying caveat for role {role}')
         v_obj.satisfy_exact(f'role = {role}')
 
     for action in actions:
         v_obj.satisfy_exact(f'action = {action}')
+
+    v_obj.satisfy_general(
+        lambda x: x.split(' = ')[0] == 'expiry' and  \
+            int(x.split(' = ')[1]) > time()
+    )
+
+    v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
 
     return v_obj.verify(macaroon, key)

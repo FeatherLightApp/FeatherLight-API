@@ -32,18 +32,14 @@ async def _get_node_balance(schema, context):
     return r
 
 @pytest.mark.usefixtures('dummy_user', 'dummy_admin')
-async def test_valid_auth(schema, context, dummy_admin):
-    context['request'].headers = {
-        'Authorization': f'Bearer {dummy_admin["tokens"]["access"]}'
-    }
+async def test_valid_role(schema, context, dummy_admin):
+    context['request'].headers['Authorization'] = f'Bearer {dummy_admin["tokens"]["access"]}'
     r = await _get_node_balance(schema, context)
     print(r)
     assert r['__typename'] == 'NodeBalance'
 
 
-async def test_invalid_auth(schema, context, dummy_user):
-    context['request'].headers = {
-        'Authorization': f'Bearer {dummy_user["tokens"]["access"]}'
-    }
+async def test_invalid_role(schema, context, dummy_user):
+    context['request'].headers['Authorization'] = f'Bearer {dummy_user["tokens"]["access"]}'
     r = await _get_node_balance(schema, context)
     assert r['__typename'] == 'Error'

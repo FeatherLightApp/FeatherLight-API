@@ -5,7 +5,7 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.mark.usefixtures('dummy_user')
 async def test_query_myself(schema, context, dummy_user):
-    context['request'].headers = {'Authorization': f"Bearer {dummy_user['tokens']['access']}"}
+    context['request'].headers['Authorization'] = f"Bearer {dummy_user['tokens']['access']}"
     res = await graphql(
         schema,
         {
