@@ -6,3 +6,4 @@ keys.json
 ariadne/.vscode
 .mypy_cache
 .env
+docker-compose.override.yml

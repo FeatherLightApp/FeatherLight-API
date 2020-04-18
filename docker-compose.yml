@@ -1,8 +1,4 @@
 version: '3'
-networks:
-    default:
-        external:
-            name: 'seanaye_default'
 services: 
     btcd:
         image: btcd:latest
