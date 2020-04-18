@@ -37,6 +37,15 @@ async def r_create_user(*_, role: str = 'USER') -> User:
     # return api object to resolver
     return user
 
+# this function is redundant as auth directive knows to send user obj
+# to downstream union resolver. Function can intercept user and add functionality
+@_MUTATION.field('refreshMacaroons')
+def r_refresh_macaroons(user: User, info) -> User:
+    _mutation_logger.logger.critical('refreshing token')
+    _mutation_logger.logger.critical(info.context['request'].headers)
+    #pass user into token payload resolver
+    return user
+
 
 @_MUTATION.field('login')
 async def r_auth(*_, username: str, password: str) -> Union[User, Error]:

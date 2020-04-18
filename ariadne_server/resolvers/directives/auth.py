@@ -79,12 +79,18 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
         else:
             async def call(_, info, **kwargs):
                 root = await self._check_auth(info)
+                # if auth is invalid return error to union resolver
+                if isinstance(root, Error):
+                    return root
+
+                # attempt to pass user into root resolver
                 if iscoroutinefunction(orig_resolver):
-                    response = await orig_resolver(root, info, **kwargs)
+                    res = await orig_resolver(root, info, **kwargs)
                 else:
-                    response = orig_resolver(root, info, **kwargs)
-                output = response or root
-                return output
+                    res = orig_resolver(root, info, **kwargs)
+
+                # if root resolver is not defined pass user into union resolver
+                return res or root
             field.resolve = call
             
         return field
