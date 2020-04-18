@@ -1,4 +1,8 @@
 version: '3'
+networks:
+    default:
+        external:
+            name: 'seanaye_default'
 services: 
     btcd:
         image: btcd:latest
@@ -26,8 +30,6 @@ services:
             - global.env
         depends_on: 
             - btcd
-        ports:
-            - '9735:9735'
 
     ariadne:
         image: graphlnd:latest
@@ -36,13 +38,13 @@ services:
         volumes: 
             - ./ariadne_server/:/app
             - ${LND_VOL}:/root/.lnd
-        ports:
-            - '5001:5001'
         depends_on: 
             - lnd
             - redis
             - postgres
         restart: unless-stopped
+        ports:
+            - ${EXPOSE_ARIADNE}
         env_file: 
             - global.env
 
