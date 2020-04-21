@@ -3,6 +3,9 @@ from typing import List
 from starlette.requests import Request
 from pymacaroons import Macaroon, Verifier
 from classes.user import User
+from helpers.mixins import LoggerMixin
+
+_logger = LoggerMixin()
 
 def bake(user: User, caveats: List[str]) -> str:
     m_obj = Macaroon(
@@ -37,7 +40,8 @@ def verify(
         lambda x: x.split(' = ')[0] == 'expiry' and  \
             int(x.split(' = ')[1]) > time()
     )
-
-    v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
+    satis_str = f"origin = {req.headers['origin']}"
+    _logger.logger.critical(satis_str)
+    v_obj.satisfy_exact(satis_str)
 
     return v_obj.verify(macaroon, key)

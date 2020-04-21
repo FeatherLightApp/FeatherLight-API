@@ -9,7 +9,7 @@ from resolvers.schema import SCHEMA
 middleware = [
     Middleware(
         CORSMiddleware,
-        allow_origins=['http://127.0.0.1:3000', 'http://127.0.0.1', 'http://localhost'],
+        allow_origins=['http://127.0.0.1:3000', 'http://127.0.0.1'],
         allow_methods=['*'],
         allow_headers=['*'],
         allow_credentials=True
