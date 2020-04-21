@@ -27,6 +27,7 @@ class CookieGraphql(GraphQL):
                 'refresh',
                 '',
                 max_age=-1,
+                secure=True,
                 domain='dev.seanaye.ca',
                 samesite='none',
                 httponly=True

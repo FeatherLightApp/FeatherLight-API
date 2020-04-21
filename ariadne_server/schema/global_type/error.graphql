@@ -5,6 +5,7 @@ type Error {
 
 
 enum ErrorType {
+    NoCredentials
     AuthenticationError
     PaymentError
     RateLimited
