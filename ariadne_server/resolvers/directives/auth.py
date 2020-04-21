@@ -85,12 +85,10 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
 
                 # attempt to pass user into root resolver
                 if iscoroutinefunction(orig_resolver):
-                    res = await orig_resolver(root, info, **kwargs)
+                    return await orig_resolver(root, info, **kwargs)
                 else:
-                    res = orig_resolver(root, info, **kwargs)
+                    return orig_resolver(root, info, **kwargs)
 
-                # if root resolver is not defined pass user into union resolver
-                return res or root
             field.resolve = call
             
         return field

@@ -18,6 +18,11 @@ async def r_info(*_) -> dict:
     request = ln.GetInfoRequest()
     return await LND.stub.GetInfo(request)
 
+@QUERY.field('nodeBalance')
+@QUERY.field('me')
+def r_passthrough(user: User, *_):
+    return user
+
 # @QUERY.field('txs')
 # #@authenticate
 # async def r_txs(_: None, info, *, user: User) -> dict:
