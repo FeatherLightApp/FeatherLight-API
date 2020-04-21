@@ -16,10 +16,19 @@ class CookieGraphql(GraphQL):
             res.set_cookie(
                 'refresh',
                 token.decode('utf-8'),
-                expires=604800, #1 week
+                max_age=604800, #1 week
                 secure=True,
                 domain='dev.seanaye.ca',
                 samesite='none',
                 httponly=True
-            ) 
+            )
+        elif b'"logout":null' in res.body:
+            res.set_cookie(
+                'refresh',
+                '',
+                max_age=-1,
+                domain='dev.seanaye.ca',
+                samesite='none',
+                httponly=True
+            )
         return res
