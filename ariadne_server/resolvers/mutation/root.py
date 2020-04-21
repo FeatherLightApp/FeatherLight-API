@@ -48,7 +48,7 @@ def r_refresh_macaroons(user: User, info) -> User:
 
 
 @_MUTATION.field('login')
-async def r_auth(*_, username: str, password: str) -> Union[User, Error]:
+async def r_login(*_, username: str, password: str) -> Union[User, Error]:
     if not (user_obj := await User.query.where(User.username == username).gino.first()):
         return Error('AuthenticationError', 'User not found')
     # verify pw hash
@@ -61,6 +61,12 @@ async def r_auth(*_, username: str, password: str) -> Union[User, Error]:
         await user_obj.update(password_hash=ARGON.hash(password)).apply()
 
     return user_obj
+
+
+@_MUTATION.field('logout')
+async def r_logout (user: User, *_) -> None:
+    await user.update(key=token_bytes(32)).apply()
+    return None
 
 
 # TODO GET RID OF THIS ITS FOR DEBUG
@@ -187,7 +193,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             for payment_res in LND.stub.SendPayment(req_gen()):
                 _mutation_logger.logger.info("payment response: %s", payment_res)
                 if payment_res.payment_error or not payment_res.payment_preimage:
-                    return Error('PaymentError', "received error %s", payment_res.payment_error)
+                    return Error('PaymentError', f"received error {payment_res.payment_error}")
 
                 invoice_obj.payment_preimage = payment_res.payment_preimage
                 # impose maximum fee

@@ -2,10 +2,6 @@ query me {
     me {
         __typename
         ... on User {
-            tokens {
-                refresh
-                access
-            }
             created
         }
         ... on Error {

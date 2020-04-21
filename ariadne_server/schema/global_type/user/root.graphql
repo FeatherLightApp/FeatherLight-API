@@ -1,7 +1,18 @@
 union UserResponse = User | Error
+union NewUserResponse = NewUser | Error
+
+interface BaseUser {
+    balance: Int!
+    btcAddress: String!
+    invoices(paid: Boolean limit: Int): [UserInvoice]!
+    payments(start: Int end: Int): [PaidInvoice]!
+    deposits: [Deposit]!
+    role: Role!
+    created: Int! 
+}
 
 
-type NewUser {
+type NewUser implements BaseUser {
     """Password is only ever returned once, upon user creation. It is the clients responsiblity to store the password"""
     password: String!
     """Username is only ever returned once, upon user creation. It is the clients responsibility to store the username"""
@@ -17,9 +28,8 @@ type NewUser {
     created: Int!
 }
 
-type User {
+type User implements BaseUser {
     """Access token is a jwt which must be supplied in the header for authorized requests"""
-    tokens: TokenPayload!
     balance: Int!
     btcAddress: String!
     invoices(paid: Boolean limit: Int): [UserInvoice]!
