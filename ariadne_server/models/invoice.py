@@ -13,7 +13,7 @@ class Invoice(db.Model):
     payment_preimage = db.Column(db.LargeBinary)
     payment_request = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.Integer, nullable=False)
-    expiry = db.Column(db.Integer, nullable=False),
+    expiry = db.Column(db.Integer, nullable=False)
     # null if paying external invoice with no memo
     memo = db.Column(db.Text)
     paid = db.Column(db.Boolean, nullable=False)
