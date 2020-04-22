@@ -4,7 +4,7 @@ union PayInvoiceResponse = PaidInvoice | Error
 union UserInvoiceResponse = UserInvoice | Error
 
 interface Invoice {
-    amount: Int!
+    msatAmount: Int!
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
@@ -15,7 +15,7 @@ interface Invoice {
 
 
 type UserInvoice implements Invoice {
-    amount: Int!
+    msatAmount: Int!
     paid: Boolean!
     paidAt: Int
     expiry: Int!
@@ -28,7 +28,7 @@ type UserInvoice implements Invoice {
 
 
 type PaidInvoice implements Invoice {
-    amount: Int!
+    msatAmount: Int!
     fee: Int!
     value: Int!
     expiry: Int!
