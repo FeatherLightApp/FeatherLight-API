@@ -3,6 +3,18 @@ query me {
         __typename
         ... on User {
             created
+            feed {
+                __typename
+                ... on UserInvoice {
+                    timestamp
+                }
+                ... on PaidInvoice {
+                    paidAt
+                }
+                ... on Deposit {
+                    time
+                }
+            }
         }
         ... on Error {
             errorType

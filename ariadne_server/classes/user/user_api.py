@@ -5,12 +5,14 @@ from helpers.mixins import LoggerMixin
 from models import User as UserModel
 from .abstract_user_method import AbstractMethod
 from .btc_address import GetBTCAddress
-from .invoices import GetUserInvoices
+from .invoices import GetInvoices
 from .balance import GetBalance
 from .onchain_txs import GetOnchainTxs
 from .offchain_txs import GetOffchainTxs
 from .lock_funds import LockFunds
 from .unlock_funds import UnlockFunds
+from models.invoice import Invoice
+from typing import Union
 
 # TODO create a deafult resolver/ schema directive to abstract away need for this class
 
@@ -28,6 +30,30 @@ class User(LoggerMixin, UserModel):
         # pass self to token resolver
         return self
 
+    async def feed(
+        self,
+        *_,
+        limit: int,
+        paid: bool,
+        confirmations: int,
+        offset: int = 0
+    ):
+        inv = await self.exec(GetInvoices(only_paid=paid, limit=limit))
+        dep = await self.exec(GetOnchainTxs(min_confirmations=confirmations, limit=limit))
+        
+        def get_time(x: Union[Invoice, ]) -> int:
+            if isinstance(x, Invoice):
+                if x.payee == self.username:
+                    return x.timestamp
+                if x.payer == self.username:
+                    return x.paid_at
+            return x['time']
+        
+        return sorted([*inv, *dep], key=get_time)[offset:offset+limit]
+
+
+
+
     async def btc_address(self, *_):
         """returns btc address if its stored in db else generate btc address"""
         if self.bitcoin_address:
@@ -37,22 +63,24 @@ class User(LoggerMixin, UserModel):
     async def balance(self, *_):
         return await self.exec(GetBalance())
 
-    async def invoices(self, *_, paid: bool = False, limit: int = 0):
-        method = GetUserInvoices(only_paid=paid, limit=limit)
+    async def invoices(self, *_, paid: bool, limit: int, offset: int = 0):
+        method = GetInvoices(only_paid=paid, limit=limit, offset=offset, payee=True, payer=False)
         return await self.exec(method)
 
-    async def payments(self, *_, start: int = 0, end: int = -1):
-        method = GetOffchainTxs(start, end)
+    async def payments(self, *_, limit: int, offset: int = 0):
+        method = GetInvoices(only_paid=True, limit=limit, offset=offset, payee=False, payer=True)
         return await self.exec(method)
 
-    async def deposits(self, *_):
-        method = GetOnchainTxs(min_confirmations=3)
+    async def deposits(self, *_, confirmations: int):
+        method = GetOnchainTxs(min_confirmations=confirmations)
         return await self.exec(method)
 
-    async def lock_funds(self, *_, pay_req, invoice):
-        method = LockFunds(pay_req, invoice)
-        return await self.exec(method)
+    # TODO determine if deprecated
+    # async def lock_funds(self, *_, pay_req, invoice):
+    #     method = LockFunds(pay_req, invoice)
+    #     return await self.exec(method)
 
-    async def unlock_funds(self, *_, pay_req):
-        method = UnlockFunds(pay_req)
-        return await self.exec(method)
+    # TODO determine of deprecated
+    # async def unlock_funds(self, *_, pay_req):
+    #     method = UnlockFunds(pay_req)
+    #     return await self.exec(method)

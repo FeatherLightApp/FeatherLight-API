@@ -10,7 +10,7 @@ interface Invoice {
     paymentRequest: String!
     paymentHash: B64!
     paymentPreimage: B64!
-    memo: String
+    memo: String!
 }
 
 
@@ -23,18 +23,18 @@ type UserInvoice implements Invoice {
     paymentRequest: String!
     paymentHash: B64!
     paymentPreimage: B64!
-    memo: String 
+    memo: String !
 }
 
 
 type PaidInvoice implements Invoice {
     msatAmount: Int!
-    fee: Int!
-    value: Int!
+    msatFee: Int!
+    paidAt: Int!
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
     paymentHash: B64!
     paymentPreimage: B64!
-    memo: String
+    memo: String!
 }

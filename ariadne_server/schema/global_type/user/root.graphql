@@ -1,12 +1,14 @@
 union UserResponse = User | Error
 union NewUserResponse = NewUser | Error
+union FeedItem = Deposit | PaidInvoice | UserInvoice
 
 interface BaseUser {
     balance: Int!
     btcAddress: String!
-    invoices(paid: Boolean limit: Int): [UserInvoice]!
-    payments(start: Int end: Int): [PaidInvoice]!
-    deposits: [Deposit]!
+    invoices(paid: Boolean=true limit: Int=10 offset: Int): [UserInvoice]!
+    payments(limit: Int=10 offset: Int): [PaidInvoice]!
+    deposits(confirmations: Int=3): [Deposit]!
+    feed(confirmations: Int=3 paid:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
     role: Role!
     created: Int! 
 }
@@ -21,9 +23,10 @@ type NewUser implements BaseUser {
     tokens: TokenPayload!
     balance: Int!
     btcAddress: String!
-    invoices(paid: Boolean limit: Int): [UserInvoice]!
-    payments(start: Int end: Int): [PaidInvoice]!
-    deposits: [Deposit]!
+    invoices(paid: Boolean=true limit: Int=10 offset: Int): [UserInvoice]!
+    payments(limit: Int=10 offset: Int): [PaidInvoice]!
+    deposits(confirmations: Int=3): [Deposit]!
+    feed(confirmations: Int=3 paid:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
     role: Role!
     created: Int!
 }
@@ -32,9 +35,10 @@ type User implements BaseUser {
     """Access token is a jwt which must be supplied in the header for authorized requests"""
     balance: Int!
     btcAddress: String!
-    invoices(paid: Boolean limit: Int): [UserInvoice]!
-    payments(start: Int end: Int): [PaidInvoice]!
-    deposits: [Deposit]!
+    invoices(paid: Boolean=true limit: Int=10 offset: Int): [UserInvoice]!
+    payments(limit: Int=10 offset: Int): [PaidInvoice]!
+    deposits(confirmations: Int=3): [Deposit]!
+    feed(confirmations: Int=3 paid:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
     role: Role!
     created: Int! 
 }

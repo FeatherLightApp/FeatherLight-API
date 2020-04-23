@@ -5,8 +5,10 @@ from context import BITCOIND
 
 class GetOnchainTxs(AbstractMethod):
 
-    def __init__(self, min_confirmations=5):
-        self.min_confirmations = min_confirmations
+    def __init__(self, min_confirmations=5, limit: int = 1000, offset: int = 0):
+        self._min_confirmations = min_confirmations
+        self._limit = limit
+        self._offset = offset
 
     # fct to convert btc amt to sats
     @staticmethod
@@ -26,14 +28,14 @@ class GetOnchainTxs(AbstractMethod):
         assert address, f"Cannot get btc address for {user.username}"
         txs = (await BITCOIND.req('listtransactions', params={
             'label': user.username,
-            'count': 10000,
-            'skip': 0,
+            'count': self._limit,
+            'skip': self._offset,
             'include_watchonly': True
         })).get('result') or []
 
         def valid_tx(tx):
             # determine if the btc transaction is valid for this user
-            confirmed = tx.get('confirmations') >= self.min_confirmations
+            confirmed = tx.get('confirmations') >= self._min_confirmations
             valid_address = tx.get('address') == address
             receive = tx.get('category') == 'receive'
             return confirmed and valid_address and receive

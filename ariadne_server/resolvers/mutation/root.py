@@ -189,8 +189,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 payer=user.username
             )
 
-            # TODO find native async way to execute
-            for payment_res in LND.stub.SendPayment(req_gen()):
+            async for payment_res in LND.stub.SendPayment(req_gen()):
                 _mutation_logger.logger.info("payment response: %s", payment_res)
                 if payment_res.payment_error or not payment_res.payment_preimage:
                     return Error('PaymentError', f"received error {payment_res.payment_error}")

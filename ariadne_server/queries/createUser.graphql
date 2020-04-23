@@ -12,7 +12,7 @@ mutation createUser($role: Role) {
                 refresh
             }
             balance
-            invoices {
+            invoices(limit: 10) {
                 paymentHash
             }
         }
