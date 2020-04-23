@@ -30,7 +30,7 @@ type UserInvoice implements Invoice {
 type PaidInvoice implements Invoice {
     msatAmount: Int!
     msatFee: Int!
-    paidAt: Int!
+    paidAt: Int
     expiry: Int!
     timestamp: Int!
     paymentRequest: String!
