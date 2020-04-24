@@ -1,6 +1,6 @@
 import asyncio
 from time import time
-from math import floor
+from math import floor, ceil
 from secrets import token_hex, token_bytes
 from typing import Union, Optional
 from ariadne import MutationType
@@ -81,12 +81,12 @@ async def r_force_user(*_, user: str) -> str:
 # TODO add more flexiblilty in invoice creation
 # TODO invoiceFor allows creating invoices for other users on their behalf
 # FIXME doesnt work
-async def r_add_invoice(user: User, *_, memo: str, amt: int, hash: Optional[str] = None) -> dict:
+async def r_add_invoice(user: User, *_, memo: str, amt: int, set_hash: Optional[str] = None) -> dict:
     """Authenticated route"""
     expiry_time = 3600*24
     request = ln.Invoice(
         memo=memo,
-        value_msat=amt,
+        value=amt,
         expiry=expiry_time
     )
     inv = await LND.stub.AddInvoice(request)
@@ -103,7 +103,7 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, hash: Optional[str]
         expiry=inv_lookup.expiry,
         memo=inv_lookup.memo,
         paid=False,
-        msat_amount=inv_lookup.value_msat,
+        amount=inv_lookup.value,
         # do not set a fee since this invoice has not been paid
         payee=user.username
         # do not set a payer since we dont know to whom to invoice is being sent
@@ -116,14 +116,14 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     pay_string = ln.PayReqString(pay_req=invoice)
     decoded = await LND.stub.DecodePayReq(pay_string)
 
-    if amt is not None and decoded.num_msat != amt and decoded.num_msat > 0:
+    if amt is not None and decoded.num_sat != amt and decoded.num_sat > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')
 
-    if decoded.num_msat == 0 and not amt:
+    if decoded.num_sat == 0 and not amt:
         return Error('PaymentError', 'You must specify an amount for this tip invoice')
 
-    payment_amt = amt or decoded.num_msat
-    fee_limit = floor(payment_amt * 0.005) + 1000 #add 1 satoshi
+    payment_amt = amt or decoded.num_sat
+    fee_limit = ceil(payment_amt * 0.01)
 
     # attempt to load invoice obj
     invoice_obj = await Invoice.get(decoded.payment_hash)
@@ -138,9 +138,9 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         if payment_amt + fee_limit > await user_balance:
             return Error(
                 'InsufficientFunds',
-                f'''Attempting to pay {payment_amt} msat 
-                with fee limit {fee_limit} msat 
-                with only {user_balance} msat'''
+                f'''Attempting to pay {payment_amt} sat
+                with fee limit {fee_limit} sat
+                with only {user_balance} sat'''
             )
 
         if LND.id_pubkey == decoded.payment_hash and invoice_obj:
@@ -152,7 +152,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             invoice_update = invoice_obj.update(
                 paid=True,
                 payer=user.username,
-                msat_fee=floor(payment_amt * 0.03),
+                fee=fee_limit,
                 paid_at=time()
             )
 
@@ -174,7 +174,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             def req_gen():
                 yield ln.SendRequest(
                     payment_request=invoice,
-                    amt_msat=payment_amt,
+                    amt=payment_amt,
                     fee_limit=ln.FeeLimit(fixed=fee_limit)
                 )
 
@@ -185,7 +185,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 expiry=decoded.expiry,
                 memo=decoded.description,
                 paid=False, # not yet paid
-                msat_amount=decoded.num_msat or decoded.num_satoshis * 1000,
+                amount=decoded.num_satoshis,
                 payer=user.username
             )
 
@@ -196,7 +196,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
 
                 invoice_obj.payment_preimage = payment_res.payment_preimage
                 # impose maximum fee
-                invoice_obj.msat_fee = max(fee_limit, payment_res.payment_route.total_fees)
+                invoice_obj.fee = max(fee_limit, payment_res.payment_route.total_fees)
                 invoice_obj.paid = True
                 invoice_obj.paid_at = time()
                 # delegate db write to background task

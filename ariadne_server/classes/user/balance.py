@@ -18,9 +18,9 @@ class GetBalance(AbstractMethod, LoggerMixin):
         invoice_method = GetInvoices(only_paid=True, payee=True, payer=False)
         for invoice in await user.exec(invoice_method):
             if (invoice.payee == user.username):
-                balance += invoice.msat_amount
+                balance += invoice.amount
             if (invoice.payer == user.username):
-                balance -= (invoice.msat_amount + invoice.msat_fee)
+                balance -= (invoice.amount + invoice.fee)
             
 
         onchain_txfer_method = GetOnchainTxs(min_confirmations=3)

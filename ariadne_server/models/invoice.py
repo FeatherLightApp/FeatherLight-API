@@ -19,9 +19,10 @@ class Invoice(db.Model):
     paid = db.Column(db.Boolean, nullable=False)
     # null if not yet paid
     paid_at = db.Column(db.Integer)
-    msat_amount = db.Column(db.Integer, nullable=False)
+    # satoshis
+    amount = db.Column(db.Integer, nullable=False)
     # fee null for receivers of invoice
-    msat_fee = db.Column(db.Integer)
+    fee = db.Column(db.Integer)
     # null if invoice paid to external node
     payee = db.Column(db.Text, db.ForeignKey('users.username'))
     # null if invoice paid by external node
