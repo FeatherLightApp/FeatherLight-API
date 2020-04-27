@@ -1,6 +1,8 @@
 """module to define lightning stub manager"""
 import ssl
 import os
+import asyncio
+from socket import gaierror
 from grpclib.client import Channel
 from grpclib.events import SendRequest, listen
 import rpc_pb2 as ln
@@ -54,12 +56,21 @@ class LightningStub(LoggerMixin):
 
         # TODO add wallet unlocking stub for wallet unlock
         # TODO max receive message length? = 1024^3
-        self.logger.info('Initialized LND stub')
-        self.stub = lnrpc.LightningStub(self._channel)
-        req = ln.GetInfoRequest()
-        info = await self.stub.GetInfo(req)
-        self.id_pubkey = info.identity_pubkey
-        assert self.id_pubkey
-
+        i = 1
+        while True:
+            try:
+                self.logger.info(f'Attempt ${i} to initialize lnd')
+                self.stub = lnrpc.LightningStub(self._channel)
+                req = ln.GetInfoRequest()
+                info = await self.stub.GetInfo(req)
+                self.id_pubkey = info.identity_pubkey
+                assert self.id_pubkey
+                self.logger.info('Success')
+                break
+            except (ConnectionRefusedError, gaierror) as e:
+                i += 1
+                self.logger.info(f'Attempt failed: {e}')
+                await asyncio.sleep(5)
+            
     def destroy(self):
         self._channel.close()

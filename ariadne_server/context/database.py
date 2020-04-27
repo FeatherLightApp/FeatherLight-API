@@ -1,4 +1,6 @@
 import os
+import asyncio
+from socket import gaierror
 from gino import Gino
 from helpers.mixins import LoggerMixin
 
@@ -16,9 +18,18 @@ class GinoInstance(LoggerMixin):
     async def initialize(self):
         """init db connection"""
         bind_str = f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
-        self.logger.warning(f'connecting to: {bind_str}')
-        await self.db.set_bind(bind_str)
-        await self.db.gino.create_all()
+        i = 1
+        while True:
+            try:
+                self.logger.warning(f'connecting to: {bind_str}, attempt {i}')
+                await self.db.set_bind(bind_str)
+                await self.db.gino.create_all()
+                break
+            except gaierror as e:
+                self.logger.warning(e)
+                self.logger.warning(f'DB connect attempt {i} failed')
+                await asyncio.sleep(5)
+                i += 1
 
     async def destroy(self):
         """ close connection"""
