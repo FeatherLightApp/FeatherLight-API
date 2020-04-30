@@ -4,7 +4,7 @@ type DecodedInvoice {
     paymentHash: String
     numSatoshis: Int
     timestamp: Int
-    exipry: Int
+    expiry: Int
     description: String
     descriptionHash: String
     paymentAddr: B64
