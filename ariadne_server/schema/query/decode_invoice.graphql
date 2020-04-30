@@ -1,10 +1,10 @@
 
 type DecodedInvoice {
-    destination: String!
-    paymentHash: String!
-    numSatoshis: Int!
-    timestamp: Int!
-    exipry: Int!
+    destination: String
+    paymentHash: String
+    numSatoshis: Int
+    timestamp: Int
+    exipry: Int
     description: String
     descriptionHash: String
     paymentAddr: B64
