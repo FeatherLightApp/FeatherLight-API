@@ -4,7 +4,7 @@ type Query {
     channels: ChannelResponse! @auth(roles: ["ADMIN"])
     # peers: GetPeersPayload! @auth(requires: ADMIN) #@grpc
     #info: GetInfoPayload!
-    decodeInvoice(invoice: String!): DecodedInvoice!
+    decodeInvoice(invoice: String!): DecodedInvoice
     # checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload! @auth(roles: ["ADMIN"])
     genericRPC(command: String! params: String): String @auth(roles: ["ADMIN"])# temp 

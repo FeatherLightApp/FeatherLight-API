@@ -3,6 +3,7 @@ import json
 import ast
 from ariadne import QueryType
 from typing import Union
+from grpclib.exceptions import GRPCError
 import rpc_pb2 as ln
 from context import LND, BITCOIND
 from classes.error import Error
@@ -58,8 +59,10 @@ def r_passthrough(user: User, *_):
 @QUERY.field('decodeInvoice')
 async def r_decode_invoice(*_, invoice: str):
     request = ln.PayReqString(pay_req=invoice)
-    return await LND.stub.DecodePayReq(request)
-
+    try:
+        return await LND.stub.DecodePayReq(request)
+    except GRPCError:
+        return None
 
 # @QUERY.field('peers')
 # async def r_get_peers(_: None, info) -> dict:
