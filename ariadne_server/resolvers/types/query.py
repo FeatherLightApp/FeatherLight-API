@@ -55,9 +55,8 @@ def r_passthrough(user: User, *_):
 #     return await user.get_pending_txs()
 
 
-# @authenticate
 @QUERY.field('decodeInvoice')
-async def r_decode_invoice(*_, invoice: str) -> dict:
+async def r_decode_invoice(*_, invoice: str):
     request = ln.PayReqString(pay_req=invoice)
     return await LND.stub.DecodePayReq(request)
 

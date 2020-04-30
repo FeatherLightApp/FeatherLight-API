@@ -1,14 +1,11 @@
-union DecodeInvoiceresponse = DecodeInvoicePayload | Error
 
-
-type DecodeInvoicePayload {
-    error: String
-    destination: String
-    paymentHash: String
-    numSatoshis: Int
-    timestamp: Int
-    expiry: Int
+type DecodedInvoice {
+    destination: String!
+    paymentHash: String!
+    numSatoshis: Int!
+    timestamp: Int!
+    exipry: Int!
     description: String
     descriptionHash: String
-    fallbackAddr: String
+    paymentAddr: B64
 }
