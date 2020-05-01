@@ -58,7 +58,7 @@ def r_passthrough(user: User, *_):
 
 @QUERY.field('decodeInvoice')
 async def r_decode_invoice(*_, invoice: str):
-    request = ln.PayReqString(pay_req=invoice)
+    request = ln.PayReqString(pay_req=invoice.replace('lightning:', ''))
     try:
         return await LND.stub.DecodePayReq(request)
     except GRPCError:
