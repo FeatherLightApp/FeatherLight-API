@@ -9,7 +9,7 @@ from resolvers.schema import SCHEMA
 middleware = [
     Middleware(
         CORSMiddleware,
-        allow_origins=['http://127.0.0.1:3000', 'http://127.0.0.1'],
+        allow_origins=['http://127.0.0.1:3000', 'http://127.0.0.1', 'https://inspiring-lichterman-9da30e.netlify.app'],
         allow_origin_regex=r'https://.*\.ngrok\.io',
         allow_methods=['*'],
         allow_headers=['*'],
