@@ -83,15 +83,20 @@ async def r_force_user(*_, user: str) -> str:
 
 @_MUTATION.field('addInvoice')
 # TODO add more flexiblilty in invoice creation
-# TODO invoiceFor allows creating invoices for other users on their behalf
-# FIXME doesnt work
-async def r_add_invoice(user: User, *_, memo: str, amt: int, set_hash: Optional[str] = None) -> dict:
+async def r_add_invoice(
+    user: User,
+    *_,
+    memo: str,
+    amt: int,
+    set_hash: Optional[bytes] = None
+) -> Invoice:
     """Authenticated route"""
     expiry_time = 3600*24
     request = ln.Invoice(
         memo=memo,
         value=amt,
-        expiry=expiry_time
+        expiry=expiry_time,
+        r_hash=set_hash
     )
     inv = await LND.stub.AddInvoice(request)
 
@@ -178,12 +183,11 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         # proceed with external payment if invoice does not exist in db already
         elif not invoice_obj:
 
-            def req_gen():
-                yield ln.SendRequest(
+            req = ln.SendRequest(
                     payment_request=invoice,
                     amt=payment_amt,
                     fee_limit=ln.FeeLimit(fixed=fee_limit)
-                )
+            )
 
             invoice_obj = Invoice(
                 payment_hash=decoded.payment_hash,
@@ -196,18 +200,18 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 payer=user.username
             )
 
-            async for payment_res in LND.stub.SendPayment(req_gen()):
-                _mutation_logger.logger.info("payment response: %s", payment_res)
-                if payment_res.payment_error or not payment_res.payment_preimage:
-                    return Error('PaymentError', f"received error {payment_res.payment_error}")
+            payment_res = await LND.stub.SendPaymentSync(req)
+            _mutation_logger.logger.info("payment response: %s", payment_res)
+            if payment_res.payment_error or not payment_res.payment_preimage:
+                return Error('PaymentError', f"received error {payment_res.payment_error}")
 
-                invoice_obj.payment_preimage = payment_res.payment_preimage
-                # impose maximum fee
-                invoice_obj.fee = max(fee_limit, payment_res.payment_route.total_fees)
-                invoice_obj.paid = True
-                invoice_obj.paid_at = time()
-                # delegate db write to background task
-                loop = asyncio.get_running_loop()
-                loop.create_task(invoice_obj.create())
+            invoice_obj.payment_preimage = payment_res.payment_preimage
+            # impose maximum fee
+            invoice_obj.fee = max(fee_limit, payment_res.payment_route.total_fees)
+            invoice_obj.paid = True
+            invoice_obj.paid_at = time()
+            # delegate db write to background task
+            loop = asyncio.get_running_loop()
+            loop.create_task(invoice_obj.create())
 
-                return invoice_obj
+            return invoice_obj
