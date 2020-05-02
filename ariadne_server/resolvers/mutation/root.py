@@ -142,7 +142,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
         # potentially user.query.with_for..
         user.query.with_for_update().gino.status() #obtain lock
         user_balance = await user.balance()
-        if payment_amt + fee_limit > await user_balance:
+        if payment_amt + fee_limit > user_balance:
             return Error(
                 'InsufficientFunds',
                 f'''Attempting to pay {payment_amt} sat
