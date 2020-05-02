@@ -122,13 +122,13 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     except GRPCError as e:
         return Error('PaymentError', e)
 
-    if amt is not None and decoded.num_sat != amt and decoded.num_sat > 0:
+    if amt is not None and decoded.num_satoshis != amt and decoded.num_satoshis > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')
 
-    if decoded.num_sat == 0 and not amt:
+    if decoded.num_satoshis == 0 and not amt:
         return Error('PaymentError', 'You must specify an amount for this tip invoice')
 
-    payment_amt = amt or decoded.num_sat
+    payment_amt = amt or decoded.num_satoshis
     fee_limit = ceil(payment_amt * 0.01)
 
     # attempt to load invoice obj
