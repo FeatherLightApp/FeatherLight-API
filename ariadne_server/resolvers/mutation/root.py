@@ -205,7 +205,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             if payment_res.payment_error or not payment_res.payment_preimage:
                 return Error('PaymentError', payment_res.payment_error)
 
-            invoice_obj.payment_preimage = payment_res.payment_preimage
+            invoice_obj.payment_preimage = base64.b64encode(payment_res.payment_preimage).decode('utf-8')
             # impose maximum fee
             invoice_obj.fee = max(fee_limit, payment_res.payment_route.total_fees)
             invoice_obj.paid = True
