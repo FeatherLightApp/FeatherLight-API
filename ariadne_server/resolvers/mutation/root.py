@@ -3,8 +3,11 @@ from time import time
 from math import floor, ceil
 from secrets import token_hex, token_bytes
 from typing import Union, Optional
+
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
+from grpclib.exceptions import GRPCError
+
 from classes.user import User
 from classes.error import Error
 from helpers.mixins import LoggerMixin
@@ -113,8 +116,11 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, set_hash: Optional[
 @_MUTATION.field('payInvoice')
 async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None):
     #determine true invoice amount
-    pay_string = ln.PayReqString(pay_req=invoice)
-    decoded = await LND.stub.DecodePayReq(pay_string)
+    pay_string = ln.PayReqString(pay_req=invoice.replace('lightning:', ''))
+    try:
+        decoded = await LND.stub.DecodePayReq(pay_string)
+    except GRPCError as e:
+        return Error('PaymentError', e)
 
     if amt is not None and decoded.num_sat != amt and decoded.num_sat > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')
