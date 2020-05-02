@@ -203,7 +203,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             payment_res = await LND.stub.SendPaymentSync(req)
             _mutation_logger.logger.info("payment response: %s", payment_res)
             if payment_res.payment_error or not payment_res.payment_preimage:
-                return Error('PaymentError', f"received error {payment_res.payment_error}")
+                return Error('PaymentError', payment_res.payment_error)
 
             invoice_obj.payment_preimage = payment_res.payment_preimage
             # impose maximum fee
@@ -211,4 +211,4 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             invoice_obj.paid = True
             invoice_obj.paid_at = int(time())
 
-            return invoice_obj.create()
+            return await invoice_obj.create()
