@@ -1,11 +1,13 @@
 """module for getting user invoices"""
+import base64
 from context import LND, GINO
 from models import Invoice as DB_Invoice
 import rpc_pb2 as ln
 from .abstract_user_method import AbstractMethod
+from helpers.mixins import LoggerMixin
 
 
-class GetInvoices(AbstractMethod):
+class GetInvoices(AbstractMethod, LoggerMixin):
     """Method for retriving a user's invoices, either paid or unpaid"""
 
     def __init__(
@@ -19,7 +21,7 @@ class GetInvoices(AbstractMethod):
         self._only_paid = only_paid
         self._limit = limit
         self._offset = offset
-        self._query = lambda x, y: x.payee == y if payee else False or x.payer == y if payer else False
+        self._query = lambda x, y: (x.payee == y if payee else False) or (x.payer == y if payer else False)
 
     async def run(self, user):
         """
@@ -36,7 +38,7 @@ class GetInvoices(AbstractMethod):
                 .limit(self._limit) \
                 .offset(self._offset) \
                 .gino.iterate():
-
+                    self.logger.critical(invoice)
                     if not invoice.paid:
                         # if not paid check lnd to see if its paid in lnd db
 

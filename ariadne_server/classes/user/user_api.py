@@ -42,7 +42,7 @@ class User(LoggerMixin, UserModel):
         self.logger.critical(inv)
         dep = await self.exec(GetOnchainTxs(min_confirmations=confirmations, limit=limit))
         
-        def get_time(x: Union[Invoice, ]) -> int:
+        def get_time(x) -> int:
             if isinstance(x, Invoice):
                 if x.payee == self.username:
                     return x.timestamp
