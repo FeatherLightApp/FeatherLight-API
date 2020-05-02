@@ -17,6 +17,7 @@ class GetBalance(AbstractMethod, LoggerMixin):
         # asking for 0 invoices returns all invoices
         invoice_method = GetInvoices(only_paid=True)
         for invoice in await user.exec(invoice_method):
+            self.logger.critical(invoice)
             if (invoice.payee == user.username):
                 balance += invoice.amount
             if (invoice.payer == user.username):

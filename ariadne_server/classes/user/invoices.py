@@ -30,30 +30,29 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         Side Effect: adds true lnd invoices as paid in redis
         Internal invoices are marked as paid on payment send
         """
-
+        statement = DB_Invoice.query.where(self._query(DB_Invoice, user.username))
+        if self._limit > 0:
+            statement = statement.limit(self._limit)
+        statement = statement.offset(self._offset)
         invoices = []
         async with GINO.db.transaction():
-            async for invoice in DB_Invoice.query \
-                .where(self._query(DB_Invoice, user.username)) \
-                .limit(self._limit) \
-                .offset(self._offset) \
-                .gino.iterate():
-                    self.logger.critical(invoice)
-                    if not invoice.paid:
-                        # if not paid check lnd to see if its paid in lnd db
+            async for invoice in statement.gino.iterate():
+                self.logger.critical(invoice)
+                if not invoice.paid:
+                    # if not paid check lnd to see if its paid in lnd db
 
-                        req = ln.PaymentHash(
-                            r_hash=base64.b64decode(invoice.payment_hash.encode('utf-8'))
-                        )
-                        lookup_info = await LND.stub.LookupInvoice(req)
+                    req = ln.PaymentHash(
+                        r_hash=base64.b64decode(invoice.payment_hash.encode('utf-8'))
+                    )
+                    lookup_info = await LND.stub.LookupInvoice(req)
 
-                        if lookup_info.state == 1:
-                            # invoice is paid update state in db
-                            await invoice.update(
-                                paid=True,
-                                paid_at=lookup_info.settle_date
-                            ).apply()
+                    if lookup_info.state == 1:
+                        # invoice is paid update state in db
+                        await invoice.update(
+                            paid=True,
+                            paid_at=lookup_info.settle_date
+                        ).apply()
 
-                    invoices.append(invoice)
+                invoices.append(invoice)
         # if only paid is false return all results else return only settled ammounts
         return [invoice for invoice in invoices if not self._only_paid or invoice.paid]
