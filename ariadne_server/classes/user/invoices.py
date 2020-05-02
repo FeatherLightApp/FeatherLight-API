@@ -37,7 +37,6 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         invoices = []
         async with GINO.db.transaction():
             async for invoice in statement.gino.iterate():
-                self.logger.critical(invoice)
                 if not invoice.paid:
                     # if not paid check lnd to see if its paid in lnd db
 

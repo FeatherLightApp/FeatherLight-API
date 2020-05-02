@@ -35,13 +35,11 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
         # check if auth header is present
         if not (serial_macaroon:= self.get_macaroon(info)):
             return Error('NoCredentials', 'No token sent. You are not logged in')
-        self.logger.critical(serial_macaroon)
         # attempt to deserialize macaroon
         try:
             macaroon = Macaroon.deserialize(serial_macaroon)
         except MacaroonDeserializationException:
             return Error('AuthenticationError', 'Invalid token sent')
-        self.logger.critical(macaroon.identifier) 
         # lookup user by identifier
         if not (db_user := await User.get(macaroon.identifier)):
             return Error('AuthenticationError', 'Could not find user')

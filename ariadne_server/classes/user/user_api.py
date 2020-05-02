@@ -39,7 +39,6 @@ class User(LoggerMixin, UserModel):
         offset: int = 0
     ):
         inv = await self.exec(GetInvoices(only_paid=paid, limit=limit))
-        self.logger.critical(inv)
         dep = await self.exec(GetOnchainTxs(min_confirmations=confirmations, limit=limit))
         
         def get_time(x) -> int:

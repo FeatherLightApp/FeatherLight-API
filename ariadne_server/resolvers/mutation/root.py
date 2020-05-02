@@ -45,8 +45,6 @@ async def r_create_user(*_, role: str = 'USER') -> User:
 # to downstream union resolver. Function can intercept user and add functionality
 @_MUTATION.field('refreshMacaroons')
 def r_refresh_macaroons(user: User, info) -> User:
-    _mutation_logger.logger.critical('refreshing token')
-    _mutation_logger.logger.critical(info.context['request'].headers)
     #pass user into token payload resolver
     return user
 
