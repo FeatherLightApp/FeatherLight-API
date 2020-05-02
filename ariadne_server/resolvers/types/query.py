@@ -64,6 +64,7 @@ async def r_decode_invoice(*_, invoice: str):
     except GRPCError:
         return None
 
+
 # @QUERY.field('peers')
 # async def r_get_peers(_: None, info) -> dict:
 #     res = await info.context.bitcoind.req('getpeerinfo')

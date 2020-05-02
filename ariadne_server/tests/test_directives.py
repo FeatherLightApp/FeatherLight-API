@@ -31,7 +31,7 @@ async def _get_node_balance(schema, context):
     r = res[1]['data']['nodeBalance']
     return r
 
-@pytest.mark.usefixtures('dummy_user', 'dummy_admin')
+@pytest.mark.usefixtures('dummy_admin')
 async def test_valid_role(schema, context, dummy_admin):
     context['request'].headers['Authorization'] = f'Bearer {dummy_admin["tokens"]["access"]}'
     r = await _get_node_balance(schema, context)
@@ -39,6 +39,7 @@ async def test_valid_role(schema, context, dummy_admin):
     assert r['__typename'] == 'NodeBalance'
 
 
+@pytest.mark.usefictures('dummy_user')
 async def test_invalid_role(schema, context, dummy_user):
     context['request'].headers['Authorization'] = f'Bearer {dummy_user["tokens"]["access"]}'
     r = await _get_node_balance(schema, context)

@@ -1,14 +1,14 @@
 union ChannelResponse = ChannelPayload | Error
 
 type ChannelPayload {
-    open(
+    openChannels(
         active: Boolean
         inactive: Boolean
         public: Boolean
         private: Boolean
         peer: B64
     ): [Channel]!
-    pending: PendingChannelsResponse!
+    pendingChannels: PendingChannelsResponse!
     
 }
 

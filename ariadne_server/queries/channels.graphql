@@ -1,0 +1,16 @@
+query channels {
+    channels {
+        __typename
+        ... on ChannelPayload {
+            openChannels {
+                active
+                localBalance
+                remoteBalance
+            }
+        }
+        ... on Error {
+            errorType
+            message
+        }
+    }
+}

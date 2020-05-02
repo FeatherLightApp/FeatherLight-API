@@ -6,11 +6,13 @@ from .scalar import SCALAR
 from .interface import INTERFACE
 from .balance_payload import BALANCE_PAYLOAD
 from .subscription.root import EXPORT as sub_export
+from .channels import QUERY as query_1
 
 TYPES = [
     *SCALAR,
     *INTERFACE,
     QUERY,
+    query_1,
     TOKEN_PAYLOAD,
     BALANCE_PAYLOAD,
     # add_invoice_payload,
