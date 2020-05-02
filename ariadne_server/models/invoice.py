@@ -8,9 +8,9 @@ class Invoice(db.Model):
     """invoice orm"""
     __tablename__ = 'invoices'
 
-    payment_hash = db.Column(db.LargeBinary, primary_key=True, nullable=False)
+    payment_hash = db.Column(db.Text, primary_key=True, nullable=False)
     #null before external invoice is paid
-    payment_preimage = db.Column(db.LargeBinary)
+    payment_preimage = db.Column(db.Text)
     payment_request = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.Integer, nullable=False)
     expiry = db.Column(db.Integer, nullable=False)

@@ -3,6 +3,7 @@ from time import time
 from math import floor, ceil
 from secrets import token_hex, token_bytes
 from typing import Union, Optional
+import base64
 
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
@@ -99,8 +100,8 @@ async def r_add_invoice(user: User, *_, memo: str, amt: int, set_hash: Optional[
     inv_lookup = await LND.stub.LookupInvoice(pay_hash)
     
     return await Invoice.create(
-        payment_hash=inv.r_hash,
-        payment_request=inv.payment_request,
+        payment_hash=base64.b64encode(inv.r_hash).decode('utf-8'),
+        payment_request=base64.b64encode(inv.payment_request).decode('utf-8'),
         payment_preimage=inv_lookup.r_preimage,
         timestamp=inv_lookup.creation_date,
         expiry=inv_lookup.expiry,

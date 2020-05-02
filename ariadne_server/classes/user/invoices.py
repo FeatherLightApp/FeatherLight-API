@@ -41,7 +41,7 @@ class GetInvoices(AbstractMethod):
                         # if not paid check lnd to see if its paid in lnd db
 
                         req = ln.PaymentHash(
-                            r_hash=invoice.payment_hash
+                            r_hash=base64.b64decode(invoice.payment_hash.encode('utf-8'))
                         )
                         lookup_info = await LND.stub.LookupInvoice(req)
 
