@@ -210,8 +210,5 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             invoice_obj.fee = max(fee_limit, payment_res.payment_route.total_fees)
             invoice_obj.paid = True
             invoice_obj.paid_at = int(time())
-            # delegate db write to background task
-            loop = asyncio.get_running_loop()
-            loop.create_task(invoice_obj.create())
 
-            return invoice_obj
+            return invoice_obj.create()
