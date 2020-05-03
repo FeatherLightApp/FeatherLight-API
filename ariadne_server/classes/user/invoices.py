@@ -15,7 +15,7 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         only_paid: bool = True,
         limit: int = 0,
         offset: int = 0,
-        payee: bool = True, 
+        payee: bool = True,
         payer: bool = True
     ):
         self._only_paid = only_paid
@@ -37,6 +37,7 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         invoices = []
         async with GINO.db.transaction():
             async for invoice in statement.gino.iterate():
+                self.logger.info(invoice)
                 if not invoice.paid:
                     # if not paid check lnd to see if its paid in lnd db
 
