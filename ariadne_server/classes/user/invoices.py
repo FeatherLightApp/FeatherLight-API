@@ -21,7 +21,12 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         self._only_paid = only_paid
         self._limit = limit
         self._offset = offset
-        self._query = lambda x, y: ((x.payee == y and payee) or (x.payer == y and payer))
+        def q(x, y):
+            self.logger.info(f"comparing {x.payee} {x.payer} and {y}")
+            res = (x.payee == y and payee) or (x.payer == y and payer)
+            self.logger.info(res)
+            return res
+        self._query = q
 
     async def run(self, user):
         """
