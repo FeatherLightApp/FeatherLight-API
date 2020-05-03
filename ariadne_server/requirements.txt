@@ -1,4 +1,4 @@
-starlette==0.13.2
+starlette==0.13.4
 ariadne
 httpx
 requests

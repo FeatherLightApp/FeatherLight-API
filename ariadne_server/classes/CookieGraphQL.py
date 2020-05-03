@@ -7,7 +7,6 @@ _logger = LoggerMixin()
 class CookieGraphql(GraphQL):
     """ class to attach cookies to refresh requests"""
     async def graphql_http_server(self, request):
-        _logger.logger.info(request)
         res: JSONResponse = await GraphQL.graphql_http_server(self, request)
         if b'"__typename":"TokenPayload"' in res.body and b'"refresh":' in res.body:
             chop = res.body.split(b'"refresh":"')
