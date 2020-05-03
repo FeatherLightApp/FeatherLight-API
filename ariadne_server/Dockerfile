@@ -55,6 +55,6 @@ RUN ls -a /app
 
 RUN ls -a /proto
 
-EXPOSE 5000
+EXPOSE 5001
 
 CMD [ "python", "-m", "uvicorn",  "app:APP", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]
