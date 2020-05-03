@@ -10,4 +10,5 @@ enum ErrorType {
     PaymentError
     RateLimited
     InsufficientFunds
+    InvalidInvoice
 }

@@ -86,6 +86,8 @@ async def r_add_invoice(
     amt: int,
     set_hash: Optional[bytes] = None
 ) -> Invoice:
+    if amt <= 0:
+        return Error('InvalidInvoice', f'Invalid amount: {amt}')
     """Authenticated route"""
     expiry_time = 3600*24
     request = ln.Invoice(
