@@ -21,12 +21,8 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         self._only_paid = only_paid
         self._limit = limit
         self._offset = offset
-        def q(x, y):
-            self.logger.info(f"comparing {x.payee} {x.payer} and {y}")
-            res = (x.payee == y and payee) or (x.payer == y and payer)
-            self.logger.info(res)
-            return res
-        self._query = q
+        self._payee = payee
+        self._payer = payer
 
     async def run(self, user):
         """
@@ -35,7 +31,10 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         Side Effect: adds true lnd invoices as paid in redis
         Internal invoices are marked as paid on payment send
         """
-        statement = DB_Invoice.query.where(self._query(DB_Invoice, user.username))
+        statement = DB_Invoice.query.where(
+            (DB_Invoice.payee == user.username and self._payee) or \
+            (DB_Invoice.payer == user.username and self._payer)
+        )
         if self._limit > 0:
             statement = statement.limit(self._limit)
         statement = statement.offset(self._offset)
