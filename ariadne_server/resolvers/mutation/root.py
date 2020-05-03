@@ -3,7 +3,7 @@ from time import time
 from math import floor, ceil
 from secrets import token_hex, token_bytes
 from typing import Union, Optional
-import base64
+from base64 import b64encode as encode64
 
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
@@ -41,8 +41,6 @@ async def r_create_user(*_, role: str = 'USER') -> User:
     # return api object to resolver
     return user
 
-# this function is redundant as auth directive knows to send user obj
-# to downstream union resolver. Function can intercept user and add functionality
 @_MUTATION.field('refreshMacaroons')
 def r_refresh_macaroons(user: User, info) -> User:
     #pass user into token payload resolver
@@ -103,9 +101,9 @@ async def r_add_invoice(
     inv_lookup = await LND.stub.LookupInvoice(pay_hash)
     
     return await Invoice.create(
-        payment_hash=base64.b64encode(inv.r_hash).decode('utf-8'),
-        payment_request=base64.b64encode(inv.payment_request).decode('utf-8'),
-        payment_preimage=inv_lookup.r_preimage,
+        payment_hash=encode64(inv.r_hash).decode(),
+        payment_request=inv.payment_request,
+        payment_preimage=encode64(inv_lookup.r_preimage).decode(),
         timestamp=inv_lookup.creation_date,
         expiry=inv_lookup.expiry,
         memo=inv_lookup.memo,
@@ -203,7 +201,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             if payment_res.payment_error or not payment_res.payment_preimage:
                 return Error('PaymentError', payment_res.payment_error)
 
-            invoice_obj.payment_preimage = base64.b64encode(payment_res.payment_preimage).decode('utf-8')
+            invoice_obj.payment_preimage = encode64(payment_res.payment_preimage).decode()
             # impose maximum fee
             invoice_obj.fee = max(fee_limit, payment_res.payment_route.total_fees)
             invoice_obj.paid = True

@@ -1,5 +1,5 @@
 """module for getting user invoices"""
-import base64
+from base64 import b64decode as decode64
 from context import LND, GINO
 from models import Invoice as DB_Invoice
 import rpc_pb2 as ln
@@ -41,7 +41,7 @@ class GetInvoices(AbstractMethod, LoggerMixin):
                     # if not paid check lnd to see if its paid in lnd db
 
                     req = ln.PaymentHash(
-                        r_hash=base64.b64decode(invoice.payment_hash.encode('utf-8'))
+                        r_hash=decode64(invoice.payment_hash.encode('utf-8'))
                     )
                     lookup_info = await LND.stub.LookupInvoice(req)
 
