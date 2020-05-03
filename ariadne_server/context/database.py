@@ -23,6 +23,7 @@ class GinoInstance(LoggerMixin):
             try:
                 self.logger.warning(f'connecting to: {bind_str}, attempt {i}')
                 await self.db.set_bind(bind_str)
+                self.logger.warning('bound to db')
                 await self.db.gino.create_all()
                 break
             except gaierror as e:
