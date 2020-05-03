@@ -26,7 +26,7 @@ APP = Starlette(
         LND.initialize,
         REDIS.initialize,
         GINO.initialize,
-        _logger.logger.info('app init')
+        lambda: _logger.logger.info('app init')
     ],
     on_shutdown=[LND.destroy, REDIS.destroy, GINO.destroy],
     middleware=middleware
