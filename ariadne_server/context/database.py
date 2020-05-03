@@ -13,7 +13,7 @@ class GinoInstance(LoggerMixin):
         self._user = os.environ.get('POSTGRES_USER')
         self._password = os.environ.get('POSTGRES_PASSWORD')
         self._db_name = os.environ.get('POSTGRES_DB')
-        self.db = Gino()
+        self.db = None
 
     async def initialize(self):
         """init db connection"""
@@ -22,7 +22,7 @@ class GinoInstance(LoggerMixin):
         while True:
             try:
                 self.logger.warning(f'connecting to: {bind_str}, attempt {i}')
-                await self.db.set_bind(bind_str)
+                self.db = Gino(bind_str)
                 self.logger.warning('bound to db')
                 await self.db.gino.create_all()
                 break
