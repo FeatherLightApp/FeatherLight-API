@@ -20,18 +20,19 @@ class GinoInstance(LoggerMixin):
         bind_str = f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
         i = 1
         while True:
+            self.logger.info(f"attempt {i}")
             try:
                 self.logger.warning(f'connecting to: {bind_str}, attempt {i}')
                 await self.db.set_bind(bind_str)
                 self.logger.warning('bound to db')
                 await self.db.gino.create_all()
-                self.logger.info('success')
                 break
             except gaierror as e:
                 self.logger.warning(e)
                 self.logger.warning(f'DB connect attempt {i} failed')
                 await asyncio.sleep(5)
                 i += 1
+        self.logger.info('finished')
 
     async def destroy(self):
         """ close connection"""
