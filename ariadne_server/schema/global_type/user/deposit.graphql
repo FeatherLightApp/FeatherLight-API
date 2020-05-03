@@ -2,9 +2,9 @@ type Deposit {
     address: String!
     amount: Int!
     confirmations: Int!
-    blockhash: String!
-    blockindex: Int!
-    blocktime: Int!
+    blockhash: String
+    blockindex: Int
+    blocktime: Int
     txid: String!
     time: Int!
     timereceived: Int!
