@@ -25,6 +25,7 @@ class GinoInstance(LoggerMixin):
                 await self.db.set_bind(bind_str)
                 self.logger.warning('bound to db')
                 await self.db.gino.create_all()
+                self.logger.info('success')
                 break
             except gaierror as e:
                 self.logger.warning(e)
