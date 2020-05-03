@@ -15,6 +15,8 @@ class RedisConnection(LoggerMixin):
         self.logger.info('Initializing redis connection')
         # TODO add support for redis username and passord
         self.conn = await aioredis.create_redis_pool(self._host)
+        self.logger.info('redis initialized')
+        return
 
     async def destroy(self):
         self.logger.info('destroying redis')
