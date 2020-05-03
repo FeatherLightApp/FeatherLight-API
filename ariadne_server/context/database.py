@@ -33,6 +33,7 @@ class GinoInstance(LoggerMixin):
                 await asyncio.sleep(5)
                 i += 1
         self.logger.info('finished')
+        return
 
     async def destroy(self):
         """ close connection"""

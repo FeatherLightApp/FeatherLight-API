@@ -5,9 +5,10 @@ from starlette.middleware.cors import CORSMiddleware
 from classes.CookieGraphQL import CookieGraphql
 from context import LND, REDIS, GINO
 from resolvers.schema import SCHEMA
+from helpers.mixins import LoggerMixin
 
-from models.invoice import Invoice
-from models.user import User
+_logger = LoggerMixin()
+
 
 middleware = [
     Middleware(
@@ -21,7 +22,12 @@ middleware = [
 
 APP = Starlette(
     debug=True,
-    on_startup=[LND.initialize, REDIS.initialize, GINO.initialize],
+    on_startup=[
+        LND.initialize,
+        REDIS.initialize,
+        GINO.initialize,
+        _logger.logger.info('app init')
+    ],
     on_shutdown=[LND.destroy, REDIS.destroy, GINO.destroy],
     middleware=middleware
 )
