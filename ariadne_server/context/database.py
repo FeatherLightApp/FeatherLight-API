@@ -22,7 +22,7 @@ class GinoInstance(LoggerMixin):
         while True:
             try:
                 self.logger.warning(f'connecting to: {bind_str}, attempt {i}')
-                self.db = await Gino(bind_str)
+                await self.db.set_bind(bind_str)
                 self.logger.warning('bound to db')
                 await self.db.gino.create_all()
                 break

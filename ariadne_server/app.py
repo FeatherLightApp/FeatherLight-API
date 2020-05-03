@@ -6,6 +6,9 @@ from classes.CookieGraphQL import CookieGraphql
 from context import LND, REDIS, GINO
 from resolvers.schema import SCHEMA
 
+from models.invoice import Invoice
+from models.user import User
+
 middleware = [
     Middleware(
         CORSMiddleware,
