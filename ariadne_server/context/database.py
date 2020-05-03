@@ -13,7 +13,7 @@ class GinoInstance(LoggerMixin):
         self._user = os.environ.get('POSTGRES_USER')
         self._password = os.environ.get('POSTGRES_PASSWORD')
         self._db_name = os.environ.get('POSTGRES_DB')
-        self.db = None
+        self.db = Gino()
 
     async def initialize(self):
         """init db connection"""
