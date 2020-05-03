@@ -49,7 +49,7 @@ class User(LoggerMixin, UserModel):
                     return x.paid_at
             return x['time']
         
-        return sorted([*inv, *dep], key=get_time)[offset:offset+limit]
+        return sorted([*inv, *dep], key=get_time, reverse=True)[offset:offset+limit]
 
 
 
