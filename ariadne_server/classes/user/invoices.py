@@ -1,6 +1,6 @@
 """module for getting user invoices"""
 from base64 import b64decode as decode64
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from context import LND, GINO
 from models import Invoice as DB_Invoice
 import rpc_pb2 as ln
@@ -33,8 +33,8 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         Internal invoices are marked as paid on payment send
         """
         statement = DB_Invoice.query.where(or_(
-            DB_Invoice.payee == user.username and self._payee,
-            DB_Invoice.payer == user.username and self._payer
+            and_(DB_Invoice.payee == user.username, self._payee),
+            and_(DB_Invoice.payer == user.username, self._payer)
         ))
         if self._limit > 0:
             statement = statement.limit(self._limit)
