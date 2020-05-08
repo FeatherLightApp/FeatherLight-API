@@ -136,6 +136,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     fee_limit = ceil(payment_amt * 0.01)
 
     # attempt to load invoice obj
+    _mutation_logger.logger.critical(decoded.payment_hash + type(decoded.payment_hash))
     invoice_obj = await Invoice.get(decoded.payment_hash)
     if invoice_obj and invoice_obj.paid:
         return Error('PaymentError', 'This invoice has already been paid')
@@ -143,7 +144,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     #lock payer's db row before determining balance
     async with GINO.db.transaction():
         # potentially user.query.with_for..
-        user.query.with_for_update().gino.status() #obtain lock
+        await user.query.with_for_update().gino.status() #obtain lock
         user_balance = await user.balance()
         if payment_amt + fee_limit > user_balance:
             return Error(
