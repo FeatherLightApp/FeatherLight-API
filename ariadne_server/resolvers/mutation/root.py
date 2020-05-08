@@ -155,6 +155,8 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
 
         _mutation_logger.logger.critical(f'lnd key {LND.id_pubkey}, {type(LND.id_pubkey)}')
         _mutation_logger.logger.critical(f'dest {decoded.destination}, {type(decoded.destination)}')
+        _mutation_logger.logger.critical(f'equivalence {LND.id_pubkey == decoded.destination}')
+        _mutation_logger.logger.critical(invoice_obj)
         if LND.id_pubkey == decoded.destination and invoice_obj:
             _mutation_logger.logger.critical('internal')
             #internal invoice, get payee from db
