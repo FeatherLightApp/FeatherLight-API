@@ -170,7 +170,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 # could not find the invoice payee in the db
                 return Error('PaymentError', 'This invoice is invalid')
 
-            invoice_update = await invoice_obj.update(
+            await invoice_obj.update(
                 paid=True,
                 payer=user.username,
                 fee=fee_limit,
@@ -181,9 +181,11 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             if payee.username in PUBSUB.keys():
                 # clients are listening, push to all open clients
                 for client in PUBSUB[payee.username]:
-                    await client.put(invoice_update)
-
-            return invoice_update
+                    await client.put(invoice_obj)
+            
+            _mutation_logger.logger.critical(invoice_obj)
+            _mutation_logger.logger.critical(invoice_obj.amount)
+            return invoice_obj
         
         # proceed with external payment if invoice does not exist in db already
         elif not invoice_obj:
