@@ -136,7 +136,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     fee_limit = ceil(payment_amt * 0.01)
 
     # attempt to load invoice obj
-    _mutation_logger.logger.critical(decoded.payment_hash + type(decoded.payment_hash))
+    _mutation_logger.logger.critical(decoded.payment_hash + str(type(decoded.payment_hash)))
     invoice_obj = await Invoice.get(decoded.payment_hash)
     if invoice_obj and invoice_obj.paid:
         return Error('PaymentError', 'This invoice has already been paid')
