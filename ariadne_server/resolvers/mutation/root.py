@@ -170,22 +170,18 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 # could not find the invoice payee in the db
                 return Error('PaymentError', 'This invoice is invalid')
 
-            invoice_update = invoice_obj.update(
+            invoice_update = await invoice_obj.update(
                 paid=True,
                 payer=user.username,
                 fee=fee_limit,
                 paid_at=time()
-            )
+            ).apply()
 
             # check if there are clients in the subscribe channel for this invoice
             if payee.username in PUBSUB.keys():
                 # clients are listening, push to all open clients
                 for client in PUBSUB[payee.username]:
                     await client.put(invoice_update)
-
-            #send update coroutine to background task
-            loop = asyncio.get_running_loop()
-            loop.create_task(invoice_update.apply())
 
             return invoice_update
         
