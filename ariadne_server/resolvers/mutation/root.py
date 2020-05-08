@@ -140,7 +140,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
 
     # convert decoded hex to string b64
     b64_payment_hash = encode64(b16decode(decoded.payment_hash, casefold=True)).decode()
-
+    _mutation_logger.logger.critical(b64_payment_hash)
     # attempt to load invoice obj
     invoice_obj = await Invoice.get(b64_payment_hash)
     if invoice_obj and invoice_obj.paid:
