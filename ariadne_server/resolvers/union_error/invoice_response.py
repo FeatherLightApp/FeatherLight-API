@@ -10,8 +10,7 @@ PAY_INVOICE_RESPONSE = UnionType('PayInvoiceResponse')
 def r_add_invoice_response(obj, _, resolve_type):
     if isinstance(obj, Error):
         return 'Error'
-    if getattr(obj, 'payment_hash', None):
-        if str(resolve_type) == 'PayInvoiceResponse':
-            return 'PaidInvoice'
-        if str(resolve_type) == 'UserInvoiceResponse':
-            return 'UserInvoice'
+    if str(resolve_type) == 'PayInvoiceResponse':
+        return 'PaidInvoice'
+    if str(resolve_type) == 'UserInvoiceResponse':
+        return 'UserInvoice'
