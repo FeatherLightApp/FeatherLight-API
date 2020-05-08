@@ -37,7 +37,7 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         statement = DB_Invoice.query.where(or_(
             and_(DB_Invoice.payee == user.username, self._payee),
             and_(DB_Invoice.payer == user.username, self._payer)
-        ))
+        )).order_by(DB_Invoice.timestamp.desc())
         if self._limit > 0:
             statement = statement.limit(self._limit)
         statement = statement.offset(self._offset)
