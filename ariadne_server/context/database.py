@@ -19,14 +19,16 @@ class GinoInstance(LoggerMixin):
         """init db connection"""
         bind_str = f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
         i = 1
-        while True:
+        done = False
+        while not done:
             self.logger.info(f"attempt {i}")
             try:
-                self.logger.warning(f'connecting to: {bind_str}, attempt {i}')
+                self.logger.info(f'connecting to: {bind_str}, attempt {i}')
                 await self.db.set_bind(bind_str)
-                self.logger.warning('bound to db')
+                self.logger.info('bound to db')
                 await self.db.gino.create_all()
-                break
+                self.logger.info('created tables')
+                done = True
             except gaierror as e:
                 self.logger.warning(e)
                 self.logger.warning(f'DB connect attempt {i} failed')

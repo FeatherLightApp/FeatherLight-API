@@ -35,10 +35,11 @@ class User(LoggerMixin, UserModel):
         *_,
         limit: int,
         paid: bool,
-        confirmations: int,
+        expired: bool = True,
+        confirmations: int = 3,
         offset: int = 0
     ):
-        inv = await self.exec(GetInvoices(only_paid=paid, limit=limit))
+        inv = await self.exec(GetInvoices(paid=paid, limit=limit, expired=expired))
         dep = await self.exec(GetOnchainTxs(min_confirmations=confirmations, limit=limit))
         
         def get_time(x) -> int:
@@ -63,12 +64,19 @@ class User(LoggerMixin, UserModel):
     async def balance(self, *_):
         return await self.exec(GetBalance())
 
-    async def invoices(self, *_, paid: bool, limit: int, offset: int = 0):
-        method = GetInvoices(only_paid=paid, limit=limit, offset=offset, payee=True, payer=False)
+    async def invoices(self, *_, paid: bool, limit: int, offset: int = 0, expired: bool = False):
+        method = GetInvoices(
+            paid=paid,
+            limit=limit,
+            offset=offset,
+            expired=expired,
+            payee=True,
+            payer=False
+        )
         return await self.exec(method)
 
     async def payments(self, *_, limit: int, offset: int = 0):
-        method = GetInvoices(only_paid=True, limit=limit, offset=offset, payee=False, payer=True)
+        method = GetInvoices(paid=True, limit=limit, offset=offset, payee=False, payer=True)
         return await self.exec(method)
 
     async def deposits(self, *_, confirmations: int):

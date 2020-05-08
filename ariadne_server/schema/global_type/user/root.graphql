@@ -8,7 +8,7 @@ interface BaseUser {
     invoices(paid: Boolean=true limit: Int=10 offset: Int): [UserInvoice]!
     payments(limit: Int=10 offset: Int): [PaidInvoice]!
     deposits(confirmations: Int=3): [Deposit]!
-    feed(confirmations: Int=3 paid:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
+    feed(confirmations: Int=3 paid:Boolean=true expired:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
     role: Role!
     created: Int! 
 }
@@ -26,7 +26,7 @@ type NewUser implements BaseUser {
     invoices(paid: Boolean=true limit: Int=10 offset: Int): [UserInvoice]!
     payments(limit: Int=10 offset: Int): [PaidInvoice]!
     deposits(confirmations: Int=3): [Deposit]!
-    feed(confirmations: Int=3 paid:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
+    feed(confirmations: Int=3 paid:Boolean=true expired:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
     role: Role!
     created: Int!
 }
@@ -38,7 +38,7 @@ type User implements BaseUser {
     invoices(paid: Boolean=true limit: Int=10 offset: Int): [UserInvoice]!
     payments(limit: Int=10 offset: Int): [PaidInvoice]!
     deposits(confirmations: Int=3): [Deposit]!
-    feed(confirmations: Int=3 paid:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
+    feed(confirmations: Int=3 paid:Boolean=true expired:Boolean=true limit:Int=10 offset:Int): [FeedItem]!
     role: Role!
     created: Int! 
 }
