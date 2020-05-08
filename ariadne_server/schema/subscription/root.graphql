@@ -1,5 +1,4 @@
 type Subscription {
-    invoice: PaidInvoiceResponse! @auth
+    invoice: UserInvoiceResponse! @auth
 }
 
-union PaidInvoiceResponse = UserInvoice | Error

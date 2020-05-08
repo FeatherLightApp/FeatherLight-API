@@ -153,7 +153,10 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
                 with only {user_balance} sat'''
             )
 
-        if LND.id_pubkey == decoded.payment_hash and invoice_obj:
+        _mutation_logger.logger.critical(f'lnd key {LND.id_pubkey}')
+        _mutation_logger.logger.critical(f'dest {decoded.destination}')
+        if LND.id_pubkey == decoded.destination and invoice_obj:
+            _mutation_logger.logger.critical('internal')
             #internal invoice, get payee from db
             if not (payee := await User.get(invoice_obj.payee)):
                 # could not find the invoice payee in the db
