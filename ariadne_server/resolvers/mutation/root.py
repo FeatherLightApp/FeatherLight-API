@@ -4,6 +4,7 @@ from math import floor, ceil
 from secrets import token_hex, token_bytes
 from typing import Union, Optional
 from base64 import urlsafe_b64encode as encode64
+from base64 import b16decode
 
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
@@ -137,9 +138,11 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     payment_amt = amt or decoded.num_satoshis
     fee_limit = ceil(payment_amt * 0.01)
 
+    # convert decoded hex to string b64
+    b64_payment_hash = encode64(b16decode(decoded.payment_hash, casefold=True)).decode()
+
     # attempt to load invoice obj
-    _mutation_logger.logger.critical(decoded.payment_hash + str(type(decoded.payment_hash)))
-    invoice_obj = await Invoice.get(decoded.payment_hash)
+    invoice_obj = await Invoice.get(b64_payment_hash)
     if invoice_obj and invoice_obj.paid:
         return Error('PaymentError', 'This invoice has already been paid')
 
@@ -196,7 +199,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             )
 
             invoice_obj = Invoice(
-                payment_hash=decoded.payment_hash,
+                payment_hash=b64_payment_hash,
                 payment_request=invoice,
                 timestamp=decoded.timestamp,
                 expiry=decoded.expiry,
