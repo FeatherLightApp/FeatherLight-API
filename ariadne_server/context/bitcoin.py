@@ -16,7 +16,6 @@ class BitcoinClient(AsyncClient, LoggerMixin):
     async def req(self, method: str, params=None, reqid=None):
         """make a request to bitcoin rpc and return response json"""
         url = f'http://{self._host}:{self._port}'
-        self.logger.info(f"making request to: {url}")
         js = {'method': method}
         if params:
             js['params'] = params

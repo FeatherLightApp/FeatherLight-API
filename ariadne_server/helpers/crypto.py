@@ -40,8 +40,6 @@ def verify(
         lambda x: x.split(' = ')[0] == 'expiry' and  \
             int(x.split(' = ')[1]) > time()
     )
-    satis_str = f"origin = {req.headers['origin']}"
-    _logger.logger.critical(satis_str)
-    v_obj.satisfy_exact(satis_str)
+    v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
 
     return v_obj.verify(macaroon, key)
