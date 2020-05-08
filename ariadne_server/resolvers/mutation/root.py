@@ -3,7 +3,7 @@ from time import time
 from math import floor, ceil
 from secrets import token_hex, token_bytes
 from typing import Union, Optional
-from base64 import b64encode as encode64
+from base64 import urlsafe_b64encode as encode64
 
 from ariadne import MutationType
 from argon2.exceptions import VerificationError
@@ -97,6 +97,8 @@ async def r_add_invoice(
         r_hash=set_hash
     )
     inv = await LND.stub.AddInvoice(request)
+    _mutation_logger.logger.critical(inv.r_hash)
+    _mutation_logger.logger.critical(encode64(inv.r_hash).decode())
 
     # lookup invoice to get preimage
     pay_hash = ln.PaymentHash(r_hash=inv.r_hash)
