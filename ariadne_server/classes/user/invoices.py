@@ -25,7 +25,7 @@ class GetInvoices(AbstractMethod, LoggerMixin):
         self._offset = offset
         self._payee = payee
         self._payer = payer
-        self._filter = lambda x: x.paid or expired or (x.timestamp + x.expiry < time()) and (x.paid or not paid)
+        self._filter = lambda x: x.paid or expired or (x.timestamp + x.expiry > time()) and (x.paid or not paid)
 
     async def run(self, user):
         """
