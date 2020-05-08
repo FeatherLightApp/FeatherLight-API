@@ -50,9 +50,7 @@ class User(LoggerMixin, UserModel):
                     return x.paid_at
             return x['time']
         
-        sorted_feed = sorted([*inv, *dep], key=get_time, reverse=True)
-        self.logger.critical(sorted_feed)
-        return sorted_feed[offset:offset+limit]
+        return sorted([*inv, *dep], key=get_time, reverse=True)[offset:offset+limit+1]
 
 
 
