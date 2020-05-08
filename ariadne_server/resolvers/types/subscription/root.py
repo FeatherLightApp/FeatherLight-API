@@ -60,16 +60,6 @@ def r_invoice_field(invoice, *_):
     return invoice
 
 
-_PAID_INVOICE_RESPONSE = UnionType('PaidInvoiceResponse')
-
-@_PAID_INVOICE_RESPONSE.type_resolver
-def r_paid_invoice_response(obj, *_):
-    if isinstance(obj, Error):
-        return 'Error'
-    return 'UserInvoice'
-
-
 EXPORT = [
-    _PAID_INVOICE_RESPONSE,
     _SUBSCRIPTION
 ]
