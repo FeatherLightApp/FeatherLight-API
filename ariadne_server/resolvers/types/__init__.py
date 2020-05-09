@@ -1,7 +1,7 @@
 """import all types"""
 from .query import QUERY
 # from .addinvoicepayload import add_invoice_payload
-from .token_payload import TOKEN_PAYLOAD
+from .macaroon_payload import AUTH_PAYLOAD
 from .scalar import SCALAR
 from .interface import INTERFACE
 from .balance_payload import BALANCE_PAYLOAD
@@ -13,7 +13,7 @@ TYPES = [
     *INTERFACE,
     QUERY,
     query_1,
-    TOKEN_PAYLOAD,
+    AUTH_PAYLOAD,
     BALANCE_PAYLOAD,
     # add_invoice_payload,
     *sub_export,

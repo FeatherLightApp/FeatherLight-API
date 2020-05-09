@@ -18,7 +18,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
     """Directive class"""
     def __init__(self, *args):
         super().__init__(*args)
-        if 'REFRESH' in self.args.get('actions'):
+        if 'REFRESH' in self.args.get('caveats'):
             self.get_macaroon = lambda info: info.context['request'].cookies.get('refresh')
         else:
             def get_access(info):
@@ -50,7 +50,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                 macaroon=macaroon,
                 key=db_user.key,
                 roles=self.args.get('roles'),
-                actions=self.args.get('actions'),
+                caveats=self.args.get('caveats'),
                 req=info.context['request']
             )
         except MacaroonInvalidSignatureException:

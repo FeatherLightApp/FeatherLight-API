@@ -17,13 +17,13 @@ def bake(user: User, caveats: List[str]) -> str:
     for caveat in caveats:
         m_obj.add_first_party_caveat(caveat)
 
-    return m_obj
+    return m_obj.serialize()
 
 def verify(
         macaroon: Macaroon,
         key: bytes,
         roles: List[str],
-        actions: List[str],
+        caveats: List[str],
         req: Request
 ) -> bool:
     assert macaroon
@@ -33,8 +33,8 @@ def verify(
     for role in roles:
         v_obj.satisfy_exact(f'role = {role}')
 
-    for action in actions:
-        v_obj.satisfy_exact(f'action = {action}')
+    for caveat in caveats:
+        v_obj.satisfy_exact(f'action = {caveat}')
 
     v_obj.satisfy_general(
         lambda x: x.split(' = ')[0] == 'expiry' and  \
@@ -43,3 +43,15 @@ def verify(
     v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
 
     return v_obj.verify(macaroon, key)
+
+
+def attenuate(
+    macaroon: str,
+    caveats: List[str]
+) -> str:
+    m_obj = Macaroon.deserialize(macaroon)
+
+    for caveat in caveats:
+        m_obj.add_first_party_caveat(caveat)
+    
+    return m_obj.serialize()

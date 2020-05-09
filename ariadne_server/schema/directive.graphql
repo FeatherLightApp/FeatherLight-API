@@ -1,7 +1,7 @@
 # FIX ME switch to enum type when new ariadne version is relased
 directive @auth(
     roles: [String]! = ["USER", "ADMIN"]
-    actions: [Action]! = []
+    caveats: [Caveat]! = []
 ) on FIELD_DEFINITION
 
 
@@ -10,14 +10,3 @@ directive @limit(
     seconds: Int!
     key: String! = "default"
 ) on FIELD_DEFINITION
-
-
-enum Action {
-    """
-    Allows user to attenuate macaroon to only add invoices
-    this means user can give attenuated macaroon to others to add invoices on their behalf
-    """
-    ADD_INVOICE
-    """Used to limit the scope of token to only refreshMacaroon"""
-    REFRESH
-}

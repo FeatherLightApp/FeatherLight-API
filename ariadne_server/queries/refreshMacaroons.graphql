@@ -1,7 +1,7 @@
 mutation refreshMacaroons{
     refreshMacaroons {
         __typename
-        ... on TokenPayload {
+        ... on AuthPayload {
             access
             refresh
         }

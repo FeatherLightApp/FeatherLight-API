@@ -18,7 +18,7 @@ async def test_refresh_tokens(schema, context, dummy_user):
     )
     r = res[1]['data']['refreshMacaroons']
     print(r)
-    assert r['__typename'] == 'TokenPayload'
+    assert r['__typename'] == 'AuthPayload'
 
 
 @pytest.mark.usefixtures('dummy_user')

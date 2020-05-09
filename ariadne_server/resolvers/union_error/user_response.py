@@ -18,5 +18,5 @@ NEW_USER_RESPONSE = UnionType('NewUserResponse')
 def r_new_user_response(obj, *_):
     if isinstance(obj, Error):
         return 'Error'
-    if isinstance(obj, User) and obj.password:
+    if isinstance(obj, User):
         return 'NewUser'

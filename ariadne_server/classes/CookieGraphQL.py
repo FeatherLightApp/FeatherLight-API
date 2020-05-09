@@ -8,7 +8,7 @@ class CookieGraphql(GraphQL):
     """ class to attach cookies to refresh requests"""
     async def graphql_http_server(self, request):
         res: JSONResponse = await GraphQL.graphql_http_server(self, request)
-        if b'"__typename":"TokenPayload"' in res.body and b'"refresh":' in res.body:
+        if b'"__typename":"AuthPayload"' in res.body and b'"refresh":' in res.body:
             chop = res.body.split(b'"refresh":"')
             token = chop[1].split(b'"', maxsplit=1)[0]
             res.set_cookie(

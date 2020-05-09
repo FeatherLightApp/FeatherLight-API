@@ -7,7 +7,7 @@ type Mutation {
     and a limited refresh macaroon which expires in 7 days
     Limited to 5 operations per day
     """
-    login(username: String! password: String!): TokenResponse! @limit(operations: 5 seconds: 86400 key: "login")
+    login(username: String! password: String!): MacaroonResponse! @limit(operations: 5 seconds: 86400 key: "login")
     
     """
     Rotates the macaroon key for the user, causing all issued macaroons to be invalidated
@@ -17,7 +17,12 @@ type Mutation {
     """
     Issues new token payload: refresh token and full token
     """
-    refreshMacaroons: TokenResponse! @auth(actions: [REFRESH])
+    refreshMacaroons: MacaroonResponse! @auth(caveats: [REFRESH])
+
+    """
+    Bake a macaroon with additional caveats to limit account access
+    """
+    bakeMacaroon(caveats: [Caveat!]!): AttenuatedMacaroonResponse! @auth
     
     """
     Add an invoice for the user. If hash is specified then this creates a hold invoice
@@ -28,7 +33,7 @@ type Mutation {
     and safely pass the macaroon to a third party, allowing them only to add new invoices
     on the user's behalf
     """
-    addInvoice(memo: String! amt: Int! hash: B64): UserInvoiceResponse! @auth(actions: [ADD_INVOICE])
+    addInvoice(memo: String! amt: Int! hash: B64): UserInvoiceResponse! @auth(caveats: [ADD_INVOICE])
     
     """
     Resolves a previously set hold invoice, if resolution is SETTLE via should be passed the externally 
