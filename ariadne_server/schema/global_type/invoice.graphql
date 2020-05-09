@@ -1,5 +1,5 @@
 """Either error . or an invoice paid by this user (payee)"""
-union PayInvoiceResponse = PaidInvoice | Error
+union PaidInvoiceResponse = PaidInvoice | Error
 """Either error or an invoice created by this user (payee)"""
 union UserInvoiceResponse = UserInvoice | Error
 

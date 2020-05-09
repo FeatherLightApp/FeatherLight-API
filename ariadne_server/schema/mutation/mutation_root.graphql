@@ -37,7 +37,7 @@ type Mutation {
     resolveInvoice(resolution: Resolution! via: B64!): UserInvoiceResponse! @auth
 
     """Pay an invoice with a payment string, if this is a tip invoice then"""
-    payInvoice(invoice: String! amt: Int): PayInvoiceResponse! @auth
+    payInvoice(invoice: String! amt: Int): PaidInvoiceResponse! @auth
 
     """Temporary mutation for testing"""
     forceUser(user: String!): UserResponse!
