@@ -7,5 +7,4 @@ type Query {
     decodeInvoice(invoice: String!): DecodedInvoice
     # checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload! @auth(roles: ["ADMIN"])
-    genericRPC(command: String! params: String): String @auth(roles: ["ADMIN"])# temp 
 }
