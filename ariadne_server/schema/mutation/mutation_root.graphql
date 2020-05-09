@@ -10,9 +10,9 @@ type Mutation {
     login(username: String! password: String!): MacaroonResponse! @limit(operations: 5 seconds: 86400 key: "login")
     
     """
-    Rotates the macaroon key for the user, causing all issued macaroons to be invalidated
+    Nullifies the browsers cookie on response. If universal is true, rotate users macaroon secret, invalidation all sessions
     """
-    logout: Error @auth
+    logout(universal: Boolean = true): Error @auth
     
     """
     Issues new token payload: refresh token and full token
