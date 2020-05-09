@@ -67,9 +67,9 @@ class LightningStub(LoggerMixin):
                 assert self.id_pubkey
                 self.logger.info('Success')
                 break
-            except (ConnectionRefusedError, gaierror) as e:
+            except (ConnectionRefusedError, gaierror) as error:
                 i += 1
-                self.logger.info(f'Attempt failed: {e}')
+                self.logger.info(f'Attempt failed: {error}')
                 await asyncio.sleep(5)
             
     def destroy(self):

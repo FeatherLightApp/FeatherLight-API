@@ -1,4 +1,6 @@
+from typing import List
 from ariadne import MutationType
+from classes import User
 
 MUTATION = MutationType()
 

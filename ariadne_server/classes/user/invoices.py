@@ -5,21 +5,21 @@ from sqlalchemy import or_, and_
 from context import LND, GINO
 from models import Invoice as DB_Invoice
 import rpc_pb2 as ln
-from .abstract_user_method import AbstractMethod
 from helpers.mixins import LoggerMixin
+from .abstract_user_method import AbstractMethod
 
 
 class GetInvoices(AbstractMethod, LoggerMixin):
     """Method for retriving a user's invoices, either paid or unpaid"""
 
     def __init__(
-        self,
-        paid: bool = True, #limit responses to only paid invoices
-        limit: int = 0, #limit number of responses
-        offset: int = 0, #offset index of search
-        expired: bool = False, #include unpaid expired invoices
-        payee: bool = True, #return invoices where current user is implicated as payee
-        payer: bool = True #return invoices where current user is implcated as payer
+            self,
+            paid: bool = True, #limit responses to only paid invoices
+            limit: int = 0, #limit number of responses
+            offset: int = 0, #offset index of search
+            expired: bool = False, #include unpaid expired invoices
+            payee: bool = True, #return invoices where current user is implicated as payee
+            payer: bool = True #return invoices where current user is implcated as payer
     ):
         self._limit = limit
         self._offset = offset
