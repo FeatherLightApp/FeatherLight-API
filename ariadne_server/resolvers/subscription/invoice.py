@@ -12,10 +12,10 @@ from helpers.mixins import LoggerMixin
 _sub_logger = LoggerMixin()
 
 
-_SUBSCRIPTION = SubscriptionType()
+INVOICE = SubscriptionType()
 
 
-@_SUBSCRIPTION.source('invoice')
+@INVOICE.source('invoice')
 async def r_invoice_gen(user: User, *_):
     #create new new pub sub client for streaming locally paid invoices
     local_stream = PUBSUB.add_client(user.username)
@@ -55,11 +55,6 @@ async def r_invoice_gen(user: User, *_):
 
 
 
-@_SUBSCRIPTION.field('invoice')
+@INVOICE.field('invoice')
 def r_invoice_field(invoice, *_):
     return invoice
-
-
-EXPORT = [
-    _SUBSCRIPTION
-]

@@ -1,4 +1,4 @@
-"""import all types"""
+"""FILE AND FOLDER IS DEPRECATED"""
 from .query import QUERY
 # from .addinvoicepayload import add_invoice_payload
 from .macaroon_payload import AUTH_PAYLOAD

@@ -2,7 +2,7 @@ from time import time
 from typing import Tuple, List
 from ariadne import ObjectType
 from classes.user import User
-from helpers.crypto import bake, attenuate
+from helpers.crypto import bake
 
 AUTH_PAYLOAD = ObjectType('AuthPayload')
 
@@ -26,18 +26,3 @@ def r_refresh_token(user: User, info) -> str:
         f"origin = {info.context['request'].headers['origin']}"
     ]
     return bake(user=user, caveats=caveats)
-
-
-ATTENUATED_MACAROON = ObjectType('AttenuatedMacaroon')
-
-@ATTENUATED_MACAROON.field('caveats')
-def r_caveats(obj: List[str], *_) -> List[str]:
-    return obj
-
-
-@ATTENUATED_MACAROON.field('macaroon')
-def r_macaroon(obj: List[str], info, *_) -> str:
-    # TODO allow for multiple caveats
-    macaroon = info.context['request'].headers.get('Authorization').replace('Bearer ', '')
-    caveat = f'action = {obj[0]}'
-    return attenuate(macaroon, [caveat])

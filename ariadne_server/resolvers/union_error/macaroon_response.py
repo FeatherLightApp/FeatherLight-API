@@ -20,8 +20,7 @@ _ATTENUATED_MACAROON_RESPONSE = UnionType('AttenuatedMacaroonResponse')
 def r_attenuated_response(obj, *_) -> str:
     if isinstance(obj, Error):
         return 'Error'
-    elif isinstance(obj, Macaroon):
-        return 'AttenuatedMacaroon'
+    return 'AttenuatedMacaroon'
 
 
 MACAROON_RESPONSES = [

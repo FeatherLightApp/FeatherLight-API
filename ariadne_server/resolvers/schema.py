@@ -4,8 +4,10 @@ from ariadne import (
     make_executable_schema,
     snake_case_fallback_resolvers
 )
-from .types import TYPES as resolvers
+from .query import QUERY
 from .mutation import MUTATION
+from .subscription import SUBSCRIPTION
+from .objects import OBJECTS
 from .union_error import UNION_ERROR
 from .union import UNION
 from .directives import AuthDirective, RatelimitDirective
@@ -15,10 +17,12 @@ _TYPE_DEFS = load_schema_from_path('schema')
 SCHEMA = make_executable_schema(
     _TYPE_DEFS,
     [
-        *resolvers,
+        *QUERY,
         *MUTATION,
+        *SUBSCRIPTION,
+        *OBJECTS,
         *UNION_ERROR,
-        *UNION
+        *UNION,
     ],
     snake_case_fallback_resolvers,
     directives={

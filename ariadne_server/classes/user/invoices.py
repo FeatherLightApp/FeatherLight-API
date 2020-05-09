@@ -1,6 +1,6 @@
 """module for getting user invoices"""
 from time import time
-from base64 import urlsafe_b64decode as decode64
+from base64 import b64decode as decode64
 from sqlalchemy import or_, and_
 from context import LND, GINO
 from models import Invoice as DB_Invoice

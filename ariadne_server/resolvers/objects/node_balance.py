@@ -2,19 +2,19 @@ from ariadne import ObjectType
 from context import LND
 import rpc_pb2 as ln
 
-BALANCE_PAYLOAD = ObjectType('NodeBalance')
+NODE_BALANCE = ObjectType('NodeBalance')
 
-@BALANCE_PAYLOAD.field('wallet')
+@NODE_BALANCE.field('wallet')
 async def r_wallet(*_):
     return await LND.stub.WalletBalance(ln.WalletBalanceRequest())
 
 
-@BALANCE_PAYLOAD.field('channel')
+@NODE_BALANCE.field('channel')
 async def r_channel(*_):
     return await LND.stub.ChannelBalance(ln.ChannelBalanceRequest())
 
 
-@BALANCE_PAYLOAD.field('liquidity')
+@NODE_BALANCE.field('liquidity')
 async def r_liquidity(*_):
     req = ln.ListChannelsRequest(public_only=True)
     channels = (await LND.stub.ListChannels(req)).channels
