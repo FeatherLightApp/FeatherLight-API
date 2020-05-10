@@ -12,7 +12,7 @@ async def r_macaroon_check(_, info, caveats: List[str]):
         if not auth:
             return None
         return auth.replace('Bearer ', '')
-    directive = AuthDirective(caveats=caveats)
+    directive = AuthDirective('authchecker', {'caveats': caveats})
     directive.get_macaroon = extract_macaroon
     res = directive.check_auth(info)
     if isinstance(res, Error):
