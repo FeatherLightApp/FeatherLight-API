@@ -1,11 +1,11 @@
 from .info import QUERY as info
 from .bypass import QUERY as bypass
 from .decode_invoice import QUERY as decode_invoice
-from .macaroon_check import QUERY as macaroon_check
+from .check_macaroon import QUERY as check_macaroon
 
 QUERY = [
     info,
     bypass,
     decode_invoice,
-    macaroon_check
+    check_macaroon
 ]

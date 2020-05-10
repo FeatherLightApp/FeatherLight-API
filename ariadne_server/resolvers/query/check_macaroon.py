@@ -5,7 +5,7 @@ from classes import Error
 
 QUERY = QueryType()
 
-@QUERY.field('macaroonCheck')
+@QUERY.field('checkMacaroon')
 async def r_macaroon_check(_, info, caveats: List[str]):
     def extract_macaroon(info):
         auth = info.context['request'].headers['Authorization']
