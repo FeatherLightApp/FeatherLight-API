@@ -7,4 +7,6 @@ type Query {
     decodeInvoice(invoice: String!): DecodedInvoice
     # checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
     info: InfoPayload! @auth(roles: ["ADMIN"])
+    """Tests the macaroon sent in Authorization header against the array of caveats"""
+    macaroonCheck(caveats: [Caveat]): Error
 }

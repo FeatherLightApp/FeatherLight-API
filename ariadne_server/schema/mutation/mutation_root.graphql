@@ -34,7 +34,6 @@ type Mutation {
     on the user's behalf
     """
     addInvoice(memo: String! amt: Int! hash: B64): UserInvoiceResponse! @auth(caveats: [ADD_INVOICE])
-    
     """
     Resolves a previously set hold invoice, if resolution is SETTLE via should be passed the externally 
     derived preimage, if reject, pass the original hash used to create the invoice

@@ -20,6 +20,7 @@ async def r_add_invoice(
     amt: int,
     set_hash: Optional[bytes] = None
 ) -> Invoice:
+
     if amt <= 0:
         return Error('InvalidInvoice', f'Invalid amount: {amt}')
     """Authenticated route"""

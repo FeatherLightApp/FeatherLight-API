@@ -18,6 +18,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
     """Directive class"""
     def __init__(self, *args):
         super().__init__(*args)
+        self.get_macaroon = None
         if 'REFRESH' in self.args.get('caveats'):
             self.get_macaroon = lambda info: info.context['request'].cookies.get('refresh')
         else:
@@ -30,7 +31,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             self.get_macaroon = get_access
 
 
-    async def _check_auth(self, info) -> Union[User, Error]:
+    async def check_auth(self, info) -> Union[User, Error]:
         """Function to check authentication of user"""
         # check if auth header is present
         if not (serial_macaroon:= self.get_macaroon(info)):
@@ -67,7 +68,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             #source gen
             async def gen(_, info, **kwargs):
 
-                root = await self._check_auth(info)
+                root = await self.check_auth(info)
                 if isinstance(root, Error):
                     yield root
                     return
@@ -76,7 +77,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             field.subscribe = gen
         else:
             async def call(_, info, **kwargs):
-                root = await self._check_auth(info)
+                root = await self.check_auth(info)
                 # if auth is invalid return error to union resolver
                 if isinstance(root, Error):
                     return root
