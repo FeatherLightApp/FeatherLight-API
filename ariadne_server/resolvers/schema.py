@@ -10,6 +10,7 @@ from .subscription import SUBSCRIPTION
 from .objects import OBJECTS
 from .union_error import UNION_ERROR
 from .union import UNION
+from .scalar import SCALAR
 from .directives import AuthDirective, RatelimitDirective
 
 _TYPE_DEFS = load_schema_from_path('schema')
@@ -23,6 +24,7 @@ SCHEMA = make_executable_schema(
         *OBJECTS,
         *UNION_ERROR,
         *UNION,
+        *SCALAR
     ],
     snake_case_fallback_resolvers,
     directives={
