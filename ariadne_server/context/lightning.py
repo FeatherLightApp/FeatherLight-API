@@ -51,7 +51,7 @@ class LightningStub(LoggerMixin):
         listen(self._channel, SendRequest, attach_metadata)
 
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """asynchronously init class and populate pubkey"""
 
         # TODO add wallet unlocking stub for wallet unlock
@@ -72,5 +72,5 @@ class LightningStub(LoggerMixin):
                 self.logger.info(f'Attempt failed: {error}')
                 await asyncio.sleep(5)
             
-    def destroy(self):
+    def destroy(self) -> None:
         self._channel.close()

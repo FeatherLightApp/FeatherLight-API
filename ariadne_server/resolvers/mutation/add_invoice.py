@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from base64 import b64encode as encode64
 
 from ariadne import MutationType
@@ -19,7 +19,7 @@ async def r_add_invoice(
     memo: str,
     amt: int,
     set_hash: Optional[bytes] = None
-) -> Invoice:
+) -> Union[Invoice, Error]:
 
     if amt <= 0:
         return Error('InvalidInvoice', f'Invalid amount: {amt}')

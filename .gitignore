@@ -2,8 +2,12 @@ venv
 __pycache__
 .DS_Store
 keys.json
-*.sqlite
+rpc.proto
+googleapis
 ariadne/.vscode
 .mypy_cache
+.pytest_cache
 .env
 docker-compose.override.yml
+rpc_grpc.py
+rpc_pb2.py

@@ -14,7 +14,7 @@ class RatelimitDirective(SchemaDirectiveVisitor, LoggerMixin):
         key = self.args.get('key')
 
         async def check_rate_limit(obj, info, **kwargs):
-            redis_key = f"{key}_{info.context['request'].client.host}"
+            redis_key = f"{key}_{info.context['request'].headers['x-real-ip']}"
             num_requests = await REDIS.conn.get(redis_key)
             if not num_requests or int(num_requests) < operations:
                 await REDIS.conn.incr(redis_key)

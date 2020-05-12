@@ -1,6 +1,6 @@
 """Module to define directive for valiadtion user requests"""
 from asyncio import iscoroutinefunction
-from typing import Union
+from typing import Union, Optional
 from ariadne import SchemaDirectiveVisitor
 from graphql import default_field_resolver
 from pymacaroons import Macaroon
@@ -42,7 +42,8 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
         except MacaroonDeserializationException:
             return Error('AuthenticationError', 'Invalid token sent')
         # lookup user by identifier
-        if not (db_user := await User.get(macaroon.identifier)):
+        db_user: Optional[User] = await User.get(macaroon.identifier)
+        if not db_user:
             return Error('AuthenticationError', 'Could not find user')
 
         # verify macaroon against directive arguments

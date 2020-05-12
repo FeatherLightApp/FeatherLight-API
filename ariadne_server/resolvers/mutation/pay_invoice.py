@@ -19,7 +19,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
     try:
         decoded = await LND.stub.DecodePayReq(pay_string)
     except GRPCError as e:
-        return Error('PaymentError', e)
+        return Error('PaymentError', str(e))
 
     if amt is not None and decoded.num_satoshis != amt and decoded.num_satoshis > 0:
         return Error('PaymentError', 'Payment amount does not match invoice amount')

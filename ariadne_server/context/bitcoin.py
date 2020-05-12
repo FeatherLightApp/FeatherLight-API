@@ -1,4 +1,5 @@
 import os
+from app_types import JSON
 from secrets import token_hex
 from httpx import AsyncClient
 from helpers.mixins import LoggerMixin
@@ -13,7 +14,7 @@ class BitcoinClient(AsyncClient, LoggerMixin):
         self._user = os.environ.get('BITCOIND_USER')
         self._pass = os.environ.get('BITCOIND_PASSWORD')
 
-    async def req(self, method: str, params=None, reqid=None):
+    async def req(self, method: str, params=None, reqid=None) -> JSON:
         """make a request to bitcoin rpc and return response json"""
         url = f'http://{self._host}:{self._port}'
         js = {'method': method}

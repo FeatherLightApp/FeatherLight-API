@@ -1,4 +1,5 @@
 import asyncio
+from typing import Dict, List
 from helpers.mixins import LoggerMixin
 
 class StreamQueue(asyncio.Queue):
@@ -14,7 +15,8 @@ class StreamQueue(asyncio.Queue):
                 raise GeneratorExit
 
 
-class PubSubManager(LoggerMixin, dict):
+
+class PubSubManager(LoggerMixin, Dict[str, List[StreamQueue]]):
     """
     Manager for pub/subbing to local invoice payments
     LND stub provides a way to sub to remotely paid invoices
@@ -24,12 +26,9 @@ class PubSubManager(LoggerMixin, dict):
     each queue represents a listener client
     """
 
-    def __init__(self):
-        self.background_tasks = StreamQueue()
-        self._task_loop = None
 
-    def add_client(self, userid):
-        """adds a queue to the list of queues and return it along with its index"""
+    def add_client(self, userid: str) -> StreamQueue:
+        """adds a queue to the list of queues and return it"""
         if userid in self.keys():
             self[userid].append(StreamQueue())
             return self[userid][-1]

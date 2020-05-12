@@ -15,7 +15,7 @@ class GinoInstance(LoggerMixin):
         self._db_name = os.environ.get('POSTGRES_DB')
         self.db = Gino()
 
-    async def initialize(self):
+    async def initialize(self) -> None:
         """init db connection"""
         bind_str = f"postgresql://{self._user}:{self._password}@{self._host}/{self._db_name}"
         i = 1
@@ -37,6 +37,6 @@ class GinoInstance(LoggerMixin):
         self.logger.info('finished')
         return
 
-    async def destroy(self):
+    async def destroy(self) -> None:
         """ close connection"""
         await self.db.pop_bind().close()

@@ -4,6 +4,7 @@ from ariadne import graphql
 @pytest.mark.asyncio()
 @pytest.mark.parametrize('role', ['ADMIN', 'USER'])
 async def test_create_user(role, schema, context):
+    context['request'].headers['x-real-ip'] = 'otherip'
     response = await graphql(
         schema,
         {

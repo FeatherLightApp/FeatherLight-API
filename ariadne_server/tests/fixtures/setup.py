@@ -12,10 +12,10 @@ def event_loop():
 async def schema(event_loop):
     await GINO.initialize()
     await REDIS.initialize()
+    await REDIS.conn.flushdb()
     await LND.initialize()
     yield SCHEMA
     await GINO.db.gino.drop_all()
     await GINO.destroy()
     await REDIS.destroy()
     LND.destroy()
-    

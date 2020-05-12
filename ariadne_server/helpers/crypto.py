@@ -42,7 +42,7 @@ def verify(
     )
     v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
 
-    return v_obj.verify(macaroon, key)
+    return bool(v_obj.verify(macaroon, key))
 
 
 def attenuate(
@@ -54,4 +54,4 @@ def attenuate(
     for caveat in caveats:
         m_obj.add_first_party_caveat(caveat)
     
-    return m_obj.serialize()
+    return str(m_obj.serialize())

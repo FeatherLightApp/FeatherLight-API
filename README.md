@@ -24,13 +24,14 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 
 ### TODOs
 
+- split admin routes into secondary service and federate it
 - ~~fix zmqpubhashblock port binding~~
-- Subclass graphql to provide http only refresh macaroons on token payload responses
+- ~~subclass graphql to provide http only refresh macaroons on token payload responses~~
 - ~~change from jwt to macaroons~~
 - CHANGE TO DEFAULT ENUM TYPES ON ARIADNE 0.12 RELEASE
 - ~~switch from hex data to bytea in postgres~~
 - ~~restructure context object~~
-- add alembic for db migrations
+- add alembic for db migrations?
 - ~~consolidate DB_User and UserAPI~~
 - ~~remove protobuf to dict~~
 - add support for lnurl
@@ -38,9 +39,9 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - ~~restructure schema~~
 - ~~write subscriptions~~
 - ~~consolidate configs into global config~~
-- mypy type checking
+- mypy type checking - in progress
 - write more app level tests
 - ~~switch to argon2 cffi password hashing~~
 - ~~restructure code directory~~
-- create simple frontend for api
+- ~~create simple frontend for api~~
 - create python package wrapper to call api from other projects

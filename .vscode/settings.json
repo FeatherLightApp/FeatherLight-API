@@ -1,6 +1,6 @@
 {
     "python.pythonPath": "/Users/timaye/.pyenv/versions/graphlightning/bin/python",
-    "python.linting.pylintEnabled": true,
-    "python.linting.mypyEnabled": false,
+    "python.linting.pylintEnabled": false,
+    "python.linting.mypyEnabled": true,
     "python.linting.enabled": true
 }

@@ -1,6 +1,6 @@
 """facade class for exposing methods on User GQL Object and subclassing the gino model"""
 from asyncio import iscoroutinefunction
-from typing import Any
+from typing import Any, Union
 from helpers.mixins import LoggerMixin
 from models import User as UserModel
 from .abstract_user_method import AbstractMethod
@@ -12,7 +12,6 @@ from .offchain_txs import GetOffchainTxs
 from .lock_funds import LockFunds
 from .unlock_funds import UnlockFunds
 from models.invoice import Invoice
-from typing import Union
 
 # TODO create a deafult resolver/ schema directive to abstract away need for this class
 

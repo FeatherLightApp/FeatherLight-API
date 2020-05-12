@@ -23,7 +23,7 @@ WORKDIR /proto
 
 RUN apt-get update && apt-get install -y wget git
 
-RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.9.2-beta/lnrpc/rpc.proto
+RUN wget https://raw.githubusercontent.com/lightningnetwork/lnd/v0.10.0-beta/lnrpc/rpc.proto
 
 RUN git clone https://github.com/googleapis/googleapis.git
 
@@ -40,7 +40,6 @@ RUN ls -a /proto/build
 
 FROM base as build-image
 
-# RUN apk add --no-cache libstdc++
 
 WORKDIR /app
 

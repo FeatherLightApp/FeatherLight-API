@@ -13,7 +13,10 @@ class FakeContext(dict):
         req_obj.cookies = {}
         req_obj.client = Object()
         req_obj.client.host = token_hex(5)
-        req_obj.headers = {'origin': 'some_origin'}
+        req_obj.headers = {
+            'origin': 'some_origin',
+            'x-real-ip': 'fake_ip'
+        }
 
         self['request'] = req_obj
 
