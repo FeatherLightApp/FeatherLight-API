@@ -39,7 +39,7 @@ async def r_add_invoice(
     
     return await Invoice.create(
         payment_hash=encode64(inv.r_hash).decode(),
-        payment_request=inv.payment_request,
+        payment_request=inv.payment_request.upper(),
         payment_preimage=encode64(inv_lookup.r_preimage).decode(),
         timestamp=inv_lookup.creation_date,
         expiry=inv_lookup.expiry,
