@@ -27,6 +27,54 @@ services:
         depends_on: 
             - btcd
 
+    lndmon:
+        image: lndmon:latest
+        build:
+            context: 'monitor/lndmon/'
+        volumes:
+            - ${LND_VOL}:/root/.lnd
+        ports:
+            - '9092:9092'
+        restart: unless-stopped
+        command: --prometheus.listenaddr=0.0.0.0:9092 --lnd.network=testnet --lnd.host=lnd --lnd.macaroondir=/root/.lnd/data/chain/bitcoin/testnet --lnd.tlspath=/root/.lnd/tls.cert
+        depends_on:
+            - lnd
+    
+    prometheus:
+        image: prom/prometheus:v2.10.0
+        volumes:
+            - ./monitor/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus-storage:/prometheus
+        # Reasoning behind Prometheus command query flags:
+        # --query.max-samples: each Prometheus data sample is 16 bytes.
+        #                      16B * 31250000 = 1/2 GB.
+        # --query.max-concurrency: the max # of concurrent queries (default is 20).
+        # these parameters are intended to limit the amount of memory Prometheus
+        # uses for its queries to ~1GB, because it's sensitive to OOMs.
+        command: "--config.file=/etc/prometheus/prometheus.yml --query.max-samples=31250000 --query.max-concurrency=2"
+        ports:
+        - "9090:9090"
+        restart: unless-stopped
+        depends_on:
+        - lndmon
+
+    grafana:
+        image: grafana/grafana:6.2.0
+        build:
+            context: 'monitor/grafana/'
+        ports:
+            - "3001:3000"
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        depends_on:
+            - prometheus
+    
+    post_start:
+        build: monitor/post_start/
+        depends_on:
+            - grafana
+            - prometheus
+
     ariadne:
         image: graphlnd:latest
         build: 
@@ -62,3 +110,6 @@ services:
             - '5432:5432'
             
 
+volumes:
+    grafana-storage:
+    prometheus-storage:
