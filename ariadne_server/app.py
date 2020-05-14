@@ -13,7 +13,7 @@ _logger = LoggerMixin()
 middleware = [
     Middleware(
         CORSMiddleware,
-        allow_origins=['http://127.0.0.1:3000', 'http://localhost:3000', 'https://inspiring-lichterman-9da30e.netlify.app'],
+        allow_origins=['http://127.0.0.1:3000', 'http://localhost:3000', 'https://inspiring-lichterman-9da30e.netlify.app', 'https://featherlight.app'],
         allow_methods=['*'],
         allow_headers=['*'],
         allow_credentials=True
