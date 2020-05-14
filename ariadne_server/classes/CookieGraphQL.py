@@ -16,7 +16,7 @@ class CookieGraphql(GraphQL):
                 token.decode('utf-8'),
                 max_age=604800, #1 week
                 secure=True,
-                domain='dev.seanaye.ca',
+                domain='featherlight.app',
                 samesite='none',
                 httponly=True
             )
@@ -26,7 +26,7 @@ class CookieGraphql(GraphQL):
                 '',
                 max_age=-1,
                 secure=True,
-                domain='dev.seanaye.ca',
+                domain='featherlight.app',
                 samesite='none',
                 httponly=True
             )
