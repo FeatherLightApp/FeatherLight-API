@@ -22,6 +22,8 @@ services:
             - ${BITCOIN_VOL}:/bitcoindata
             - ./lnd/lnd.conf:/root/.lnd/lnd.conf
         restart: unless-stopped
+        ports: 
+            - '9735:9735'
         env_file: 
             - global.env
         depends_on: 
