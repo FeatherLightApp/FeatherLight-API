@@ -20,8 +20,10 @@ class GetOnchainTxs(AbstractMethod):
         """
         Return incoming onchain btc transactions
         retrives the valid transcations for a user based on bitcoind json response
-        defaults to returning txs with >= 5 confirmations 
         """
+        # if the user doesn't have a bitcoin address generated, return
+        if not user.bitcoin_address:
+            return []
 
         get_address_method = GetBTCAddress()
         address = await user.exec(get_address_method)
