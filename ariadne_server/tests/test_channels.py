@@ -18,6 +18,7 @@ async def test_invalid_user(schema, context, dummy_user):
     assert r['__typename'] == 'Error'
     assert r['errorType'] == 'AuthenticationError'
 
+@pytest.mark.skip
 @pytest.mark.usefixtures('dummy_admin')
 async def test_valid_user(schema, context, dummy_admin):
     context['request'].headers['Authorization'] = f'Bearer {dummy_admin["tokens"]["access"]}'
