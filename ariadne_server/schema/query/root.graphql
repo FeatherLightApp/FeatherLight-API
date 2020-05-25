@@ -1,12 +1,20 @@
 type Query {
+    """ account info about the logged in user"""
     me: UserResponse! @auth
+    """Total Balance of the underlying lightning node"""
     nodeBalance: BalanceResponse! @auth(roles: ["ADMIN"])
+    """Info about the nodes channels"""
     channels: ChannelResponse! @auth(roles: ["ADMIN"])
-    # peers: GetPeersPayload! @auth(requires: ADMIN) #@grpc
-    #info: GetInfoPayload!
+    """decodes a given lightning invoice"""
     decodeInvoice(invoice: String!): DecodedInvoice
-    # checkRouteInvoice(invoice: String!): CheckRouteInvoicePayload!
+    """Returns info about the lightning node """
     info: InfoPayload! @auth(roles: ["ADMIN"])
     """Tests the macaroon sent in Authorization header against the array of caveats"""
     checkMacaroon(caveats: [Caveat]): Error
+    """returns name of api (used by frontend to determine valid endpoints"""
+    API: String!
+    """returns api version"""
+    version: String!
 }
+
+
