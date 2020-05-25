@@ -11,3 +11,4 @@ ariadne/.vscode
 docker-compose.override.yml
 rpc_grpc.py
 rpc_pb2.py
+.vscode

@@ -1,0 +1,5 @@
+BITCOIN_VOL=/Volumes/Storage/graphlightning_temp/bitcoin
+LND_VOL=/Volumes/Storage/graphlightning_temp/lnd
+REDIS_VOL=/Volumes/Storage/graphlightning_temp/redis
+POSTGRES_VOL=/Volumes/Storage/graphlightning_temp/postgres
+EXPOSE_ARIADNE=5001:5001
