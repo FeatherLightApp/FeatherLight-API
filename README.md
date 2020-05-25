@@ -16,6 +16,14 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 4. Configure desired settings in global.env and .env
 5. docker-compose up -d
 
+### Usage
+
+1. The GraphQL endpoint is exposed at localhost:5001/graphql. You can view and interact with schema from the GraphQL playground. Schema is also found in ariadne_server/schema. Further docs are pending.
+2. Grafana dashboards are exposed at localhost:3001. Monitor and view node data over time. A password should be set to prevent outside access.
+3. pytest suite can be run with `docker-compose run --rm ariadne python -m pytest -s -x`. Further tests are pending.
+4. A web app GUI is available for creating accounts at [FeatherLight.app](https://featherlight.app)
+
+
 
 ### Reponsible Disclosure
 
