@@ -19,7 +19,7 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 * Designed with the browser and IoT in mind
 * Query paginated feed of all past transactions
 * Support for hold invoices (planned)
-
+* Seamlessly interact with lApps using WebLn (planned)
 
 #### Setup
 
