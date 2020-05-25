@@ -8,6 +8,19 @@ The repo is a fully featured FeatherLight setup which automatically builds every
 
 FeatherLight has many dependencies in many different languages. Docker is the best way to get a node up and running.
 
+### Features
+
+* Add, pay, and view lightning invoices ⚡️⚡
+* Delegated account access with macaroons. Allow others to create invoices on your behalf!
+* Websockets push invoice data to your device in realtime.
+* Access accounts in a sleek and open source [Web App](https://featherlight.app)
+* Deposit funds on or off-chain
+* Strongly typed GraphQL API ensures you always get exactly the data you want and only the data you want
+* Designed with the browser and IoT in mind
+* Query paginated feed of all past transactions
+* Support for hold invoices (planned)
+
+
 #### Setup
 
 1. git clone https://github.com/FeatherLightApp/FeatherLight-API
@@ -15,6 +28,8 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 3. mv .env1 .env
 4. Configure desired settings in global.env and .env
 5. docker-compose up -d
+
+*Warning* Currently setup with no seed backup for debugging purposes. Change this in the lnd/dockerfile or you risk losing funds.
 
 ### Usage
 
