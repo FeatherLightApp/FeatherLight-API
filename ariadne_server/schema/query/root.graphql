@@ -15,6 +15,11 @@ type Query {
     API: String!
     """returns api version"""
     version: String!
+    """get network of node"""
+    network: Network!
 }
 
-
+enum Network {
+    TESTNET
+    MAINNET
+}

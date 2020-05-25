@@ -1,0 +1,5 @@
+query inspectEndpoint {
+    API
+    version
+    network
+}

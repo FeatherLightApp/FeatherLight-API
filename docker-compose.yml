@@ -10,7 +10,7 @@ services:
             - ./btcd/btcd.conf:/root/.btcd/btcd.conf
         restart: unless-stopped
         env_file: 
-            - global.env
+            - container.env
     
     lnd:
         image: lnd:latest
@@ -25,7 +25,7 @@ services:
         ports: 
             - '9735:9735'
         env_file: 
-            - global.env
+            - container.env
         depends_on: 
             - btcd
 
@@ -35,8 +35,6 @@ services:
             context: 'monitor/lndmon/'
         volumes:
             - ${LND_VOL}:/root/.lnd
-        ports:
-            - '9092:9092'
         restart: unless-stopped
         command: --prometheus.listenaddr=0.0.0.0:9092 --lnd.network=testnet --lnd.host=lnd --lnd.macaroondir=/root/.lnd/data/chain/bitcoin/testnet --lnd.tlspath=/root/.lnd/tls.cert
         depends_on:
@@ -88,7 +86,7 @@ services:
             - postgres
         restart: unless-stopped
         env_file: 
-            - global.env
+            - container.env
 
     redis:
         image: redis:alpine
@@ -97,7 +95,7 @@ services:
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
         restart: unless-stopped
         env_file: 
-            - global.env
+            - container.env
 
     postgres:
         image: postgres:alpine
@@ -105,7 +103,7 @@ services:
             - ${POSTGRES_VOL}:/var/lib/postgresql/data
         restart: unless-stopped
         env_file: 
-            - global.env
+            - container.env
         ports: 
             - '5432:5432'
             

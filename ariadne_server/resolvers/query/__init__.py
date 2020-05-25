@@ -4,6 +4,7 @@ from .decode_invoice import QUERY as decode_invoice
 from .check_macaroon import QUERY as check_macaroon
 from .version import QUERY as version
 from .api import QUERY as api
+from .network import QUERY as network
 
 QUERY = [
     info,
@@ -11,5 +12,6 @@ QUERY = [
     decode_invoice,
     check_macaroon,
     version,
-    api
+    api,
+    network
 ]
