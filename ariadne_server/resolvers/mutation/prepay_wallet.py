@@ -49,8 +49,9 @@ async def r_prepay_wallet(*_, amount: int, memo: str):
         amount=amount,
         used=0
     )
-    
+
     lsat.macaroon=macaroon.serialize()
+    lsat.payment_request = inv.payment_request
 
     return lsat
 

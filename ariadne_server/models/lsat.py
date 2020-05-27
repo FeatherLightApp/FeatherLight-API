@@ -10,6 +10,7 @@ class LSAT(db.Model):
 
     # not necessary to store in db but returned to user
     macaroon = None
+    payment_request = None
 
     key = db.Column(db.LargeBinary, unique=True, nullable=False)
     payment_hash = db.Column(db.Text, primary_key=True, nullable=False)

@@ -11,13 +11,12 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 ### Features
 
 * Add, pay, and view lightning invoices ⚡️⚡
-* Websockets push invoice data to any device in realtime.
+* Websockets securely push invoice data to any device in realtime. Integrate with IoT!
 * Access accounts in a sleek and open source [Web App](https://featherlight.app)
 * Prepay wallet creation! 🎉 Start your friends off immediately with a pre-funded wallet. (Coming Soon)
 * Delegated account access with macaroons. Allow others to create invoices on your behalf!
 * Deposit funds on or off-chain
 * Strongly typed GraphQL API ensures you always get exactly the data you want and only the data you want
-* Designed with the browser and IoT in mind
 * Query paginated feed of all past transactions
 * Support for hold invoices (planned)
 * Seamlessly interact with lApps using WebLn (planned)
@@ -48,8 +47,9 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 ### TODOs
 
 - ~~Implement LSAT minting and db integration~~
-- Add interceptor for created LSATs
+- ~~Add interceptor for created LSATs~~
 - Add mutation to redeem LSATs
+- Add travis and coveralls
 - split admin routes into secondary service and federate it
 - ~~fix zmqpubhashblock port binding~~
 - ~~subclass graphql to provide http only refresh macaroons on token payload responses~~

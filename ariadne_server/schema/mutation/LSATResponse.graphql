@@ -2,6 +2,7 @@ type LSATPayload {
     paymentRequest: String!
     paymentHash: B64!
     macaroon: String!
+    amount: Int!
 }
 
 union LSATPayload = Error | LSATPayload
