@@ -11,9 +11,10 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 ### Features
 
 * Add, pay, and view lightning invoices ⚡️⚡
-* Delegated account access with macaroons. Allow others to create invoices on your behalf!
-* Websockets push invoice data to your device in realtime.
+* Websockets push invoice data to any device in realtime.
 * Access accounts in a sleek and open source [Web App](https://featherlight.app)
+* Prepay wallet creation! 🎉 Start your friends off immediately with a pre-funded wallet. (Coming Soon)
+* Delegated account access with macaroons. Allow others to create invoices on your behalf!
 * Deposit funds on or off-chain
 * Strongly typed GraphQL API ensures you always get exactly the data you want and only the data you want
 * Designed with the browser and IoT in mind
