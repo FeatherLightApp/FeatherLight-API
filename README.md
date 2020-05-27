@@ -46,6 +46,9 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 
 ### TODOs
 
+- ~~Implement LSAT minting and db integration~~
+- Add interceptor for created LSATs
+- Add mutation to redeem LSATs
 - split admin routes into secondary service and federate it
 - ~~fix zmqpubhashblock port binding~~
 - ~~subclass graphql to provide http only refresh macaroons on token payload responses~~
@@ -61,7 +64,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 - ~~write subscriptions~~
 - ~~consolidate configs into global config~~
 - mypy type checking - in progress
-- write more app level tests
+- write more app level tests - in progress
 - ~~switch to argon2 cffi password hashing~~
 - ~~restructure code directory~~
 - ~~create simple frontend for api~~
