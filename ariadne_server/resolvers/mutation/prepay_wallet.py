@@ -38,7 +38,7 @@ async def r_prepay_wallet(*_, amount: int, memo: str):
     # add macaroon caveats
 
     macaroon.add_first_party_caveat('uses = 1')
-    macaroon.add_first_party_caveat('action = redeem_wallet')
+    macaroon.add_first_party_caveat('action = REDEEM_WALLET')
     # caveat is unecessary for validation and is only included so the token holder may know the amount being redeemed
     macaroon.add_first_party_caveat(f'amount = {amount}')
 
@@ -46,8 +46,8 @@ async def r_prepay_wallet(*_, amount: int, memo: str):
         key=macaroon_key,
         payment_hash=b64encode(inv.r_hash).decode(),
         preimage=preimage,
-        amount=amount,
-        used=0
+        used=0,
+        uses=1,
     )
 
     lsat.macaroon=macaroon.serialize()

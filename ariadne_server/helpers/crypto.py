@@ -25,6 +25,7 @@ def verify(
         key: bytes,
         roles: List[str],
         caveats: List[str],
+        used: int,
         req: Request
 ) -> bool:
     assert macaroon
@@ -34,15 +35,24 @@ def verify(
     for role in roles:
         v_obj.satisfy_exact(f'role = {role}')
 
+    # satisfy specific actions in the API
     for caveat in caveats:
         v_obj.satisfy_exact(f'action = {caveat}')
 
+    # satify same origin restrictions
+    v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
+
+    # satisfy macaroon with time expiry
     v_obj.satisfy_general(
         lambda x: x.split(' = ')[0] == 'expiry' and  \
             int(x.split(' = ')[1]) > time()
     )
 
-    v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
+    # satisfy macaroon with limited uses
+    v_obj.satisfy_general(
+        lambda x: x.split(' = ')[0] == 'uses' and \
+            int(x.split(' = ')[1]) > used
+    )
 
     return bool(v_obj.verify(macaroon, key))
 

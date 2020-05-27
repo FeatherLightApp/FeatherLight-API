@@ -12,8 +12,7 @@ def r_token_response(obj, *_) -> str:
         return 'Error'
     elif isinstance(obj, User):
         return 'AuthPayload'
-    return
-
+    return ''
 
 _ATTENUATED_MACAROON_RESPONSE = UnionType('AttenuatedMacaroonResponse')
 

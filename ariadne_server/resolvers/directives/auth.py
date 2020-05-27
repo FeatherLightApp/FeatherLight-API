@@ -47,7 +47,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
         self.get_auth = get_auth
 
 
-    async def check_auth(self, info) -> Union[User, LSAT, Error]:
+    async def check_auth(self, info) -> Union[User, Tuple[LSAT, Macaroon], Error]:
         """Function to check authentication of user"""
         # check if auth header is present
         serial_macaroon, preimage = self.get_auth(info)
@@ -61,7 +61,9 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
 
         # define types needed
         macaroon_key: bytes
-        payload: Union[User, LSAT]
+        payload: Union[User, Tuple[LSAT, Macaroon]]
+        # times token has been used. Only important with lsats
+        used = 0
         # determine if auth is an lsat
         if 'LSAT' in self.args.get('kind'):
             lsat: Optional[LSAT] = await LSAT.get(macaroon.identifier)
@@ -69,8 +71,9 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                 return Error('AuthenticationError', 'Could not find lsat')
             if not preimage or preimage != lsat.preimage:
                 return Error('AuthenticationError', 'Invalid preimage')
+            used = lsat.used
             macaroon_key = lsat.key
-            payload = lsat
+            payload = (lsat, macaroon)
 
         # auth is standard macaroon
         else:
@@ -88,6 +91,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                 key=macaroon_key,
                 roles=self.args.get('roles'),
                 caveats=self.args.get('caveats'),
+                used=used,
                 req=info.context['request']
             )
         except MacaroonInvalidSignatureException:
