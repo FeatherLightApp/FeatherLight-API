@@ -5,4 +5,4 @@ type LSATPayload {
     amount: Int!
 }
 
-union LSATPayload = Error | LSATPayload
+union LSATResponse = Error | LSATPayload
