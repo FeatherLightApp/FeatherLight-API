@@ -20,4 +20,6 @@ enum Caveat {
     ADD_INVOICE
     """Used to limit the scope of token to only refreshMacaroon"""
     REFRESH
+    """Caveat to claim a prepaid wallet"""
+    REDEEM_WALLET
 }

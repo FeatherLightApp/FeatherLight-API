@@ -1,6 +1,6 @@
 """Module to define directive for valiadtion user requests"""
 from asyncio import iscoroutinefunction
-from typing import Union, Optional
+from typing import Union, Optional, Tuple
 from ariadne import SchemaDirectiveVisitor
 from graphql import default_field_resolver
 from pymacaroons import Macaroon
@@ -8,8 +8,8 @@ from pymacaroons.exceptions import (
     MacaroonDeserializationException,
     MacaroonInvalidSignatureException
 )
-from classes.error import Error
-from classes.user import User
+from classes import Error, User
+from models import LSAT
 from helpers.mixins import LoggerMixin
 from helpers.crypto import verify
 
@@ -18,47 +18,83 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
     """Directive class"""
     def __init__(self, *args):
         super().__init__(*args)
-        self.get_macaroon = None
+        self.get_auth = None
+        # Determine how to retrieve credentials and preimage, if applicable
+
+        #define refresh macaroon retrieval 
         if 'REFRESH' in self.args.get('caveats'):
-            self.get_macaroon = lambda info: info.context['request'].cookies.get('refresh')
+            def get_auth(info) -> Tuple[Optional[str], Optional[str]]:
+                return info.context['request'].cookies.get('refresh'), None 
+
+        #define lsat retrieval with preimage
+        elif 'LSAT' in self.args.get('kind'):
+            def get_auth(info) -> Tuple[Optional[str], Optional[str]]:
+                auth = info.context['request'].headers.get('Authorization')
+                if not auth:
+                    return None, None
+                data = auth.replace('LSAT ', '').split(':')
+                return data[0], data[1]
+        
+        # define standard access macaroon retrieval
         else:
-            def get_access(info):
+            def get_auth(info) -> Tuple[Optional[str], Optional[str]]:
                 """helper to correctly retrieve access macaroon from req headers"""
                 auth = info.context['request'].headers.get('Authorization')
                 if not auth:
-                    return None
-                return auth.replace('Bearer ', '')
-            self.get_macaroon = get_access
+                    return None, None
+                return auth.replace('Bearer ', ''), None
+        
+        self.get_auth = get_auth
 
 
-    async def check_auth(self, info) -> Union[User, Error]:
+    async def check_auth(self, info) -> Union[User, LSAT, Error]:
         """Function to check authentication of user"""
         # check if auth header is present
-        if not (serial_macaroon:= self.get_macaroon(info)):
+        serial_macaroon, preimage = self.get_auth(info)
+        if not serial_macaroon:
             return Error('NoCredentials', 'No token sent. You are not logged in')
         # attempt to deserialize macaroon
         try:
             macaroon = Macaroon.deserialize(serial_macaroon)
         except MacaroonDeserializationException:
             return Error('AuthenticationError', 'Invalid token sent')
-        # lookup user by identifier
-        db_user: Optional[User] = await User.get(macaroon.identifier)
-        if not db_user:
-            return Error('AuthenticationError', 'Could not find user')
+
+        # define types needed
+        macaroon_key: bytes
+        payload: Union[User, LSAT]
+        # determine if auth is an lsat
+        if 'LSAT' in self.args.get('kind'):
+            lsat: Optional[LSAT] = await LSAT.get(macaroon.identifier)
+            if not lsat:
+                return Error('AuthenticationError', 'Could not find lsat')
+            if not preimage or preimage != lsat.preimage:
+                return Error('AuthenticationError', 'Invalid preimage')
+            macaroon_key = lsat.key
+            payload = lsat
+
+        # auth is standard macaroon
+        else:
+            # lookup user by identifier
+            db_user: Optional[User] = await User.get(macaroon.identifier)
+            if not db_user:
+                return Error('AuthenticationError', 'Could not find user')
+            macaroon_key = db_user.key
+            payload = db_user
 
         # verify macaroon against directive arguments
         try:
             verify(
                 macaroon=macaroon,
-                key=db_user.key,
+                key=macaroon_key,
                 roles=self.args.get('roles'),
                 caveats=self.args.get('caveats'),
                 req=info.context['request']
             )
         except MacaroonInvalidSignatureException:
-            return Error('AuthenticationError', 'You do not have the permission to do that')
+            return Error('AuthenticationError', 'Macaroon caveats not satisfied')
 
-        return db_user
+        return payload
+
 
     def visit_field_definition(self, field, object_type):
         orig_resolver = field.resolve or default_field_resolver

@@ -1,7 +1,9 @@
 # FIX ME switch to enum type when new ariadne version is relased
+# default enum types currently not supported
 directive @auth(
     roles: [String]! = ["USER", "ADMIN"]
     caveats: [Caveat]! = []
+    kind: String! = "BEARER" # should be enum BEARER | LSAT. See above
 ) on FIELD_DEFINITION
 
 
