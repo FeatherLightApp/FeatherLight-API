@@ -4,7 +4,7 @@ from helpers.mixins import LoggerMixin
 
 _logger = LoggerMixin()
 
-class CookieGraphql(GraphQL):
+class GraphqlInterceptor(GraphQL):
     """ class to attach cookies to refresh requests"""
     async def graphql_http_server(self, request):
         res: JSONResponse = await GraphQL.graphql_http_server(self, request)

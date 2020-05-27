@@ -1,0 +1,7 @@
+type LSATPayload {
+    paymentRequest: String!
+    paymentHash: B64!
+    macaroon: String!
+}
+
+union LSATPayload = Error | LSATPayload

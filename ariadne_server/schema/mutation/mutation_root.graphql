@@ -1,5 +1,5 @@
 type Mutation {
-    """Creates a new user of type Role, rate limited mutation"""
+    """Creates a new user of type Role, if an LSAT is provided the wallet will be loaded with prepaid balance. rate limited mutation"""
     createUser(role: Role): NewUserResponse! @limit(operations:3 seconds:86400 key:"create")
     
     """
@@ -42,9 +42,8 @@ type Mutation {
 
     """Pay an invoice with a payment string, if this is a tip invoice then"""
     payInvoice(invoice: String! amt: Int): PaidInvoiceResponse! @auth
-
-    """Temporary mutation for testing"""
-    forceUser(user: String!): UserResponse!
+    """Pre pay for the balance of a new wallet via LSAT"""
+    prepayWallet(amount: Int! memo: String!): LSATResponse!
 }
 
 """Possible resolutions to resolve a hold invoice"""

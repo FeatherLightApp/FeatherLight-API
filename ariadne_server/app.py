@@ -2,7 +2,7 @@
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from classes.CookieGraphQL import CookieGraphql
+from classes import GraphqlInterceptor
 from context import LND, REDIS, GINO
 from resolvers.schema import SCHEMA
 from helpers.mixins import LoggerMixin
@@ -16,7 +16,6 @@ middleware = [
         allow_origins=[
             'http://127.0.0.1:3000',
             'http://localhost:3000',
-            'https://inspiring-lichterman-9da30e.netlify.app',
             'https://featherlight.app', 
             'chrome-extension://iolgemahcebdonemnjepfomopcgikklg'
         ],
@@ -37,4 +36,4 @@ APP = Starlette(
     middleware=middleware
 )
 
-APP.mount('/graphql', CookieGraphql(SCHEMA, debug=True))
+APP.mount('/graphql', GraphqlInterceptor(SCHEMA, debug=True))

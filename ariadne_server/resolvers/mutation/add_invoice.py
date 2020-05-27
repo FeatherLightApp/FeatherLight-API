@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from base64 import b64encode as encode64
+from base64 import b64encode
 
 from ariadne import MutationType
 
@@ -23,14 +23,16 @@ async def r_add_invoice(
 
     if amt <= 0:
         return Error('InvalidInvoice', f'Invalid amount: {amt}')
-    """Authenticated route"""
+
     expiry_time = 3600*24
+    
     request = ln.Invoice(
         memo=memo,
         value=amt,
         expiry=expiry_time,
         r_hash=set_hash
     )
+
     inv = await LND.stub.AddInvoice(request)
 
     # lookup invoice to get preimage
@@ -38,9 +40,9 @@ async def r_add_invoice(
     inv_lookup = await LND.stub.LookupInvoice(pay_hash)
     
     return await Invoice.create(
-        payment_hash=encode64(inv.r_hash).decode(),
+        payment_hash=b64encode(inv.r_hash).decode(),
         payment_request=inv.payment_request.upper(),
-        payment_preimage=encode64(inv_lookup.r_preimage).decode(),
+        payment_preimage=b64encode(inv_lookup.r_preimage).decode(),
         timestamp=inv_lookup.creation_date,
         expiry=inv_lookup.expiry,
         memo=inv_lookup.memo,

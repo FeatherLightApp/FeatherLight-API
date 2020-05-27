@@ -1,3 +1,4 @@
+import os
 from time import time
 from typing import List
 from starlette.requests import Request
@@ -9,7 +10,7 @@ _logger = LoggerMixin()
 
 def bake(user: User, caveats: List[str]) -> str:
     m_obj = Macaroon(
-        location='lumenwallet.io',
+        location=os.environ.get('ENDPOINT'),
         identifier=user.username,
         key=user.key
     )
@@ -40,6 +41,7 @@ def verify(
         lambda x: x.split(' = ')[0] == 'expiry' and  \
             int(x.split(' = ')[1]) > time()
     )
+
     v_obj.satisfy_exact(f"origin = {req.headers['origin']}")
 
     return bool(v_obj.verify(macaroon, key))
