@@ -54,6 +54,11 @@ def verify(
             int(x.split(' = ')[1]) > used
     )
 
+    # satisfy any with 'amount' caveat. Currently only included so macaroon user can tell amount
+    v_obj.satisfy_general(
+        lambda x: x.split(' = ')[0] == 'amount'
+    )
+
     return bool(v_obj.verify(macaroon, key))
 
 
