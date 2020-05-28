@@ -74,7 +74,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
                 return Error('AuthenticationError', 'Invalid preimage')
             used = lsat.used
             macaroon_key = lsat.key
-            payload = (lsat, macaroon)
+            payload = lsat
 
         # auth is standard macaroon
         else:
