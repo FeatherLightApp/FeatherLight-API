@@ -51,9 +51,9 @@ async def r_redeem_wallet(lsat: LSAT, info):
     lsat_used = lsat.used + 1
     if lsat_used == lsat.uses:
         # lsat has been used up
-        lsat.delete()
+        await lsat.delete()
     else:
-        lsat.update(used=lsat_used)
+        await lsat.update(used=lsat_used).apply()
     
     return user
 
