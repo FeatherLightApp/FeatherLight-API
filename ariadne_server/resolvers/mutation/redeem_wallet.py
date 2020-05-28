@@ -12,7 +12,7 @@ import rpc_pb2 as ln
 MUTATION = MutationType()
 
 @MUTATION.field('redeemWallet')
-async def r_redeem_wallet(data: LSAT, info):
+async def r_redeem_wallet(lsat: LSAT, info):
 
     password = token_hex(10)
     # save to db
