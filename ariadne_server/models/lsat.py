@@ -16,5 +16,6 @@ class LSAT(db.Model):
     # hex encoded preimage
     preimage = db.Column(db.Text, unique=True, nullable=False)
     used = db.Column(db.Integer, default=0, nullable=False)
+    uses = db.Column(db.Integer, nullable=False)
 
     
