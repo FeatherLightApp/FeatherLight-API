@@ -1,3 +1,4 @@
+from typing import Union
 from ariadne import UnionType
 from pymacaroons import Macaroon
 from classes.user import User
@@ -7,12 +8,11 @@ _MACAROON_RESPONSE = UnionType('MacaroonResponse')
 
 
 @_MACAROON_RESPONSE.type_resolver
-def r_token_response(obj, *_) -> str:
+def r_token_response(obj: Union[User, Error], *_) -> str:
     if isinstance(obj, Error):
         return 'Error'
-    elif isinstance(obj, User):
-        return 'AuthPayload'
-    return ''
+    return 'AuthPayload'
+
 
 _ATTENUATED_MACAROON_RESPONSE = UnionType('AttenuatedMacaroonResponse')
 
