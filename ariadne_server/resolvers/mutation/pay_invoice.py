@@ -112,6 +112,7 @@ async def r_pay_invoice(user: User, *_, invoice: str, amt: Optional[int] = None)
             return await Invoice.create(
                 payment_hash=b64_payment_hash,
                 payment_request=invoice,
+                payment_preimage=lsat_obj.preimage,
                 timestamp=decoded.timestamp,
                 expiry=decoded.expiry,
                 memo=decoded.description,
