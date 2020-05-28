@@ -23,6 +23,7 @@ async def r_redeem_wallet(lsat: LSAT, info):
         role='USER',
         created=time()
     )
+    user.password = password
 
     # decode b64 to bytes
     pay_hash = ln.PaymentHash(r_hash=b64decode(lsat.payment_hash.encode('utf-8')))
