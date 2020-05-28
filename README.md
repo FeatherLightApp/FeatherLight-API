@@ -48,7 +48,7 @@ This software is responsible for handling and transfering valuable Bitcoins. If 
 
 - ~~Implement LSAT minting and db integration~~
 - ~~Add interceptor for created LSATs~~
-- Add mutation to redeem LSATs
+- ~~Add mutation to redeem LSATs~~
 - Add travis and coveralls
 - split admin routes into secondary service and federate it
 - ~~fix zmqpubhashblock port binding~~
