@@ -17,13 +17,6 @@ async def r_redeem_wallet(lsat: LSAT, info):
     tx = await GINO.db.transaction()
 
     try:
-        lsat_used = lsat.used + 1
-        if lsat_used == lsat.uses:
-            # lsat has been used up
-            await lsat.delete()
-        else:
-            await lsat.update(used=lsat_used).apply()
-
         password = token_hex(10)
         # save to db
         user = await User.create(
@@ -57,6 +50,14 @@ async def r_redeem_wallet(lsat: LSAT, info):
                 amount=inv_lookup.value,
                 payee=user.username
             )
+
+        lsat_used = lsat.used + 1
+        if lsat_used == lsat.uses:
+            # lsat has been used up
+            await lsat.delete()
+        else:
+            await lsat.update(used=lsat_used).apply()
+
         await tx.commit()
         return user
 
