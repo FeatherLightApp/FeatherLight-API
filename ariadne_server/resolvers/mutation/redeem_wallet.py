@@ -28,17 +28,24 @@ async def r_redeem_wallet(lsat: LSAT, info):
     pay_hash = ln.PaymentHash(r_hash=b64decode(lsat.payment_hash.encode('utf-8')))
     inv_lookup = await LND.stub.LookupInvoice(pay_hash)
 
-    invoice = await Invoice.create(
-        payment_hash=lsat.payment_hash,
-        payment_preimage=lsat.preimage,
-        payment_request=inv_lookup.payment_request,
-        timestamp=inv_lookup.creation_date,
-        expiry=inv_lookup.expiry,
-        memo=inv_lookup.memo,
-        paid=True,
-        amount=inv_lookup.value,
-        payee=user.username
-    )
+    # determine if lsat was paid for internally or externally
+    if (invoice := await Invoice.get(lsat.payment_hash)):
+        # invoice was paid by another internal user
+        await invoice.update(payee=user.username).apply()
+
+    else:
+        #invoice was paid by external node
+        await Invoice.create(
+            payment_hash=lsat.payment_hash,
+            payment_preimage=lsat.preimage,
+            payment_request=inv_lookup.payment_request,
+            timestamp=inv_lookup.creation_date,
+            expiry=inv_lookup.expiry,
+            memo=inv_lookup.memo,
+            paid=True,
+            amount=inv_lookup.value,
+            payee=user.username
+        )
 
     lsat_used = lsat.used + 1
     if lsat_used == lsat.uses:
