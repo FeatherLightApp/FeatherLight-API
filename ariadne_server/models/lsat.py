@@ -1,4 +1,5 @@
 """module to define lsat orm of database"""
+from typing import Optional
 from context import GINO
 
 db = GINO.db
@@ -9,7 +10,9 @@ class LSAT(db.Model):
     __tablename__ = 'lsats'
 
     # not necessary to store in db but returned to user
-    macaroon = None
+    macaroon: Optional[str] = None
+    payment_request: Optional[str] = None
+    amount: Optional[int] = None
 
     key = db.Column(db.LargeBinary, unique=True, nullable=False)
     payment_hash = db.Column(db.Text, primary_key=True, nullable=False)
