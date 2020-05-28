@@ -69,6 +69,7 @@ class AuthDirective(SchemaDirectiveVisitor, LoggerMixin):
             lsat: Optional[LSAT] = await LSAT.get(macaroon.identifier)
             if not lsat:
                 return Error('AuthenticationError', 'Could not find lsat')
+            self.logger.critical(f'comparing {preimage} with {lsat.preimage}')
             if not preimage or preimage != lsat.preimage:
                 return Error('AuthenticationError', 'Invalid preimage')
             used = lsat.used

@@ -17,14 +17,14 @@ async def r_prepay_wallet(*_, amount: int, memo: str):
         return Error('InsufficientFunds', 'Prepaid Wallets must have a value of at least 10000 sats')
 
     expiry_time = 3600*24
-    preimage = token_hex(32)
+    preimage = token_bytes(32)
     macaroon_key = token_bytes(32)
 
     request = ln.Invoice(
         value=amount,
         memo=memo,
         expiry=expiry_time,
-        r_preimage=preimage.encode('utf-8')
+        r_preimage=preimage
     )
 
     inv = await LND.stub.AddInvoice(request)
@@ -45,7 +45,7 @@ async def r_prepay_wallet(*_, amount: int, memo: str):
     lsat = await LSAT.create(
         key=macaroon_key,
         payment_hash=b64encode(inv.r_hash).decode(),
-        preimage=preimage,
+        preimage=b64encode(preimage).decode(),
         used=0,
         uses=1,
     )
