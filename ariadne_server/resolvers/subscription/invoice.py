@@ -39,14 +39,12 @@ async def r_invoice_gen(user: User, *_):
                         invoice = await Invoice.get(response.r_hash)
                     if invoice and invoice.payee == user.username:
                         #received a paid invoice with this user as payee
-                        updated = invoice.update(
+                        updated = await invoice.update(
                             paid=True,
                             paid_at=invoice.settle_date
-                        )
+                        ).apply()
                         yield updated
-                        # delegate db write to background process
-                        loop = asyncio.get_running_loop()
-                        loop.create_task(updated.apply())
+
             except GeneratorExit:
                 # user closed stream, del pubsub queue
                 del local_stream

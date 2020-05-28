@@ -11,7 +11,7 @@ MUTATION = MutationType()
 
 @MUTATION.field('login')
 async def r_login(*_, username: str, password: str) -> Union[User, Error]:
-    if not (user_obj := await User.query.where(User.username == username).gino.first()):
+    if not (user_obj := await User.get(username)):
         return Error('AuthenticationError', 'User not found')
     # verify pw hash
     try:
