@@ -1,6 +1,6 @@
 import os
 from base64 import b64encode
-from secrets import token_hex, token_bytes
+from secrets import token_bytes
 from ariadne import MutationType
 from pymacaroons import Macaroon
 from context import LND

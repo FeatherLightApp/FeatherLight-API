@@ -1,4 +1,3 @@
-import asyncio
 from helpers.mixins import LoggerMixin
 from context import BITCOIND, LND
 from proto import rpc_pb2 as ln
@@ -25,7 +24,7 @@ class GetBTCAddress(AbstractMethod, LoggerMixin):
         request = ln.NewAddressRequest(type=0)
         response = await LND.stub.NewAddress(request)
         address = response.address.upper()
-        update = await user.update(bitcoin_address=address).apply()
+        await user.update(bitcoin_address=address).apply()
         self.logger.warning("Created address: %s for user: %s", address, user.username)
         await BITCOIND.req(
             "importaddress",

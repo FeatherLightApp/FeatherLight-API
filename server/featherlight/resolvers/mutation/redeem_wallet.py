@@ -2,7 +2,6 @@ from base64 import b64decode
 from secrets import token_bytes, token_hex
 from time import time
 from ariadne import MutationType
-from pymacaroons import Macaroon
 from models import LSAT, Invoice
 from classes import User, Error
 from context import ARGON, LND, GINO
@@ -34,7 +33,7 @@ async def r_redeem_wallet(lsat: LSAT, info):
         inv_lookup = await LND.stub.LookupInvoice(pay_hash)
 
         # determine if lsat was paid for internally or externally
-        if (invoice := await Invoice.get(lsat.payment_hash)) :
+        if (invoice := await Invoice.get(lsat.payment_hash)):
             # invoice was paid by another internal user
             await invoice.update(payee=user.username).apply()
 

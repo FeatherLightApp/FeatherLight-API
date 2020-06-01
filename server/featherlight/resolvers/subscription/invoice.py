@@ -1,12 +1,9 @@
-import asyncio
-from typing import Union
-from ariadne import SubscriptionType, UnionType
+from ariadne import SubscriptionType
 from aiostream import stream
 from proto import rpc_pb2 as ln
 from context import LND, PUBSUB
 from models import Invoice
 from classes.user import User
-from classes.error import Error
 from helpers.mixins import LoggerMixin
 
 _sub_logger = LoggerMixin()
@@ -27,13 +24,15 @@ async def r_invoice_gen(user: User, *_):
     async with global_stream.stream() as streamer:
         async for response in streamer:
             try:
-                # check if response if from lnd - external payment or pubsub - local payment
+                # check if response if from lnd
+                # external payment or pubsub - local payment
                 if isinstance(response, Invoice):
                     # invoice model received from pubsub client
-                    # yield this and default resolver will retrieve requested fields
+                    # yield and default resolver will retrieve requested fields
                     yield response
                 else:
-                    # payment comes from lnd, check if its associated with this user
+                    # payment comes from lnd,
+                    # check if its associated with this user
                     invoice = None
                     if response.state == 1:
                         invoice = await Invoice.get(response.r_hash)

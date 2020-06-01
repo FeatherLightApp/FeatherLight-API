@@ -32,8 +32,4 @@ APP = Starlette(
     middleware=middleware,
 )
 
-print('test')
-import sys
-sys.exit('exiting')
-
 APP.mount("/graphql", GraphqlInterceptor(SCHEMA, debug=True))
