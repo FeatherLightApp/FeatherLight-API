@@ -1,13 +1,13 @@
 version: '3'
 services: 
-    btcd:
-        image: btcd:latest
+    bitcoind:
+        image: bitcoind:latest
         build: 
-            context: 'btcd/'
+            context: 'bitcoind/'
         volumes:
             # - shared:/rpc
             - ${BITCOIN_VOL}:/data
-            - ./btcd/btcd.conf:/root/.btcd/btcd.conf
+            - ./bitcoind/bitcoind.conf:/root/.bitcoind/bitcoind.conf
         restart: unless-stopped
         env_file: 
             - container.env
@@ -27,7 +27,7 @@ services:
         env_file: 
             - container.env
         depends_on: 
-            - btcd
+            - bitcoind
 
     lndmon:
         image: lndmon:latest
@@ -73,12 +73,12 @@ services:
             - grafana
             - prometheus
 
-    ariadne:
-        image: graphlnd:latest
+    featherlight:
+        image: featherlight:latest
         build: 
-            context: 'ariadne_server/'
+            context: 'server/'
         volumes: 
-            - ./ariadne_server/:/app
+            - ./server/featherlight/:/app/featherlight
             - ${LND_VOL}:/root/.lnd
         depends_on: 
             - lnd
