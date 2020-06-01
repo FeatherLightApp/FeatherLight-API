@@ -1,3 +1,0 @@
-[console_scripts]
-compile = featherlight.helpers.generate_proto:compile_protos
-

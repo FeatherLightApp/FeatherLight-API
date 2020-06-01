@@ -8,3 +8,4 @@ ariadne/.vscode
 .env
 docker-compose.override.yml
 .vscode
+*.egg-info
