@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from helpers.mixins import LoggerMixin
 
 
-class BitcoinClient(AsyncClient, LoggerMixin):
+class BitcoinClient(LoggerMixin):
     """Subclass for making btcd rpc requests"""
 
     def __init__(self):

@@ -4,6 +4,8 @@ from ariadne import graphql
 
 pytestmark = pytest.mark.asyncio
 
+print(__file__)
+
 login_query = open('queries/login.graphql').read()
 
 async def user_login(schema, context, user):

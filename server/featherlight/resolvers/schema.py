@@ -1,4 +1,5 @@
 """import and define schem execution"""
+import os
 from ariadne import (
     load_schema_from_path,
     make_executable_schema,
@@ -13,7 +14,8 @@ from .union import UNION
 from .scalar import SCALAR
 from .directives import AuthDirective, RatelimitDirective
 
-_TYPE_DEFS = load_schema_from_path("schema")
+schema_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'schema'))
+_TYPE_DEFS = load_schema_from_path(schema_dir)
 
 SCHEMA = make_executable_schema(
     _TYPE_DEFS,
