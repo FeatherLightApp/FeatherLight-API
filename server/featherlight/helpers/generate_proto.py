@@ -43,7 +43,7 @@ def compile_protos():
                 "-I{}".format(proto_include),
                 "--proto_path=googleapis:.",
                 f"--python_out={ROOT_DIR}",
-                f"--grpc_python_out={ROOT_DIR}",
+                f"--python_grpc_out={ROOT_DIR}",
                 "rpc.proto",
             ]
         )

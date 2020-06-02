@@ -7,7 +7,7 @@ from grpclib.client import Channel
 from grpclib.events import SendRequest, listen
 from helpers.mixins import LoggerMixin
 import rpc_pb2 as ln
-import rpc_pb2_grpc as lnrpc
+import rpc_grpc as lnrpc
 
 
 class LightningStub(LoggerMixin):
