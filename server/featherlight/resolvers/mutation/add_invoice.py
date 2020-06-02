@@ -7,7 +7,7 @@ from classes.user import User
 from classes.error import Error
 from models import Invoice
 from context import LND
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 MUTATION = MutationType()
 

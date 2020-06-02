@@ -1,7 +1,7 @@
 import asyncio
 import pytest
-from context import GINO, REDIS, LND
-from resolvers.schema import SCHEMA
+from ..context.featherlight.context import GINO, REDIS, LND
+from ..context.featherlight.resolvers.schema import SCHEMA
 
 
 @pytest.fixture(scope='session')

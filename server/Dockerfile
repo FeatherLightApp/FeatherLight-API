@@ -22,4 +22,6 @@ RUN poetry config virtualenvs.create false \
 # Creating folders, and files for a project:
 COPY featherlight /app/featherlight/
 
-CMD [ "poetry", "run", "compile", "&&", "python", "-m", "uvicorn",  "app:APP", "--host", "0.0.0.0", "--port", "5001", "--log-level", "info", "--reload", "--reload-dir", "/app"]
+COPY tests /app/tests
+
+CMD [ "sh", "-c", "poetry run compile && cd featherlight && python -m uvicorn main:APP --host 0.0.0.0 --port 5001 --log-level info --reload --reload-dir /app/featherlight"]

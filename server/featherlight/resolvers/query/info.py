@@ -1,6 +1,6 @@
 from ariadne import QueryType
 from context import LND
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 
 QUERY = QueryType()

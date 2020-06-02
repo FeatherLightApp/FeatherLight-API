@@ -5,9 +5,9 @@ import asyncio
 from socket import gaierror
 from grpclib.client import Channel
 from grpclib.events import SendRequest, listen
-from proto import rpc_pb2 as ln
-from proto import rpc_pb2_grpc as lnrpc
 from helpers.mixins import LoggerMixin
+import rpc_pb2 as ln
+import rpc_pb2_grpc as lnrpc
 
 
 class LightningStub(LoggerMixin):

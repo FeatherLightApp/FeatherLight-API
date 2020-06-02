@@ -1,6 +1,6 @@
 from ariadne import ObjectType
 from context import LND
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 NODE_BALANCE = ObjectType("NodeBalance")
 

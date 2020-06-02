@@ -5,7 +5,7 @@ from ariadne import MutationType
 from models import LSAT, Invoice
 from classes import User, Error
 from context import ARGON, LND, GINO
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 
 MUTATION = MutationType()

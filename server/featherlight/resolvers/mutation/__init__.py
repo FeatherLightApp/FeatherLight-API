@@ -1,4 +1,4 @@
-from tpying import List
+from typing import List
 from ariadne import MutationType
 from .create_user import MUTATION as _create_user
 from .bypass import MUTATION as _bypass

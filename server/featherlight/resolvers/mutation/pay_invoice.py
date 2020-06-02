@@ -8,7 +8,7 @@ from classes.user import User
 from classes.error import Error
 from models import Invoice, LSAT
 from context import LND, GINO, PUBSUB
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 MUTATION = MutationType()
 

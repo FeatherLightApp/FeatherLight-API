@@ -1,7 +1,7 @@
 from typing import Optional
 from ariadne import ObjectType
 from context import LND
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 CHANNEL_PAYLOAD = ObjectType("ChannelPayload")
 

@@ -6,7 +6,7 @@ from pymacaroons import Macaroon
 from context import LND
 from models import LSAT
 from classes import Error
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 
 
 MUTATION = MutationType()

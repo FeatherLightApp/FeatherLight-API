@@ -1,6 +1,6 @@
 from ariadne import SubscriptionType
 from aiostream import stream
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 from context import LND, PUBSUB
 from models import Invoice
 from classes.user import User

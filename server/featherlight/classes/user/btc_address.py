@@ -1,6 +1,6 @@
 from helpers.mixins import LoggerMixin
 from context import BITCOIND, LND
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 from .abstract_user_method import AbstractMethod
 
 

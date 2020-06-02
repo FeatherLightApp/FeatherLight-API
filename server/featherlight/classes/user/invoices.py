@@ -4,7 +4,7 @@ from base64 import b64decode as decode64
 from sqlalchemy import or_, and_
 from context import LND, GINO
 from models import Invoice as DB_Invoice
-from proto import rpc_pb2 as ln
+import rpc_pb2 as ln
 from helpers.mixins import LoggerMixin
 from .abstract_user_method import AbstractMethod
 
