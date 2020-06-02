@@ -101,6 +101,7 @@ services:
         image: postgres:alpine
         volumes:
             - ${POSTGRES_VOL}:/var/lib/postgresql/data
+            - ./postgres:/docker-entrypoint-initdb.d
         restart: unless-stopped
         env_file: 
             - container.env
