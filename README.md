@@ -11,13 +11,13 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 ### Features
 
 * Add, pay, and view lightning invoices ⚡️⚡
-* Websockets securely push invoice data to any device in realtime. Integrate with IoT!
 * Access accounts in a sleek and open source [Web App](https://featherlight.app)
-* Prepay wallet creation! 🎉 Start your friends off immediately with a pre-funded wallet. (Coming Soon)
+* Prepay wallet creation! 🎉 Start your friends off immediately with a pre-funded wallet.
+* Full transaction history. Query paginated feed of all past transactions, on or off-chain
 * Delegated account access with macaroons. Allow others to create invoices on your behalf!
 * Deposit funds on or off-chain
-* Strongly typed GraphQL API ensures you always get exactly the data you want and only the data you want
-* Query paginated feed of all past transactions
+* Websockets securely push invoice data to any device in realtime. Integrate with IoT!
+* Strongly typed GraphQL API ensures you only get what you ask for
 * Support for hold invoices (planned)
 * Seamlessly interact with lApps using WebLn (planned)
 
@@ -26,7 +26,7 @@ FeatherLight has many dependencies in many different languages. Docker is the be
 1. git clone https://github.com/FeatherLightApp/FeatherLight-API
 2. cd FeatherLight-API
 3. mv .env1 .env
-4. Configure desired settings in global.env and .env
+4. Configure desired settings in container.env and .env
 5. docker-compose up -d
 
 *Warning* Currently setup with no seed backup for debugging purposes. Change this in the lnd/dockerfile or you risk losing funds.
