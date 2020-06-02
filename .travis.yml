@@ -1,6 +1,7 @@
 services: 
     - docker
 script:
+    - "mv .env1 .env"
     - "docker-compose run featherlight pytest -sx"
 
 # script:

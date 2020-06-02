@@ -1,5 +1,5 @@
-BITCOIN_VOL=/Volumes/Storage/graphlightning_temp/bitcoin
-LND_VOL=/Volumes/Storage/graphlightning_temp/lnd
-REDIS_VOL=/Volumes/Storage/graphlightning_temp/redis
-POSTGRES_VOL=/Volumes/Storage/graphlightning_temp/postgres
+BITCOIN_VOL=/featherlight/bitcoin
+LND_VOL=/featherlight/lnd
+REDIS_VOL=/featherlight/redis
+POSTGRES_VOL=/featherlight/postgres
 EXPOSE_ARIADNE=5001:5001
