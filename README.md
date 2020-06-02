@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/FeatherLightApp/FeatherLight-API.svg?branch=master)](https://travis-ci.org/FeatherLightApp/FeatherLight-API)
+
 # FeatherLight API
 
 FeatherLight is a GraphQL API for interacting with a custodial Bitcoin Lightning Network node. The node supports many users and handles the transfer of funds internally with an accounting system and externally via regular lightning network payments.
