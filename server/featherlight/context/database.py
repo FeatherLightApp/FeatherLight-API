@@ -4,6 +4,9 @@ from socket import gaierror
 from gino import Gino
 from helpers.mixins import LoggerMixin
 
+if not os.environ.get('POSTGRES_DB'):
+    os.environ['POSTGRES_DB'] = 'staging'
+
 
 class GinoInstance(LoggerMixin):
     """Gino connection manager"""
